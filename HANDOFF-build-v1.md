@@ -39,8 +39,13 @@ Vinyl/Single gate $695 ✓, Dump Fee $300 ✓, project total $4,695 ✓ (section
 −200 discount+extra), edit linear_ft reprices ✓, dump toggle reprices ✓, project labor
 change reprices sections ✓, delete cascades (DB verified 0 orphans) ✓. Test data deleted.
 D1 re-confirmed: PIN kept (Anthony briefly considered no-PIN; risk explained; PIN stays).
-`.env.local` is configured on Anthony's machine. Git repo init'd, remote:
-https://github.com/alara592/happy-fence-app — awaiting Anthony's push + Vercel import.
+`.env.local` is configured on Anthony's machine. Git repo: https://github.com/alara592/happy-fence-app.
+
+DEPLOYED 2026-06-05: **https://happy-fence-app.vercel.app** (production, D4). Gotchas hit:
+Vercel framework preset was "Other" → middleware crashed (`__dirname` / alias bundling
+errors); fixed by setting preset to Next.js + redeploy. Middleware uses a RELATIVE import
+for lib/auth-token on purpose. Verified in production: PIN gate + live DB reads.
+Remaining: Anthony's phone test (spec acceptance #3).
 
 ## Open items being tracked elsewhere (do not solve now)
 
