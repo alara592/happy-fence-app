@@ -1,0 +1,61 @@
+{
+  "extracted": "2026-06-04",
+  "source": {
+    "fencing": "Fencing Price Per Section sheet 1uxFm_MouNaKygHtS8-mXWiXSgjog3LD1wTIbylrspvc",
+    "gates": "Gate Price sheet 10wMoFlL8fjy7eV58KcTt4SBXpGxZCXnyzfKr9UpXdtQ"
+  },
+  "notes": [
+    "Live tables have drifted from the docs: 20 fence types (docs said 17), 22 gate rows (docs said 16).",
+    "Vinyl(Cypress) is 120 (docs recorded it zeroed 2026-05-27 — apparently reconciled since).",
+    "Vinyl - Walnut and Chainlink are 0 = unpriced flags; UI must warn, never quote material at $0 silently.",
+    "Vinyl/Double gate is 1,429 (CHANGELOG #4 recorded 1,395 — price has been updated since).",
+    "CONFIRM the three drifted values with Anthony/Mimi before production cutover."
+  ],
+  "settings": { "defaultTearDownRate": 3, "defaultDumpRate": 3, "permitFee": 300 },
+  "fencePrices": [
+    { "type": "Privacy Vinyl - White", "perSection": 91, "ftPerSection": 6 },
+    { "type": "Aluminum (6x6)", "perSection": 180, "ftPerSection": 6 },
+    { "type": "Aluminum (6x4)", "perSection": 133, "ftPerSection": 6 },
+    { "type": "Wood - Dog Ear", "perSection": 60, "ftPerSection": 4 },
+    { "type": "DuraFence", "perSection": 65, "ftPerSection": 4 },
+    { "type": "Vinyl (Solid Gray)", "perSection": 169.92, "ftPerSection": 6 },
+    { "type": "Vinyl(Cypress)", "perSection": 120, "ftPerSection": 6 },
+    { "type": "Vinyl(Driftwood)", "perSection": 280.92, "ftPerSection": 6 },
+    { "type": "Vinyl - Walnut", "perSection": 0, "ftPerSection": 6 },
+    { "type": "Wood - Board-on-Board", "perSection": 73, "ftPerSection": 4 },
+    { "type": "Vinyl W/ Stiff - White", "perSection": 130, "ftPerSection": 6 },
+    { "type": "Wood - Shadowbox", "perSection": 73, "ftPerSection": 4 },
+    { "type": "Horizontal DuraFence", "perSection": 70, "ftPerSection": 4 },
+    { "type": "Chainlink", "perSection": 0, "ftPerSection": 10 },
+    { "type": "Picket Vinyl - White", "perSection": 123, "ftPerSection": 6 },
+    { "type": "Louvered Vinyl - White", "perSection": 123, "ftPerSection": 6 },
+    { "type": "Privacy Vinyl 4ft(White)", "perSection": 90, "ftPerSection": 6 },
+    { "type": "Horizontal Privacy Vinyl - White", "perSection": 108, "ftPerSection": 6 },
+    { "type": "Vinyl w/ stiff - Tan", "perSection": 170, "ftPerSection": 6 },
+    { "type": "Vinyl - Tan", "perSection": 115, "ftPerSection": 6 }
+  ],
+  "gatePrices": [
+    { "type": "Vinyl", "style": "Single", "price": 695 },
+    { "type": "Vinyl", "style": "Double", "price": 1429 },
+    { "type": "Aluminum(4ft)", "style": "Single", "price": 916 },
+    { "type": "Aluminum(4ft)", "style": "Double", "price": 1919 },
+    { "type": "Wood", "style": "Single", "price": 504 },
+    { "type": "Wood", "style": "Double", "price": 926 },
+    { "type": "Durafence", "style": "Single", "price": 534 },
+    { "type": "Durafence", "style": "Double", "price": 1000 },
+    { "type": "Aluminum(6ft)", "style": "Single", "price": 1058 },
+    { "type": "Aluminum(6ft)", "style": "Double", "price": 2212 },
+    { "type": "Picket Vinyl(4ft)", "style": "Single", "price": 832 },
+    { "type": "Picket Vinyl(4ft)", "style": "Double", "price": 1786 },
+    { "type": "Louvered Vinyl(White-6ft)", "style": "Single", "price": 491 },
+    { "type": "Louvered Vinyl(White-6ft)", "style": "Double", "price": 1037 },
+    { "type": "Privacy Vinyl 4ft(White)", "style": "Single", "price": 695 },
+    { "type": "Privacy Vinyl 4ft(White)", "style": "Double", "price": 1429 },
+    { "type": "Privacy Vinyl - Cypress", "style": "Single", "price": 765 },
+    { "type": "Privacy Vinyl - Cypress", "style": "Double", "price": 1565 },
+    { "type": "Privacy Vinyl - Tan", "style": "Single", "price": 700 },
+    { "type": "Privacy Vinyl - Tan", "style": "Double", "price": 1489 },
+    { "type": "Horizontal Vinyl - White", "style": "Single", "price": 670 },
+    { "type": "Horizontal Vinyl - White", "style": "Double", "price": 1375 }
+  ]
+}
