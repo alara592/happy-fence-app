@@ -18,7 +18,7 @@ export interface ReferenceData {
 export async function loadReference(): Promise<ReferenceData> {
   const client = db();
   const [fences, gates, extras, settings] = await Promise.all([
-    client.from("fence_prices").select("*").order("type"),
+    client.from("fence_prices").select("*").order("sort_order"),
     client.from("gate_prices").select("*").order("type"),
     client.from("extras").select("*").order("name"),
     client.from("settings").select("*").eq("id", "GLOBAL").single(),
