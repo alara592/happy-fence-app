@@ -14,6 +14,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!b.type || !["Single", "Double"].includes(b.style)) {
       return NextResponse.json({ error: "Type and Single/Double are required" }, { status: 400 });
     }
+    const quantity = Math.floor(Number(b.quantity ?? 1));
+    if (!(quantity > 0)) {
+      return NextResponse.json({ error: "Quantity must be at least 1" }, { status: 400 });
+    }
     const ref = await loadReference();
     const price = gatePrice(b.type, b.style, ref.gatePrices);
     if (price === null) {
@@ -31,6 +35,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         type: b.type,
         style: b.style,
         actual_price: price,
+        quantity,
       })
       .select()
       .single();

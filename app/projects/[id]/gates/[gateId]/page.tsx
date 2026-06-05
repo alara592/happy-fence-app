@@ -12,6 +12,7 @@ interface Bundle {
     description: string | null;
     type: string;
     style: "Single" | "Double";
+    quantity: number;
   }[];
 }
 
@@ -30,6 +31,7 @@ export default function EditGatePage() {
           description: g.description ?? "",
           type: g.type,
           style: g.style,
+          quantity: String(g.quantity ?? 1),
         });
       })
       .catch((e) => setError(e.message));

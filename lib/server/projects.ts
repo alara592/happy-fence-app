@@ -43,7 +43,9 @@ export interface GateRow {
   description: string | null;
   type: string;
   style: "Single" | "Double";
+  /** UNIT price — totals multiply by quantity. */
   actual_price: number;
+  quantity: number;
 }
 
 export interface ExtraRow {
@@ -159,12 +161,16 @@ export async function getProjectBundle(id: string) {
 
   const project = normalizeProject(proj.data);
   const sectionRows = (sections.data ?? []).map(normalizeSection);
-  const gateRows = (gates.data ?? []).map((g) => ({ ...g, actual_price: num(g.actual_price) })) as GateRow[];
+  const gateRows = (gates.data ?? []).map((g) => ({
+    ...g,
+    actual_price: num(g.actual_price),
+    quantity: num(g.quantity ?? 1),
+  })) as GateRow[];
   const extraRows = (extras.data ?? []).map((e) => ({ ...e, price: num(e.price) })) as ExtraRow[];
   const materialRows = (materials.data ?? []) as MaterialRow[];
 
   const board = computeBoard(project, sectionRows, gateRows, extraRows, materialRows, ref);
-  const gatesTotal = gateRows.reduce((sum, g) => sum + g.actual_price, 0);
+  const gatesTotal = gateRows.reduce((sum, g) => sum + g.actual_price * g.quantity, 0);
   const activeRow = board.find((r) => r.active) ?? null;
   // Project total = active fence row (sections+permit+extras+discount) + gates.
   const total = activeRow && activeRow.total !== null ? activeRow.total + gatesTotal : null;

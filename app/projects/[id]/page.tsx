@@ -27,7 +27,7 @@ interface Bundle {
     dump: boolean;
     take_down_ft: number;
   }[];
-  gates: { id: string; name: string; type: string; style: string; actual_price: number }[];
+  gates: { id: string; name: string; type: string; style: string; actual_price: number; quantity: number }[];
   extras: { id: string; name: string; price: number }[];
   materials: { id: string; type: string; is_active: boolean }[];
   board: { materialId: string; type: string; total: number | null; unpriced: boolean; active: boolean }[];
@@ -228,9 +228,12 @@ export default function ProjectDetailPage() {
           <div className="spread">
             <div>
               <strong>{g.name}</strong>
-              <div className="muted">{g.type} · {g.style}</div>
+              <div className="muted">
+                {g.type} · {g.style}
+                {g.quantity > 1 ? ` · ${fmtUSD(g.actual_price)} × ${g.quantity}` : ""}
+              </div>
             </div>
-            <strong>{fmtUSD(g.actual_price)}</strong>
+            <strong>{fmtUSD(g.actual_price * g.quantity)}</strong>
           </div>
           <div className="actions">
             <Link href={`/projects/${id}/gates/${g.id}`}><button>Edit</button></Link>

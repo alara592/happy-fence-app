@@ -11,9 +11,10 @@ export interface GateFormValues {
   description: string;
   type: string;
   style: "Single" | "Double" | "";
+  quantity: string;
 }
 
-export const emptyGate: GateFormValues = { name: "", description: "", type: "", style: "" };
+export const emptyGate: GateFormValues = { name: "", description: "", type: "", style: "", quantity: "1" };
 
 /** Screen 6a — gate form: type + Single/Double → flat price lookup. */
 export default function GateForm({
@@ -53,7 +54,13 @@ export default function GateForm({
     setBusy(true);
     setError("");
     try {
-      const body = { name: v.name, description: v.description, type: v.type, style: v.style };
+      const body = {
+        name: v.name,
+        description: v.description,
+        type: v.type,
+        style: v.style,
+        quantity: Number(v.quantity || 1),
+      };
       if (gateId) {
         await api(`/api/projects/${projectId}/gates/${gateId}`, {
           method: "PATCH",
@@ -100,10 +107,22 @@ export default function GateForm({
         ))}
       </select>
 
+      <label>Quantity</label>
+      <input
+        type="number"
+        step="1"
+        min="1"
+        inputMode="numeric"
+        value={v.quantity}
+        onChange={(e) => set("quantity", e.target.value)}
+      />
+
       {preview && (
         <div className="card spread">
-          <span>Price</span>
-          <strong>{fmtUSD(preview.price)}</strong>
+          <span>
+            Price{Number(v.quantity) > 1 ? ` (${fmtUSD(preview.price)} × ${Number(v.quantity)})` : ""}
+          </span>
+          <strong>{fmtUSD(preview.price * Math.max(1, Number(v.quantity) || 1))}</strong>
         </div>
       )}
 

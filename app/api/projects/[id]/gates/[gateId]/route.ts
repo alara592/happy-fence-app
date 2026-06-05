@@ -21,6 +21,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const type = b.type ?? existing.type;
     const style = b.style ?? existing.style;
+    const quantity =
+      b.quantity !== undefined ? Math.floor(Number(b.quantity)) : Number(existing.quantity ?? 1);
+    if (!(quantity > 0)) {
+      return NextResponse.json({ error: "Quantity must be at least 1" }, { status: 400 });
+    }
     const ref = await loadReference();
     const price = gatePrice(type, style, ref.gatePrices);
     if (price === null) {
@@ -37,6 +42,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         type,
         style,
         actual_price: price,
+        quantity,
       })
       .eq("id", gateId)
       .select()
