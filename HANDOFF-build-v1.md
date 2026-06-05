@@ -1,70 +1,99 @@
-# Handoff — Build the v1 "Quote a Job" App
+# HANDOFF — Happy Fence "Quote a Job" App
 
-For a fresh Claude session working in the `Happy Fence Company` folder. Read this first, then `../Big Ant Fencing/V1-SPEC-quote-a-job.md` (the approved spec) and `lib/pricing.ts` (the tested engine). The full migration strategy is in `../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`.
+Single source of truth for app state. Read this first in any new session, then
+`README.md` (run/deploy) and `lib/pricing.ts` (the engine). History: spec in
+`../Big Ant Fencing/V1-SPEC-quote-a-job.md`, strategy in
+`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-05**.
 
-## State as of 2026-06-05 (everything below is DONE)
+## What this is
 
-- **Decision made:** migrating off AppSheet to a custom app. AppSheet stays production until this app reaches parity — it is feature-frozen, do not touch it.
-- **Spec approved** with decisions resolved: D1 no user accounts — one shared PIN per device; D2 start with an empty DB (no project import); D3 Supabase owned by anthony@happyfencecompany.com; D4 free `.vercel.app` URL for v1.
-- **Pricing engine built and verified:** `lib/pricing.ts` + `tests/pricing.test.ts` — 11/11 tests pass (`npx tsx --test tests/pricing.test.ts`). Ground truth: Frank Theye $3,600, Pedro Bravo $3,300 (RECOVERY doc). Do NOT alter the math; the engine is the single source of truth for all quote calculations.
-- **Database is LIVE:** Supabase project **"Happy Fence Calculator"**, ref `knbyonagksvaqpqkkehj`, us-east-1, Postgres 17. Migration `v1_initial_schema_and_seed` applied (`db/schema.sql` is the exact copy). Verified seeded: 20 fence_prices, 22 gate_prices, 1 extra (Dump Fee $300), settings GLOBAL (rates $3/ft, permit $300), 0 projects. RLS enabled on all 8 tables with NO policies — all access must go through server routes using the service-role key. The **Supabase MCP connector is connected** — use it (`list_tables`, `execute_sql`, etc.) rather than asking Anthony to run SQL.
-- **Seed snapshot:** `seed/price-tables-2026-06-04.json` — includes drift notes (Vinyl(Cypress) restored at 120; Vinyl/Double gate 1,429; Vinyl - Walnut & Chainlink at $0 = unpriced, UI must warn, never silently quote $0 material).
+Custom replacement for the AppSheet quoting app. Field workflow: measure the job on a
+phone → record sections as pure measurements → render the job's price under whichever
+materials Anthony picks (the **price board**) → set one as the **Active fence** → that
+plus gates is the project total. AppSheet remains feature-frozen as fallback until
+Anthony retires it.
 
-## What to build next (spec §3 — the six screens)
+## Live infrastructure
 
-Next.js (App Router) PWA, TypeScript. Plain/default styling — v1 is about correct math, not looks:
-1. PIN unlock (shared PIN, remembered per device; server-side check; keeps the API closed)
-2. Project list (client · city · date · total · permit, newest first)
-3. Project form (client, address, date, permit, labor $/ft, margin, discount, notes)
-4. Project detail (header, total, sections/gates/extras lists, add/edit/delete; project delete cascades)
-5. Section form (name, type dropdown from fence_prices, linear ft, tear-down/dump toggles, take-down ft, conditional rate overrides defaulting from settings; price computed via `lib/pricing.ts` on save, recomputed on edit)
-6. Gate form (type + Single/Double → flat lookup) and Extra form (pick from extras)
+- **App:** https://happy-fence-app.vercel.app (Vercel project `happy-fence-app`, team "Anthony Lara's projects", framework preset **Next.js** — must stay Next.js, see gotchas)
+- **Repo:** https://github.com/alara592/happy-fence-app (private; Anthony pushes — the sandbox has no git credentials; pushes auto-deploy)
+- **DB:** Supabase "Happy Fence Calculator", ref `knbyonagksvaqpqkkehj`, us-east-1, Postgres 17, owner anthony@happyfencecompany.com. Supabase MCP connector is connected — use it directly. Vercel MCP connector also connected (logs, deployments).
+- **Env vars** (Vercel + `.env.local`): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PIN`.
+- **Auth:** one shared device PIN (D1; revisited 2026-06-05 — Anthony considered no-PIN, risk explained, PIN kept). RLS on all tables with NO policies: the service-role key via server routes is the only path in.
 
-Rules: all DB access through server routes (service-role key in env vars, never client-side); import the pricing module — never re-implement math in components; currency always formatted with $ and commas; acceptance tests in spec §6.
+## Current data model (v1.1 price board — replaced per-section materials)
 
-## After the app works locally
+- `projects` — client, address, date, permit, labor_cost_ft, profit_margin (decimal), discount (signed), notes, price_mod_notes.
+- `project_sections` — **pure measurements**: name, description, linear_ft, tear_down, dump, take_down_ft, tear_down_rate/dump_rate (null = global default). No material, no stored price.
+- `project_materials` — the board. Row = (project, fence type); `is_active` marks the Active fence (partial unique index, max one per project). Removing the active row clears the total.
+- `project_gates` — type+style flat lookup; `actual_price` is the UNIT price, `quantity` multiplies it.
+- `project_extras` — name+price copied from `extras` catalog at add time.
+- `fence_prices` — type (named **"Material - Style - Color"**, bare vinyls = Privacy), per_section ($0 = unpriced flag), ft_per_section, sort_order (dropdown + board order).
+- `gate_prices`, `extras`, `settings` (GLOBAL: tear-down 3, dump 3, permit 300).
 
-Deploy to Vercel (Anthony has/creates the free account, sign-in via GitHub). Env vars: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PIN`. Then Anthony tests a real quote on his phone (spec acceptance test #3).
+**Board math (server glue, `lib/server/projects.ts`):** each board row = engine
+`projectTotal` with all sections typed as that material and **gates excluded** →
+sections + permit + extras + discount. Project total = active row + Σ(gate unit × qty).
+No active fence → no total. Unpriced materials render a warning row, never $0.
+Everything is computed on read — price-table changes flow into all projects instantly
+(deliberate; mirrors Anthony's old Sheets calculator).
 
-## Build status update — 2026-06-05
+**Home list** shows client · city · date · permit only — no totals (Anthony's call).
+City = address text after the first comma.
 
-v1 app is BUILT (this session). Pricing tests re-run first: 11/11 green, engine untouched.
-All six screens + API routes implemented per spec §3; `next build` green; smoke-tested:
-PIN gate (middleware redirect/401, wrong-PIN 401, cookie unlock), graceful API errors.
-Live DB re-verified via Supabase MCP: 20/22/1 price rows, 0 projects, RLS on, 0 policies.
-See `README.md` for run/deploy.
+## Pricing engine — DO NOT REIMPLEMENT
 
-LIVE E2E PASSED (2026-06-05, against the real Supabase DB): Frank-fixture section $3,600 ✓,
-Vinyl/Single gate $695 ✓, Dump Fee $300 ✓, project total $4,695 ✓ (sections+permit+gate
-−200 discount+extra), edit linear_ft reprices ✓, dump toggle reprices ✓, project labor
-change reprices sections ✓, delete cascades (DB verified 0 orphans) ✓. Test data deleted.
-D1 re-confirmed: PIN kept (Anthony briefly considered no-PIN; risk explained; PIN stays).
-`.env.local` is configured on Anthony's machine. Git repo: https://github.com/alara592/happy-fence-app.
+`lib/pricing.ts` is the only place quote math lives; UI and server import it.
+Section formula: CEIL(whole sections)×per_section + $0.50/ft hardware + labor +
+override-or-global tear-down/dump on take_down_ft, all ÷ (1−margin), CEIL to $100.
+Tests: `npm test` → 11/11 must pass. Fixtures: Frank Theye $3,600, Pedro Bravo $3,300
+(RECOVERY doc), plus Anthony's sheet case verified live: 200 ft Dog Ear, tear 200,
+labor 12, margin 35% → fence $9,400 exact.
 
-DEPLOYED 2026-06-05: **https://happy-fence-app.vercel.app** (production, D4). Gotchas hit:
-Vercel framework preset was "Other" → middleware crashed (`__dirname` / alias bundling
-errors); fixed by setting preset to Next.js + redeploy. Middleware uses a RELATIVE import
-for lib/auth-token on purpose. Verified in production: PIN gate + live DB reads.
-Remaining: Anthony's phone test (spec acceptance #3).
+UI conveniences: take_down_ft auto-mirrors linear_ft until manually edited; Take Down Ft
+field renders inside the tear-down block (or dump block if tear-down is off).
 
-## v1.1 PRICE-BOARD REWORK — 2026-06-05 (built, tested, awaiting deploy)
+## DB migrations applied (in order; copies in `db/`)
 
-Anthony's real workflow replaced the per-section material model (his call: per-section
-material choice was "pointless"). New model, mirrors his Sheets "Job Quote Calculator":
-- Sections = pure measurements (name, linear ft, tear-down/dump, take-down ft, rate overrides). No type, no stored price.
-- `project_materials` = the price board. Each row renders the job under that material:
-  **sections + permit + extras + discount — gates EXCLUDED** (engine's projectTotal with gates=[]).
-- One row can be the **Active fence** (`is_active`, partial unique index): Project Total = active row + gates. No active → no total.
-- Home list shows client · city · date only (no totals — Anthony's call).
-- Unpriced materials ($0/section) render a warning row, never a $0 quote.
-- Board is always computed on read → editing measurements/prices updates everything; no stored section prices to drift.
-- Migrations: price_board_sections_lose_material, active_material_on_board. Engine UNTOUCHED (11/11).
-- E2E verified vs his sheet: 200ft Dog Ear tear-200 permit labor-12 margin-35 → fence $9,400 exact.
-- Catalog drift found vs his sheet: sheet has DuraFence ≈$63–64/section (ours 65), Chainlink priced (~$96/section implied, ours $0 unpriced), plus materials the app lacks (Wood Horizontal, Semi-Priv Horizontal Vinyl 6ft White/Sand/Clay, Horizontal Wood Infill Aluminum 4ft-center, Vinyl White "Broward only"). SYNC CATALOG with Anthony/Mimi.
+1. `v1_initial_schema_and_seed` (`db/schema.sql` — historical v1 schema; sections have since changed)
+2. `rename_fence_types_material_style_color_and_sort_order`
+3. `price_board_sections_lose_material`
+4. `active_material_on_board`
+5. `gate_quantity`
+Plus data updates 2026-06-05: Cypress 121 (confirmed), new Vinyl(Sand) 112 @ 6 ft.
+Current state + drift notes: `seed/price-tables-2026-06-04.json`.
 
-## Open items being tracked elsewhere (do not solve now)
+## Decided, not yet built
 
-- Price drift to confirm with Mimi (see seed JSON notes).
-- Gate-pricing margin rebuild — DESIGN DECIDED 2026-06-05, build deferred until Anthony provides per-gate material costs. Model: `gatePrice = (materialCost + subLabor) ÷ (1 − projectMargin)`, no rounding; sub labor flat $125 single / $300 double (→ settings); same margin as sections; gates recompute on project margin change. Until then gates stay flat lookups. When switching: existing projects keep their saved gate prices (quote-integrity rule — applies to all future pricing changes).
-- Present-to-Customer screen, calendar sync, photos — all post-v1 (migration plan §6–7).
-- WISH LIST: address autocomplete on the project form (Google Places API or similar — requires an API key + per-use billing; alternatives: Mapbox, Radar). Added 2026-06-05 at Anthony's request. Would also make the list page's city parsing reliable.
+**Gate margin rebuild** (build when Anthony provides per-gate material costs):
+`gatePrice = (materialCost + subLabor) ÷ (1 − projectMargin)`, no rounding; sub labor
+flat $125 single / $300 double (→ settings); same margin as sections. Quote-integrity
+rule: when it ships, existing projects keep their saved gate prices. Until then gates
+stay flat lookups.
+
+## Open data questions (Anthony/Mimi)
+
+- Vinyl/Double gate $1,429 unconfirmed (CHANGELOG said 1,395).
+- Walnut & Chainlink at $0 — price or remove. Anthony's sheet implies Chainlink ≈ $96/section.
+- Sheet vs app catalog drift: DuraFence $65 here vs ≈$63–64 in his sheet; sheet has materials the app lacks (Wood Horizontal; Semi-Priv Horizontal Vinyl 6ft White/Sand/Clay; Horizontal Wood Infill Aluminum 4ft-center; Vinyl White "Broward only"). Sync catalog against the sheet feeding his "Job Quote Calculator".
+
+## Wish list / later
+
+- Address autocomplete on project form (Google Places or similar; needs API key; also fixes city parsing).
+- Home-page upgrades (mocked, deferred): project status + filter chips, search, stats strip, call/map buttons (needs phone field), month grouping, brand styling.
+- Admin screen for price tables (today: edit via Supabase dashboard or ask Claude).
+- Present-to-Customer screen, calendar sync, photos (migration plan §6–7).
+- Quote freezing for sent quotes (board recomputes live by design — revisit when quotes are presented to customers).
+
+## Process rules (project conventions)
+
+- Propose and confirm with Anthony before building; check in before every deploy.
+- All DB access through server routes with the service-role key; nothing client-side.
+- Engine tests green before any deploy; full live E2E against the real DB after server changes (create → verify math → delete; clean up test rows).
+- Update this handoff + commit after every meaningful change. Anthony runs `git push`.
+
+## Deploy gotchas (hit once already)
+
+- Vercel framework preset MUST be "Next.js" — "Other" breaks middleware (`__dirname` / alias bundling errors).
+- `middleware.ts` imports `./lib/auth-token` RELATIVELY on purpose — Vercel's edge bundler rejects the `@/` alias there.
+- Stale `.git/*.lock` files from sandbox commits: delete via `find .git -name "*.lock" -delete`.
