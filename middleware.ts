@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE, pinToken } from "@/lib/auth-token";
+// Relative import on purpose: Vercel's edge bundler rejects the "@/" alias in middleware.
+import { AUTH_COOKIE, pinToken } from "./lib/auth-token";
 
 /**
  * The whole app sits behind the shared device PIN (spec D1). Pages redirect to
