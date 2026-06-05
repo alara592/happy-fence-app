@@ -6,10 +6,10 @@
   },
   "notes": [
     "Live tables have drifted from the docs: 20 fence types (docs said 17), 22 gate rows (docs said 16).",
-    "Vinyl(Cypress) is 120 (docs recorded it zeroed 2026-05-27 — apparently reconciled since).",
-    "Vinyl - Walnut and Chainlink are 0 = unpriced flags; UI must warn, never quote material at $0 silently.",
-    "Vinyl/Double gate is 1,429 (CHANGELOG #4 recorded 1,395 — price has been updated since).",
-    "CONFIRM the three drifted values with Anthony/Mimi before production cutover."
+    "2026-06-05 Anthony confirmed: Vinyl(Cypress) = 121 (was 120; live DB updated). Horizontal Privacy Vinyl - White = 108 confirmed. NEW type Vinyl(Sand) = 112 @ 6ft added to live DB.",
+    "Vinyl - Walnut and Chainlink are 0 = unpriced flags; UI must warn, never quote material at $0 silently. Still unresolved.",
+    "Vinyl/Double gate is 1,429 (CHANGELOG #4 recorded 1,395 — price has been updated since). Still unconfirmed.",
+    "Remaining to confirm with Anthony/Mimi: Vinyl/Double gate 1,429; Walnut & Chainlink pricing."
   ],
   "settings": { "defaultTearDownRate": 3, "defaultDumpRate": 3, "permitFee": 300 },
   "fencePrices": [
@@ -19,7 +19,8 @@
     { "type": "Wood - Dog Ear", "perSection": 60, "ftPerSection": 4 },
     { "type": "DuraFence", "perSection": 65, "ftPerSection": 4 },
     { "type": "Vinyl (Solid Gray)", "perSection": 169.92, "ftPerSection": 6 },
-    { "type": "Vinyl(Cypress)", "perSection": 120, "ftPerSection": 6 },
+    { "type": "Vinyl(Cypress)", "perSection": 121, "ftPerSection": 6 },
+    { "type": "Vinyl(Sand)", "perSection": 112, "ftPerSection": 6 },
     { "type": "Vinyl(Driftwood)", "perSection": 280.92, "ftPerSection": 6 },
     { "type": "Vinyl - Walnut", "perSection": 0, "ftPerSection": 6 },
     { "type": "Wood - Board-on-Board", "perSection": 73, "ftPerSection": 4 },
