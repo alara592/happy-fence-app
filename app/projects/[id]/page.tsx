@@ -22,30 +22,33 @@ interface Bundle {
   sections: {
     id: string;
     name: string;
-    type: string;
     linear_ft: number;
     tear_down: boolean;
     dump: boolean;
-    actual_price: number;
+    take_down_ft: number;
   }[];
   gates: { id: string; name: string; type: string; style: string; actual_price: number }[];
   extras: { id: string; name: string; price: number }[];
-  breakdown: {
-    sectionsTotal: number;
-    permitFee: number;
-    gatesTotal: number;
-    discount: number;
-    extrasTotal: number;
-    total: number;
-    unmatchedGateTypes: string[];
-  };
+  materials: { id: string; type: string; is_active: boolean }[];
+  board: { materialId: string; type: string; total: number | null; unpriced: boolean; active: boolean }[];
+  gatesTotal: number;
+  activeType: string | null;
+  total: number | null;
+  totalLinearFt: number;
 }
 
-/** Screen 4 — project detail: header, Project Total, children, add/edit/delete. */
+interface FencePriceRow {
+  type: string;
+  perSection: number;
+}
+
+/** Screen 4 — project: measurements + the price board (whole job per material). */
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [b, setB] = useState<Bundle | null>(null);
+  const [allTypes, setAllTypes] = useState<FencePriceRow[] | null>(null);
+  const [pick, setPick] = useState("");
   const [error, setError] = useState("");
 
   const reload = useCallback(() => {
@@ -53,6 +56,25 @@ export default function ProjectDetailPage() {
   }, [id]);
 
   useEffect(reload, [reload]);
+  useEffect(() => {
+    api<{ fencePrices: FencePriceRow[] }>("/api/reference")
+      .then((r) => setAllTypes(r.fencePrices))
+      .catch((e) => setError(e.message));
+  }, []);
+
+  async function addMaterial(type: string) {
+    if (!type) return;
+    setPick("");
+    try {
+      await api(`/api/projects/${id}/materials`, {
+        method: "POST",
+        body: JSON.stringify({ type }),
+      });
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
 
   async function del(path: string, label: string) {
     if (!confirm(`Delete ${label}?`)) return;
@@ -64,8 +86,29 @@ export default function ProjectDetailPage() {
     }
   }
 
+  async function removeMaterial(materialId: string) {
+    try {
+      await api(`/api/projects/${id}/materials/${materialId}`, { method: "DELETE" });
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function setActive(materialId: string) {
+    try {
+      await api(`/api/projects/${id}/materials/${materialId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ is_active: true }),
+      });
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   async function delProject() {
-    if (!confirm(`Delete this project AND all its sections, gates, and extras?`)) return;
+    if (!confirm(`Delete this project AND all its sections, gates, extras, and materials?`)) return;
     try {
       await api(`/api/projects/${id}`, { method: "DELETE" });
       router.push("/");
@@ -74,9 +117,11 @@ export default function ProjectDetailPage() {
     }
   }
 
-  if (error) return <p className="error">{error}</p>;
+  if (error && !b) return <p className="error">{error}</p>;
   if (!b) return <p className="muted">Loading…</p>;
-  const { project: p, breakdown: t } = b;
+  const { project: p } = b;
+  const onBoard = new Set(b.materials.map((m) => m.type));
+  const available = (allTypes ?? []).filter((t) => !onBoard.has(t.type));
 
   return (
     <>
@@ -88,26 +133,26 @@ export default function ProjectDetailPage() {
       <p className="muted">
         {p.address || "No address"} · {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"} ·
         labor {fmtUSD(p.labor_cost_ft)}/ft · margin {(p.profit_margin * 100).toFixed(0)}%
+        {p.discount !== 0 ? ` · adj ${fmtUSD(p.discount)}` : ""}
       </p>
       {p.notes && <p className="muted">Notes: {p.notes}</p>}
       {p.price_mod_notes && <p className="muted">Price mods: {p.price_mod_notes}</p>}
+      {error && <p className="error">{error}</p>}
 
       <div className="card">
         <div className="spread">
           <span>Project Total</span>
-          <span className="total">{fmtUSD(t.total)}</span>
+          <span className="total">{b.total !== null ? fmtUSD(b.total) : "—"}</span>
         </div>
         <div className="muted">
-          Sections {fmtUSD(t.sectionsTotal)} · Permit {fmtUSD(t.permitFee)} · Gates{" "}
-          {fmtUSD(t.gatesTotal)} · Discount {fmtUSD(t.discount)} · Extras {fmtUSD(t.extrasTotal)}
+          {b.activeType
+            ? `${b.activeType} (active) + gates ${fmtUSD(b.gatesTotal)}`
+            : "Set an Active fence on the price board to get the project total."}
         </div>
       </div>
-      {t.unmatchedGateTypes.length > 0 && (
-        <div className="warn">⚠ No price found for gate(s): {t.unmatchedGateTypes.join(", ")}</div>
-      )}
 
       <div className="spread">
-        <h2>Sections ({b.sections.length})</h2>
+        <h2>Sections ({b.sections.length}) — {b.totalLinearFt} ft</h2>
         <Link href={`/projects/${id}/sections/new`}><button>+ Add</button></Link>
       </div>
       {b.sections.map((s) => (
@@ -116,21 +161,63 @@ export default function ProjectDetailPage() {
             <div>
               <strong>{s.name}</strong>
               <div className="muted">
-                {s.type} · {s.linear_ft} ft
-                {s.tear_down ? " · tear-down" : ""}
+                {s.linear_ft} ft
+                {s.tear_down ? ` · tear-down ${s.take_down_ft} ft` : ""}
                 {s.dump ? " · dump" : ""}
               </div>
             </div>
-            <strong>{fmtUSD(s.actual_price)}</strong>
-          </div>
-          <div className="actions">
-            <Link href={`/projects/${id}/sections/${s.id}`}><button>Edit</button></Link>
-            <button className="danger" onClick={() => del(`/api/projects/${id}/sections/${s.id}`, `section "${s.name}"`)}>
-              Delete
-            </button>
+            <div className="actions" style={{ margin: 0 }}>
+              <Link href={`/projects/${id}/sections/${s.id}`}><button>Edit</button></Link>
+              <button className="danger" onClick={() => del(`/api/projects/${id}/sections/${s.id}`, `section "${s.name}"`)}>
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       ))}
+      {b.sections.length === 0 && <p className="muted">No sections measured yet.</p>}
+
+      <h2>Price board <span className="muted" style={{ fontWeight: 400 }}>(fence + permit + extras, no gates)</span></h2>
+      {b.board.map((row) => (
+        <div
+          key={row.materialId}
+          className="card spread"
+          style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : undefined}
+        >
+          <div>
+            <strong>{row.type}</strong>
+            {row.active && <div className="muted" style={{ color: "#1a7f37" }}>Active fence</div>}
+            {row.unpriced && (
+              <div className="warn" style={{ margin: "4px 0 0" }}>
+                Unpriced material — no $/section on file. Update the price table before quoting.
+              </div>
+            )}
+          </div>
+          <div className="row" style={{ flex: "none", gap: 8 }}>
+            {row.total !== null && <span className="total">{fmtUSD(row.total)}</span>}
+            {!row.active && (
+              <button onClick={() => setActive(row.materialId)}>Set active</button>
+            )}
+            <button className="danger" onClick={() => removeMaterial(row.materialId)}>✕</button>
+          </div>
+        </div>
+      ))}
+      {b.board.length === 0 && <p className="muted">No materials on the board yet — add one below.</p>}
+      <select
+        value={pick}
+        onChange={(e) => addMaterial(e.target.value)}
+        disabled={!allTypes || available.length === 0}
+      >
+        <option value="" disabled>
+          {allTypes ? "+ Add material…" : "Loading materials…"}
+        </option>
+        {available.map((t) => (
+          <option key={t.type} value={t.type}>
+            {t.type}
+            {t.perSection === 0 ? " (UNPRICED)" : ""}
+          </option>
+        ))}
+      </select>
 
       <div className="spread">
         <h2>Gates ({b.gates.length})</h2>

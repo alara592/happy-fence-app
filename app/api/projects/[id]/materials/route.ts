@@ -1,0 +1,28 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/server/db";
+
+type Params = { params: Promise<{ id: string }> };
+
+/** POST — add a material to the project's price board. */
+export async function POST(req: NextRequest, { params }: Params) {
+  try {
+    const { id } = await params;
+    const b = await req.json();
+    if (!b.type) return NextResponse.json({ error: "Pick a material" }, { status: 400 });
+
+    const { data, error } = await db()
+      .from("project_materials")
+      .insert({ project_id: id, type: b.type })
+      .select()
+      .single();
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "Already on the board" }, { status: 409 });
+      }
+      throw new Error(error.message);
+    }
+    return NextResponse.json(data, { status: 201 });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
+}

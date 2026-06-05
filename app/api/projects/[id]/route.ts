@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
-import { getProjectBundle, recomputeProjectSections } from "@/lib/server/projects";
+import { getProjectBundle } from "@/lib/server/projects";
 
 type Params = { params: Promise<{ id: string }> };
 
-/** GET — project + children + computed breakdown. */
+/** GET — project + children + rendered price board. */
 export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
     const bundle = await getProjectBundle(id);
     if (!bundle) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const { ref, ...rest } = bundle; // ref not needed by the client here
+    const { ref, ...rest } = bundle;
     return NextResponse.json(rest);
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
-/** PATCH — update project; recompute section prices if pricing inputs changed. */
+/** PATCH — update project. Board is computed on read, so no recompute step. */
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
@@ -40,18 +40,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       .select()
       .single();
     if (error) throw new Error(error.message);
-
-    // Same semantics as AppSheet Reset_If: labor/margin changes re-price sections.
-    if (b.labor_cost_ft !== undefined || b.profit_margin !== undefined) {
-      await recomputeProjectSections(id);
-    }
     return NextResponse.json(data);
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
-/** DELETE — cascades to sections/gates/extras via FK. */
+/** DELETE — cascades to sections/gates/extras/materials via FK. */
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;

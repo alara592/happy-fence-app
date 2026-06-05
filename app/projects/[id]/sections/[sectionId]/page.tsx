@@ -10,7 +10,6 @@ interface Bundle {
     id: string;
     name: string;
     description: string | null;
-    type: string;
     linear_ft: number;
     tear_down: boolean;
     dump: boolean;
@@ -33,7 +32,6 @@ export default function EditSectionPage() {
         setInitial({
           name: s.name,
           description: s.description ?? "",
-          type: s.type,
           linear_ft: String(s.linear_ft),
           tear_down: s.tear_down,
           take_down_ft: String(s.take_down_ft),

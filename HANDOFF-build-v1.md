@@ -47,6 +47,21 @@ errors); fixed by setting preset to Next.js + redeploy. Middleware uses a RELATI
 for lib/auth-token on purpose. Verified in production: PIN gate + live DB reads.
 Remaining: Anthony's phone test (spec acceptance #3).
 
+## v1.1 PRICE-BOARD REWORK — 2026-06-05 (built, tested, awaiting deploy)
+
+Anthony's real workflow replaced the per-section material model (his call: per-section
+material choice was "pointless"). New model, mirrors his Sheets "Job Quote Calculator":
+- Sections = pure measurements (name, linear ft, tear-down/dump, take-down ft, rate overrides). No type, no stored price.
+- `project_materials` = the price board. Each row renders the job under that material:
+  **sections + permit + extras + discount — gates EXCLUDED** (engine's projectTotal with gates=[]).
+- One row can be the **Active fence** (`is_active`, partial unique index): Project Total = active row + gates. No active → no total.
+- Home list shows client · city · date only (no totals — Anthony's call).
+- Unpriced materials ($0/section) render a warning row, never a $0 quote.
+- Board is always computed on read → editing measurements/prices updates everything; no stored section prices to drift.
+- Migrations: price_board_sections_lose_material, active_material_on_board. Engine UNTOUCHED (11/11).
+- E2E verified vs his sheet: 200ft Dog Ear tear-200 permit labor-12 margin-35 → fence $9,400 exact.
+- Catalog drift found vs his sheet: sheet has DuraFence ≈$63–64/section (ours 65), Chainlink priced (~$96/section implied, ours $0 unpriced), plus materials the app lacks (Wood Horizontal, Semi-Priv Horizontal Vinyl 6ft White/Sand/Clay, Horizontal Wood Infill Aluminum 4ft-center, Vinyl White "Broward only"). SYNC CATALOG with Anthony/Mimi.
+
 ## Open items being tracked elsewhere (do not solve now)
 
 - Price drift to confirm with Mimi (see seed JSON notes).

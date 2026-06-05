@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/client";
-import { fmtUSD, fmtDate } from "@/lib/format";
+import { fmtDate } from "@/lib/format";
 
 interface ProjectListItem {
   id: string;
@@ -11,17 +11,16 @@ interface ProjectListItem {
   address: string | null;
   date: string;
   permit: boolean;
-  total: number;
 }
 
-/** City = tail of the address; good enough for the list line (spec §3.2). */
+/** City = tail of the address; good enough for the list line. */
 function city(address: string | null): string {
   if (!address) return "";
   const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
   return parts.length > 1 ? parts[1] : "";
 }
 
-/** Screen 2 — project list, newest first. */
+/** Screen 2 — project list, newest first. No totals (price-board model). */
 export default function ProjectListPage() {
   const [projects, setProjects] = useState<ProjectListItem[] | null>(null);
   const [error, setError] = useState("");
@@ -47,10 +46,11 @@ export default function ProjectListPage() {
             <div>
               <strong>{p.client}</strong>
               <div className="muted">
-                {city(p.address) || "—"} · {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"}
+                {city(p.address) || "—"} · {fmtDate(p.date)}
+                {p.permit ? " · Permit" : ""}
               </div>
             </div>
-            <div style={{ fontWeight: 700 }}>{fmtUSD(p.total)}</div>
+            <div className="muted">›</div>
           </div>
         </Link>
       ))}
