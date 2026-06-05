@@ -66,4 +66,5 @@ material choice was "pointless"). New model, mirrors his Sheets "Job Quote Calcu
 
 - Price drift to confirm with Mimi (see seed JSON notes).
 - Gate-pricing margin rebuild — DESIGN DECIDED 2026-06-05, build deferred until Anthony provides per-gate material costs. Model: `gatePrice = (materialCost + subLabor) ÷ (1 − projectMargin)`, no rounding; sub labor flat $125 single / $300 double (→ settings); same margin as sections; gates recompute on project margin change. Until then gates stay flat lookups. When switching: existing projects keep their saved gate prices (quote-integrity rule — applies to all future pricing changes).
-- Present-to-Customer screen, calendar sync, photos, material comparison — all post-v1 (migration plan §6–7).
+- Present-to-Customer screen, calendar sync, photos — all post-v1 (migration plan §6–7).
+- WISH LIST: address autocomplete on the project form (Google Places API or similar — requires an API key + per-use billing; alternatives: Mapbox, Radar). Added 2026-06-05 at Anthony's request. Would also make the list page's city parsing reliable.
