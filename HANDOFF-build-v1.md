@@ -50,4 +50,5 @@ Remaining: Anthony's phone test (spec acceptance #3).
 ## Open items being tracked elsewhere (do not solve now)
 
 - Price drift to confirm with Mimi (see seed JSON notes).
-- Gate-pricing margin rebuild, Present-to-Customer screen, calendar sync, photos, material comparison — all post-v1 (migration plan §6–7).
+- Gate-pricing margin rebuild — DESIGN DECIDED 2026-06-05, build deferred until Anthony provides per-gate material costs. Model: `gatePrice = (materialCost + subLabor) ÷ (1 − projectMargin)`, no rounding; sub labor flat $125 single / $300 double (→ settings); same margin as sections; gates recompute on project margin change. Until then gates stay flat lookups. When switching: existing projects keep their saved gate prices (quote-integrity rule — applies to all future pricing changes).
+- Present-to-Customer screen, calendar sync, photos, material comparison — all post-v1 (migration plan §6–7).
