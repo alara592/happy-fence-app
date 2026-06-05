@@ -32,8 +32,15 @@ v1 app is BUILT (this session). Pricing tests re-run first: 11/11 green, engine 
 All six screens + API routes implemented per spec §3; `next build` green; smoke-tested:
 PIN gate (middleware redirect/401, wrong-PIN 401, cookie unlock), graceful API errors.
 Live DB re-verified via Supabase MCP: 20/22/1 price rows, 0 projects, RLS on, 0 policies.
-See `README.md` for run/deploy. NOT yet deployed — awaiting Anthony: service-role key +
-APP_PIN in `.env.local`, real-data E2E, then Vercel.
+See `README.md` for run/deploy.
+
+LIVE E2E PASSED (2026-06-05, against the real Supabase DB): Frank-fixture section $3,600 ✓,
+Vinyl/Single gate $695 ✓, Dump Fee $300 ✓, project total $4,695 ✓ (sections+permit+gate
+−200 discount+extra), edit linear_ft reprices ✓, dump toggle reprices ✓, project labor
+change reprices sections ✓, delete cascades (DB verified 0 orphans) ✓. Test data deleted.
+D1 re-confirmed: PIN kept (Anthony briefly considered no-PIN; risk explained; PIN stays).
+`.env.local` is configured on Anthony's machine. Git repo init'd, remote:
+https://github.com/alara592/happy-fence-app — awaiting Anthony's push + Vercel import.
 
 ## Open items being tracked elsewhere (do not solve now)
 
