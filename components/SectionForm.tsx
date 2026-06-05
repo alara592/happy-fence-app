@@ -104,6 +104,19 @@ export default function SectionForm({
     }
   }
 
+  const takeDownField = (
+    <>
+      <label>Take Down Ft</label>
+      <input
+        type="number"
+        step="any"
+        min="0"
+        value={v.take_down_ft}
+        onChange={(e) => set("take_down_ft", e.target.value)}
+      />
+    </>
+  );
+
   return (
     <form onSubmit={submit}>
       <h1>{sectionId ? "Edit Section" : "New Section"}</h1>
@@ -143,6 +156,7 @@ export default function SectionForm({
             placeholder={String(settings?.defaultTearDownRate ?? "")}
             onChange={(e) => set("tear_down_rate", e.target.value)}
           />
+          {takeDownField}
         </>
       )}
 
@@ -165,19 +179,7 @@ export default function SectionForm({
             placeholder={String(settings?.defaultDumpRate ?? "")}
             onChange={(e) => set("dump_rate", e.target.value)}
           />
-        </>
-      )}
-
-      {(v.tear_down || v.dump) && (
-        <>
-          <label>Take Down Ft</label>
-          <input
-            type="number"
-            step="any"
-            min="0"
-            value={v.take_down_ft}
-            onChange={(e) => set("take_down_ft", e.target.value)}
-          />
+          {!v.tear_down && takeDownField}
         </>
       )}
 
