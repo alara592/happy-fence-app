@@ -52,6 +52,25 @@ export default function SectionForm({
   const set = (k: keyof SectionFormValues, val: string | boolean) =>
     setV((p) => ({ ...p, [k]: val }));
 
+  /** Take-down ft mirrors linear ft by default (Anthony: "it always will"), but stays editable. */
+  const setLinearFt = (val: string) =>
+    setV((p) => ({
+      ...p,
+      linear_ft: val,
+      take_down_ft:
+        p.take_down_ft === p.linear_ft || p.take_down_ft === "0" || p.take_down_ft === ""
+          ? val
+          : p.take_down_ft,
+    }));
+
+  const toggle = (k: "tear_down" | "dump", checked: boolean) =>
+    setV((p) => ({
+      ...p,
+      [k]: checked,
+      take_down_ft:
+        checked && (p.take_down_ft === "0" || p.take_down_ft === "") ? p.linear_ft : p.take_down_ft,
+    }));
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -101,7 +120,7 @@ export default function SectionForm({
         step="any"
         min="0"
         value={v.linear_ft}
-        onChange={(e) => set("linear_ft", e.target.value)}
+        onChange={(e) => setLinearFt(e.target.value)}
         required
       />
 
@@ -110,7 +129,7 @@ export default function SectionForm({
           id="teardown"
           type="checkbox"
           checked={v.tear_down}
-          onChange={(e) => set("tear_down", e.target.checked)}
+          onChange={(e) => toggle("tear_down", e.target.checked)}
         />
         <label htmlFor="teardown" style={{ margin: 0 }}>Tear Down</label>
       </div>
@@ -132,7 +151,7 @@ export default function SectionForm({
           id="dump"
           type="checkbox"
           checked={v.dump}
-          onChange={(e) => set("dump", e.target.checked)}
+          onChange={(e) => toggle("dump", e.target.checked)}
         />
         <label htmlFor="dump" style={{ margin: 0 }}>Dump</label>
       </div>
