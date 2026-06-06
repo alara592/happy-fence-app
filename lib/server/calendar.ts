@@ -15,8 +15,10 @@ function jwtClient(): JWT {
   if (!email || !key) {
     throw new Error("Missing GOOGLE_SA_CLIENT_EMAIL / GOOGLE_SA_PRIVATE_KEY env vars");
   }
-  // Env-stored keys escape newlines as literal "\n"; restore them.
-  key = key.replace(/\\n/g, "\n");
+  // Be forgiving about how the key was pasted: strip wrapping quotes, then turn
+  // literal "\n" into real newlines. Works whether pasted from .env.local
+  // (\n-escaped, often quoted) or straight from the JSON key file.
+  key = key.trim().replace(/^["']|["']$/g, "").replace(/\\n/g, "\n");
   return new JWT({ email, key, scopes: SCOPES });
 }
 
