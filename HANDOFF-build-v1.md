@@ -137,6 +137,7 @@ stay flat lookups.
 - Admin screen for price tables (today: edit via Supabase dashboard or ask Claude).
 - Present-to-Customer screen, photos (migration plan §6–7). *(Calendar sync — DONE 2026-06-06, see above.)*
 - Quote freezing for sent quotes (board recomputes live by design — revisit when quotes are presented to customers).
+- Per-user calendar sync (later): sync each team member's own calendar, not just `anthony@happyfencecompany.com`. Single-user for now by design — Anthony is the only user.
 
 ## Process rules (project conventions)
 
