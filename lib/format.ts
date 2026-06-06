@@ -42,6 +42,16 @@ export function fmtApptClock(iso: string | null): string {
   });
 }
 
+/** Maps directions link for an address (opens Google Maps app/site). */
+export function mapsUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+/** Google Earth link for an address. */
+export function earthUrl(address: string): string {
+  return `https://earth.google.com/web/search/${encodeURIComponent(address)}`;
+}
+
 /** YYYY-MM-DD of an instant in Miami time — seeds a project's date column. */
 export function etDate(iso: string | Date): string {
   return new Intl.DateTimeFormat("en-CA", {

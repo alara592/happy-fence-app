@@ -3,7 +3,7 @@
 Single source of truth for app state. Read this first in any new session, then
 `README.md` (run/deploy) and `lib/pricing.ts` (the engine). History: spec in
 `../Big Ant Fencing/V1-SPEC-quote-a-job.md`, strategy in
-`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-05**.
+`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-06**.
 
 ## What this is
 
@@ -133,6 +133,44 @@ flat $125 single / $300 double (→ settings); same margin as sections. Quote-in
 rule: when it ships, existing projects keep their saved gate prices. Until then gates
 stay flat lookups.
 
+## UX v2 — home, project, present (built 2026-06-06)
+
+Client-only UI pass (no schema, no engine, no server-route changes). Designed from
+mockups in repo root (`*-mockup.html`, kept as reference). Verified live against the
+real DB via dev preview; `npm test` 17/17 and `npm run build` green.
+
+- **Home** (`app/page.tsx`): search box (filters client + address), date grouping into
+  **This week / Upcoming / Earlier** by job date (This week = today→end of week; soonest-
+  first for current/future, most-recent-first for past), and a 📍 map pin per card. Totals
+  still off the list. The card layout splits into a text `<Link>` + a sibling pin `<a>` to
+  avoid nested anchors. "Needs quote" badge was considered and **deliberately dropped** (Anthony).
+- **Project** (`app/projects/[id]/page.tsx`):
+  - Sticky green **Project Total** bar (full-bleed via negative margins) with a **Present →**
+    link; replaces the old total card. Shows `—` until an Active fence is set.
+  - Header line is inconspicuous: address + 📍 (Maps) / 🌐 (Google Earth) icons, then a bare
+    `{margin}% | {labor}/ft` readout (no "margin"/"labor" labels — Anthony reads it at a glance,
+    customers don't clock it). Margin/labor are still edited only on the project form.
+  - "Sections" heading renamed **Measurements** (form titles + spec unchanged).
+  - Price board rows show `$X / section` (from reference `perSection`) and a **delta vs the
+    Active fence** (`+$200` etc.) on non-active rows.
+  - Empty **Gates/Extras** collapse to a single quiet line; expand to full list once populated.
+  - **Discount** is a plain `$` field parked at the bottom; saves on blur (PATCH `discount`)
+    → reload → "Saved ✓" toast. (Margin intentionally has NO inline control — set-and-forget.)
+  - Native `confirm()` replaced with a styled modal sheet (Cancel / Delete); deletes + set-active
+    flash a toast.
+- **Present** (`app/projects/[id]/present/page.tsx`, NEW route): customer-facing read-only
+  estimate. Branded hero, client, address, the **Active fence + Project total**, a "what's
+  included" list (fence + linear ft, permit, gates, extras), and discount as a positive line
+  (`Your discount −$X` when `discount < 0`). **Safe by construction** — margin, labor, the
+  price board, and internal notes are simply not rendered on this screen, so nothing leaks if
+  the phone is handed over. Falls back to a "no fence selected" message when there's no Active
+  fence. Still behind the PIN (shown on Anthony's device, not truly public).
+- **Shared helpers** added to `lib/format.ts`: `mapsUrl()`, `earthUrl()`.
+
+Not built (open for later): per-material "show to customer" flag to present multiple options;
+shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
+hero (placeholder text today — drop in from `../Logo`).
+
 ## Open data questions (Anthony/Mimi)
 
 - Vinyl/Double gate $1,429 unconfirmed (CHANGELOG said 1,395).
@@ -142,9 +180,9 @@ stay flat lookups.
 ## Wish list / later
 
 - Address autocomplete on project form (Google Places or similar; needs API key; also fixes city parsing).
-- Home-page upgrades (mocked, deferred): project status + filter chips, search, stats strip, call/map buttons (needs phone field), month grouping, brand styling.
+- Home-page upgrades: search + date grouping (This week / Upcoming / Earlier) + 📍 map pin **DONE 2026-06-06, see UX v2 below**. Still deferred: project status + filter chips, stats strip, call button (needs phone field), brand styling.
 - Admin screen for price tables (today: edit via Supabase dashboard or ask Claude).
-- Present-to-Customer screen, photos (migration plan §6–7). *(Calendar sync — DONE 2026-06-06, see above.)*
+- Present-to-Customer screen **DONE 2026-06-06 (basic), see UX v2 below**; photos still deferred (migration plan §6–7). *(Calendar sync — DONE 2026-06-06, see above.)*
 - Quote freezing for sent quotes (board recomputes live by design — revisit when quotes are presented to customers).
 - Per-user calendar sync (later): sync each team member's own calendar, not just `anthony@happyfencecompany.com`. Single-user for now by design — Anthony is the only user.
 

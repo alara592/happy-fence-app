@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/client";
-import { fmtUSD, fmtDate } from "@/lib/format";
+import { fmtUSD, fmtDate, mapsUrl, earthUrl } from "@/lib/format";
 
 interface Bundle {
   project: {
@@ -50,9 +50,17 @@ export default function ProjectDetailPage() {
   const [allTypes, setAllTypes] = useState<FencePriceRow[] | null>(null);
   const [pick, setPick] = useState("");
   const [error, setError] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [toast, setToast] = useState("");
+  const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
   const reload = useCallback(() => {
-    api<Bundle>(`/api/projects/${id}`).then(setB).catch((e) => setError(e.message));
+    api<Bundle>(`/api/projects/${id}`)
+      .then((bundle) => {
+        setB(bundle);
+        setDiscount(String(bundle.project.discount));
+      })
+      .catch((e) => setError(e.message));
   }, [id]);
 
   useEffect(reload, [reload]);
@@ -61,6 +69,11 @@ export default function ProjectDetailPage() {
       .then((r) => setAllTypes(r.fencePrices))
       .catch((e) => setError(e.message));
   }, []);
+
+  function flash(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(""), 1800);
+  }
 
   async function addMaterial(type: string) {
     if (!type) return;
@@ -76,14 +89,19 @@ export default function ProjectDetailPage() {
     }
   }
 
-  async function del(path: string, label: string) {
-    if (!confirm(`Delete ${label}?`)) return;
-    try {
-      await api(path, { method: "DELETE" });
-      reload();
-    } catch (e) {
-      setError((e as Error).message);
-    }
+  function del(path: string, label: string) {
+    setConfirmAsk({
+      message: `Delete ${label}?`,
+      run: async () => {
+        try {
+          await api(path, { method: "DELETE" });
+          flash("Deleted");
+          reload();
+        } catch (e) {
+          setError((e as Error).message);
+        }
+      },
+    });
   }
 
   async function removeMaterial(materialId: string) {
@@ -101,20 +119,41 @@ export default function ProjectDetailPage() {
         method: "PATCH",
         body: JSON.stringify({ is_active: true }),
       });
+      flash("Active fence set");
       reload();
     } catch (e) {
       setError((e as Error).message);
     }
   }
 
-  async function delProject() {
-    if (!confirm(`Delete this project AND all its sections, gates, extras, and materials?`)) return;
+  async function saveDiscount() {
+    if (!b) return;
+    const next = Number(discount || 0);
+    if (next === b.project.discount) return;
     try {
-      await api(`/api/projects/${id}`, { method: "DELETE" });
-      router.push("/");
+      await api(`/api/projects/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ discount: next }),
+      });
+      flash("Saved ✓");
+      reload();
     } catch (e) {
       setError((e as Error).message);
     }
+  }
+
+  function delProject() {
+    setConfirmAsk({
+      message: "Delete this project AND all its sections, gates, extras, and materials?",
+      run: async () => {
+        try {
+          await api(`/api/projects/${id}`, { method: "DELETE" });
+          router.push("/");
+        } catch (e) {
+          setError((e as Error).message);
+        }
+      },
+    });
   }
 
   if (error && !b) return <p className="error">{error}</p>;
@@ -122,37 +161,49 @@ export default function ProjectDetailPage() {
   const { project: p } = b;
   const onBoard = new Set(b.materials.map((m) => m.type));
   const available = (allTypes ?? []).filter((t) => !onBoard.has(t.type));
+  const perSection = new Map((allTypes ?? []).map((t) => [t.type, t.perSection]));
+  const activeTotal = b.board.find((r) => r.active)?.total ?? null;
 
   return (
     <>
-      <p><Link href="/">← Projects</Link></p>
+      {toast && <div className="toast">{toast}</div>}
+
+      <div className="sticky-total">
+        <div>
+          <div className="lbl">
+            Project Total{b.activeType ? ` · ${b.activeType}` : ""}
+          </div>
+          <div className="num">{b.total !== null ? fmtUSD(b.total) : "—"}</div>
+        </div>
+        <Link href={`/projects/${id}/present`}>
+          <button className="present-btn">Present →</button>
+        </Link>
+      </div>
+
       <div className="spread">
         <h1 style={{ margin: 0 }}>{p.client}</h1>
         <Link href={`/projects/${id}/edit`}><button>Edit</button></Link>
       </div>
       <p className="muted">
-        {p.address || "No address"} · {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"} ·
-        labor {fmtUSD(p.labor_cost_ft)}/ft · margin {(p.profit_margin * 100).toFixed(0)}%
-        {p.discount !== 0 ? ` · adj ${fmtUSD(p.discount)}` : ""}
+        {p.address || "No address"}
+        {p.address && (
+          <span className="geo">
+            <a href={mapsUrl(p.address)} target="_blank" rel="noopener noreferrer" title="Directions">📍</a>
+            <a href={earthUrl(p.address)} target="_blank" rel="noopener noreferrer" title="Google Earth">🌐</a>
+          </span>
+        )}
+        <br />
+        {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"} · {(p.profit_margin * 100).toFixed(0)}% | {p.labor_cost_ft}/ft
       </p>
       {p.notes && <p className="muted">Notes: {p.notes}</p>}
       {p.price_mod_notes && <p className="muted">Price mods: {p.price_mod_notes}</p>}
       {error && <p className="error">{error}</p>}
-
-      <div className="card">
-        <div className="spread">
-          <span>Project Total</span>
-          <span className="total">{b.total !== null ? fmtUSD(b.total) : "—"}</span>
-        </div>
-        <div className="muted">
-          {b.activeType
-            ? `${b.activeType} (active) + gates ${fmtUSD(b.gatesTotal)}`
-            : "Set an Active fence on the price board to get the project total."}
-        </div>
-      </div>
+      {!b.activeType && (
+        <p className="muted">Set an Active fence on the price board to get the project total.</p>
+      )}
 
       <div className="spread">
-        <h2>Sections ({b.sections.length}) — {b.totalLinearFt} ft</h2>
+        <h2>Measurements ({b.sections.length}) — {b.totalLinearFt} ft</h2>
         <Link href={`/projects/${id}/sections/new`}><button>+ Add</button></Link>
       </div>
       {b.sections.map((s) => (
@@ -175,33 +226,46 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       ))}
-      {b.sections.length === 0 && <p className="muted">No sections measured yet.</p>}
+      {b.sections.length === 0 && <p className="muted">No measurements yet.</p>}
 
       <h2>Price board <span className="muted" style={{ fontWeight: 400 }}>(fence + permit + extras, no gates)</span></h2>
-      {b.board.map((row) => (
-        <div
-          key={row.materialId}
-          className="card spread"
-          style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : undefined}
-        >
-          <div>
-            <strong>{row.type}</strong>
-            {row.active && <div className="muted" style={{ color: "#1a7f37" }}>Active fence</div>}
-            {row.unpriced && (
-              <div className="warn" style={{ margin: "4px 0 0" }}>
-                Unpriced material — no $/section on file. Update the price table before quoting.
-              </div>
-            )}
+      {b.board.map((row) => {
+        const ps = perSection.get(row.type);
+        const delta =
+          !row.active && row.total !== null && activeTotal !== null ? row.total - activeTotal : null;
+        return (
+          <div
+            key={row.materialId}
+            className="card spread"
+            style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : undefined}
+          >
+            <div>
+              <strong>{row.type}</strong>
+              {row.active && <div className="muted" style={{ color: "#1a7f37" }}>Active fence</div>}
+              {ps !== undefined && ps > 0 && <div className="muted">{fmtUSD(ps)} / section</div>}
+              {row.unpriced && (
+                <div className="warn" style={{ margin: "4px 0 0" }}>
+                  Unpriced material — no $/section on file. Update the price table before quoting.
+                </div>
+              )}
+            </div>
+            <div className="row" style={{ flex: "none", gap: 8, textAlign: "right" }}>
+              {row.total !== null && (
+                <div>
+                  <div className="total" style={{ fontSize: "1.3rem" }}>{fmtUSD(row.total)}</div>
+                  {delta !== null && delta !== 0 && (
+                    <div className="delta">{delta > 0 ? "+" : "−"}{fmtUSD(Math.abs(delta))}</div>
+                  )}
+                </div>
+              )}
+              {!row.active && (
+                <button onClick={() => setActive(row.materialId)}>Set active</button>
+              )}
+              <button className="danger" onClick={() => removeMaterial(row.materialId)}>✕</button>
+            </div>
           </div>
-          <div className="row" style={{ flex: "none", gap: 8 }}>
-            {row.total !== null && <span className="total">{fmtUSD(row.total)}</span>}
-            {!row.active && (
-              <button onClick={() => setActive(row.materialId)}>Set active</button>
-            )}
-            <button className="danger" onClick={() => removeMaterial(row.materialId)}>✕</button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       {b.board.length === 0 && <p className="muted">No materials on the board yet — add one below.</p>}
       <select
         value={pick}
@@ -219,51 +283,105 @@ export default function ProjectDetailPage() {
         ))}
       </select>
 
-      <div className="spread">
-        <h2>Gates ({b.gates.length})</h2>
-        <Link href={`/projects/${id}/gates/new`}><button>+ Add</button></Link>
-      </div>
-      {b.gates.map((g) => (
-        <div key={g.id} className="card">
+      {b.gates.length === 0 ? (
+        <div className="collapsed">
+          Gates (0) — none yet
+          <Link href={`/projects/${id}/gates/new`}>+ Add</Link>
+        </div>
+      ) : (
+        <>
           <div className="spread">
-            <div>
-              <strong>{g.name}</strong>
-              <div className="muted">
-                {g.type} · {g.style}
-                {g.quantity > 1 ? ` · ${fmtUSD(g.actual_price)} × ${g.quantity}` : ""}
+            <h2>Gates ({b.gates.length})</h2>
+            <Link href={`/projects/${id}/gates/new`}><button>+ Add</button></Link>
+          </div>
+          {b.gates.map((g) => (
+            <div key={g.id} className="card">
+              <div className="spread">
+                <div>
+                  <strong>{g.name}</strong>
+                  <div className="muted">
+                    {g.type} · {g.style}
+                    {g.quantity > 1 ? ` · ${fmtUSD(g.actual_price)} × ${g.quantity}` : ""}
+                  </div>
+                </div>
+                <strong>{fmtUSD(g.actual_price * g.quantity)}</strong>
+              </div>
+              <div className="actions">
+                <Link href={`/projects/${id}/gates/${g.id}`}><button>Edit</button></Link>
+                <button className="danger" onClick={() => del(`/api/projects/${id}/gates/${g.id}`, `gate "${g.name}"`)}>
+                  Delete
+                </button>
               </div>
             </div>
-            <strong>{fmtUSD(g.actual_price * g.quantity)}</strong>
-          </div>
-          <div className="actions">
-            <Link href={`/projects/${id}/gates/${g.id}`}><button>Edit</button></Link>
-            <button className="danger" onClick={() => del(`/api/projects/${id}/gates/${g.id}`, `gate "${g.name}"`)}>
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
+          ))}
+        </>
+      )}
 
-      <div className="spread">
-        <h2>Extras ({b.extras.length})</h2>
-        <Link href={`/projects/${id}/extras/new`}><button>+ Add</button></Link>
-      </div>
-      {b.extras.map((x) => (
-        <div key={x.id} className="card spread">
-          <div>
-            <strong>{x.name}</strong>
-          </div>
-          <div className="row" style={{ flex: "none", gap: 12 }}>
-            <strong>{fmtUSD(x.price)}</strong>
-            <button className="danger" onClick={() => del(`/api/projects/${id}/extras/${x.id}`, `extra "${x.name}"`)}>
-              Delete
-            </button>
-          </div>
+      {b.extras.length === 0 ? (
+        <div className="collapsed">
+          Extras (0) — none yet
+          <Link href={`/projects/${id}/extras/new`}>+ Add</Link>
         </div>
-      ))}
+      ) : (
+        <>
+          <div className="spread">
+            <h2>Extras ({b.extras.length})</h2>
+            <Link href={`/projects/${id}/extras/new`}><button>+ Add</button></Link>
+          </div>
+          {b.extras.map((x) => (
+            <div key={x.id} className="card spread">
+              <div>
+                <strong>{x.name}</strong>
+              </div>
+              <div className="row" style={{ flex: "none", gap: 12 }}>
+                <strong>{fmtUSD(x.price)}</strong>
+                <button className="danger" onClick={() => del(`/api/projects/${id}/extras/${x.id}`, `extra "${x.name}"`)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      <label htmlFor="discount" style={{ marginTop: 24 }}>Discount $</label>
+      <input
+        id="discount"
+        type="number"
+        step="any"
+        inputMode="decimal"
+        style={{ maxWidth: 200 }}
+        value={discount}
+        onChange={(e) => setDiscount(e.target.value)}
+        onBlur={saveDiscount}
+      />
+      <p className="muted">Negative = discount off the total.</p>
 
       <h2>Danger zone</h2>
       <button className="danger" onClick={delProject}>Delete Project</button>
+
+      {confirmAsk && (
+        <div className="modal-backdrop" onClick={() => setConfirmAsk(null)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="body">
+              <strong>{confirmAsk.message}</strong>
+            </div>
+            <div className="btns">
+              <button onClick={() => setConfirmAsk(null)}>Cancel</button>
+              <button
+                style={{ color: "#b02a37", fontWeight: 700 }}
+                onClick={() => {
+                  const r = confirmAsk.run;
+                  setConfirmAsk(null);
+                  r();
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Project page optimizations</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 48px; }
+  h1 { font-size:1.3rem; } h2 { font-size:1.05rem; margin:20px 0 8px; }
+  a { color:#0a58ca; }
+  input,select { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .total { font-size:1.6rem; font-weight:700; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; margin-top:8px; }
+
+  .wrap { max-width:820px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:28px; }
+  .intro h1 { margin:0 0 6px; font-size:1.4rem; }
+  .stage { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .phone { width:360px; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; position:relative; }
+  .notch { height:26px; background:#1c1c1e; }
+  .screen { height:680px; overflow-y:auto; position:relative; }
+
+  .sticky-total { position:sticky; top:0; z-index:5; background:#1a7f37; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  .sticky-total .num { font-size:1.5rem; font-weight:800; }
+  .sticky-total .lbl { font-size:.8rem; opacity:.9; }
+  .hl { outline:2px solid #1a7f37; outline-offset:2px; border-radius:8px; }
+
+  .delta { color:#1a7f37; font-weight:700; font-size:.85rem; }
+  .collapsed { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#fff; border:1px solid #eee; border-radius:8px; margin:8px 0; color:#888; font-size:.95rem; }
+  .collapsed .chev { color:#bbb; }
+
+  /* map/earth icons */
+  .geo { display:inline-flex; gap:8px; vertical-align:middle; margin-left:6px; }
+  .geo a { font-size:1.05rem; text-decoration:none; }
+
+  /* discount option swatches */
+  .opts { display:flex; gap:18px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
+  .opt { width:300px; background:#fff; border:1px solid #ddd; border-radius:12px; padding:16px; }
+  .opt h4 { margin:0 0 4px; font-size:.95rem; }
+  .opt .why { color:#666; font-size:.8rem; margin:0 0 12px; }
+  .d-line { display:flex; align-items:center; gap:10px; }
+  .d-line label { font-weight:700; font-size:.9rem; white-space:nowrap; }
+  .d-line input { text-align:right; }
+  .stepper { display:flex; align-items:center; gap:8px; }
+  .stepper button { width:40px; height:40px; font-size:1.2rem; font-weight:700; padding:0; }
+  .stepper .v { flex:1; text-align:center; font-weight:700; font-size:1.05rem; }
+  .reveal { color:#1a7f37; font-weight:600; font-size:.9rem; cursor:pointer; }
+  .target-eq { color:#666; font-size:.8rem; margin-top:8px; }
+
+  .annot { background:#1a7f37; color:#fff; font-size:.78rem; border-radius:8px; padding:9px 12px; margin:10px 0; }
+  .annot b { display:block; margin-bottom:2px; }
+  .free { display:inline-block; font-size:.66rem; font-weight:800; background:#d6ecdd; color:#0f5e29; border-radius:10px; padding:1px 7px; margin-left:6px; vertical-align:middle; }
+  .pick { display:inline-block; font-size:.66rem; font-weight:800; background:#fff3cd; color:#7a5b00; border-radius:10px; padding:1px 7px; margin-left:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Project page — optimizations <span class="free">all free / no schema change</span></h1>
+    <p class="muted" style="font-size:.9rem">Directions fixed to a quiet pin + globe. Discount removed from the page — three replacement styles to pick from are below the phone.</p>
+  </div>
+
+  <div class="stage">
+
+    <!-- PHONE -->
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sticky-total">
+          <div><div class="lbl">Project Total · Dog Ear</div><div class="num">$3,600</div></div>
+          <button style="background:#fff;color:#1a7f37;font-weight:700;padding:8px 12px">Present →</button>
+        </div>
+        <div class="phone-main">
+          <div class="spread"><h1 style="margin:0">Frank Theye</h1><button>Edit</button></div>
+          <!-- #1 pin + globe -->
+          <p class="muted">1820 NW 5th St, Miami
+            <span class="geo"><a href="#" title="Directions in Maps">📍</a><a href="#" title="View in Google Earth">🌐</a></span>
+            <br>Jun 6, 2026 · Permit · 30% | 12/ft</p>
+
+          <div class="spread"><h2>Measurements (1) — 200 ft</h2><button>+ Add</button></div>
+          <div class="card">
+            <div class="spread"><div><strong>Back yard</strong><div class="muted">200 ft · tear-down 200 ft</div></div>
+            <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div></div>
+          </div>
+
+          <h2>Price board</h2>
+          <div class="card spread hl" style="border-color:#1a7f37;border-width:2px">
+            <div><strong>Dog Ear</strong><div class="muted" style="color:#1a7f37">Active fence</div><div class="muted">$118 / section</div></div>
+            <span class="total">$3,600</span>
+          </div>
+          <div class="card spread">
+            <div><strong>Vinyl (White)</strong><div class="muted">$140 / section</div></div>
+            <div class="row" style="flex:none;gap:8px;text-align:right">
+              <div><div class="total" style="font-size:1.3rem">$4,200</div><div class="delta">+$600</div></div>
+              <button>Set active</button>
+            </div>
+          </div>
+          <select style="margin-top:8px"><option>+ Add material…</option></select>
+
+          <div class="collapsed">Gates (0) — none yet <span class="chev">+ Add</span></div>
+          <div class="collapsed">Extras (0) — none yet <span class="chev">+ Add</span></div>
+
+          <!-- discount: plain field (style A), small, parked at the bottom -->
+          <div class="d-line" style="margin-top:20px;max-width:200px">
+            <label style="color:#444">Discount $</label><input value="0" style="padding:8px">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div style="width:330px">
+      <div class="annot"><b>#1 · 📍 pin + 🌐 globe</b>Pin opens Maps for directions; globe opens Google Earth at the address. Quiet icons, no worded link.</div>
+      <div class="annot"><b>#2 · Option delta (+$600)</b>Each non-active material shows its gap to the Active fence — a built-in upsell line.</div>
+      <div class="annot"><b>#4 · Collapsed empties</b>Gates/Extras shrink to one quiet line until you add something.</div>
+      <div class="annot"><b>Discount · style A</b>A plain $ field parked small at the bottom of the page (see phone). Type the amount, the sticky total moves. No chips, no clutter when it’s $0.</div>
+    </div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:24px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>

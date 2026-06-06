@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Home page optimizations</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 48px; }
+  h1 { font-size:1.3rem; margin:0; }
+  a { color:#0a58ca; }
+  input { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; }
+
+  .wrap { max-width:840px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:28px; }
+  .intro h1 { font-size:1.4rem; }
+  .cols { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col { flex:1; min-width:330px; max-width:400px; }
+  .col > h3 { text-align:center; font-size:1rem; margin:0 0 12px; color:#333; }
+  .badge { display:inline-block; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; margin-left:8px; }
+  .badge.before { background:#f1d6d6; color:#8a1f2b; }
+  .badge.after { background:#d6ecdd; color:#0f5e29; }
+  .phone { width:360px; margin:0 auto; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; }
+  .notch { height:26px; background:#1c1c1e; }
+  .screen { height:680px; overflow-y:auto; }
+
+  .search { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #bbb; border-radius:8px; padding:0 10px; margin:10px 0 4px; }
+  .search input { border:0; padding:10px 0; }
+  .search .ico { color:#999; }
+  .group-h { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:#999; font-weight:800; margin:18px 0 4px; }
+  .pin { color:#0a58ca; text-decoration:none; font-size:1.05rem; }
+  .chev { color:#bbb; }
+  .needs { display:inline-block; font-size:.66rem; font-weight:800; background:#fff3cd; color:#7a5b00; border-radius:10px; padding:1px 7px; margin-left:8px; vertical-align:middle; }
+
+  .annot { background:#1a7f37; color:#fff; font-size:.78rem; border-radius:8px; padding:9px 12px; margin:10px 0; }
+  .annot b { display:block; margin-bottom:2px; }
+  .free { display:inline-block; font-size:.66rem; font-weight:800; background:#d6ecdd; color:#0f5e29; border-radius:10px; padding:1px 7px; margin-left:6px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Home page — optimizations <span class="free">all free / no schema change</span></h1>
+    <p class="muted" style="font-size:.9rem">Left: today. Right: a "what's next" dashboard — search, an unquoted flag, and date grouping, all derived from data you already store. Totals stay off the list (your call).</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- BEFORE -->
+    <div class="col">
+      <h3>Today <span class="badge before">BEFORE</span></h3>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="phone-main">
+            <div class="spread">
+              <h1>Projects</h1>
+              <div class="actions"><button>Appointments</button><button class="primary">+ New</button></div>
+            </div>
+            <div class="card spread"><div><strong>Maria Lopez</strong><div class="muted">Hialeah · Jun 8, 2026</div></div><span class="chev">›</span></div>
+            <div class="card spread"><div><strong>Frank Theye</strong><div class="muted">Miami · Jun 6, 2026 · Permit</div></div><span class="chev">›</span></div>
+            <div class="card spread"><div><strong>Dave Kim</strong><div class="muted">Doral · Jun 10, 2026</div></div><span class="chev">›</span></div>
+            <div class="card spread"><div><strong>Pedro Bravo</strong><div class="muted">Miami · Jun 3, 2026 · Permit</div></div><span class="chev">›</span></div>
+            <div class="card spread"><div><strong>Susan Reyes</strong><div class="muted">Kendall · May 28, 2026</div></div><span class="chev">›</span></div>
+            <p class="muted" style="margin-top:14px">One flat newest-first list. No search; nothing tells you which jobs still need a quote.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="col">
+      <h3>Proposed <span class="badge after">AFTER</span></h3>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="phone-main">
+            <div class="spread">
+              <h1>Projects</h1>
+              <div class="actions"><button>Appointments</button><button class="primary">+ New</button></div>
+            </div>
+
+            <!-- #5 search -->
+            <div class="search"><span class="ico">🔍</span><input placeholder="Search client or address"></div>
+
+            <!-- #7 grouping + #6 unquoted badge + pin -->
+            <div class="group-h">This week</div>
+            <div class="card spread">
+              <div><strong>Frank Theye</strong><div class="muted">Miami · Jun 6, 2026 · Permit</div></div>
+              <div class="actions"><a class="pin" href="#" title="Directions">📍</a><span class="chev">›</span></div>
+            </div>
+
+            <div class="group-h">Upcoming</div>
+            <div class="card spread">
+              <div><strong>Maria Lopez</strong><div class="muted">Hialeah · Jun 8, 2026</div></div>
+              <div class="actions"><a class="pin" href="#" title="Directions">📍</a><span class="chev">›</span></div>
+            </div>
+            <div class="card spread">
+              <div><strong>Dave Kim</strong><div class="muted">Doral · Jun 10, 2026</div></div>
+              <div class="actions"><a class="pin" href="#" title="Directions">📍</a><span class="chev">›</span></div>
+            </div>
+
+            <div class="group-h">Earlier</div>
+            <div class="card spread">
+              <div><strong>Pedro Bravo</strong><div class="muted">Miami · Jun 3, 2026 · Permit</div></div>
+              <div class="actions"><a class="pin" href="#" title="Directions">📍</a><span class="chev">›</span></div>
+            </div>
+            <div class="card spread">
+              <div><strong>Susan Reyes</strong><div class="muted">Kendall · May 28, 2026</div></div>
+              <div class="actions"><a class="pin" href="#" title="Directions">📍</a><span class="chev">›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:520px;margin:24px auto 0">
+    <div class="annot"><b>#5 · Search</b>Filter by client or address — the one that matters once the list grows past a screen.</div>
+    <div class="annot"><b>#7 · Date grouping</b>This week / Upcoming / Earlier by job date, instead of one long run — easier to scan, surfaces what's coming.</div>
+    <div class="annot"><b>Bonus · 📍 pin</b>Same tap-to-navigate from the project page, on each card — drive to a job straight from the list.</div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:24px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>

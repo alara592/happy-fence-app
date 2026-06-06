@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Present screen (Option A)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 48px; }
+  h1 { font-size:1.3rem; } h2 { font-size:1.05rem; margin:20px 0 8px; }
+  a { color:#0a58ca; }
+  label { display:block; margin:12px 0 4px; font-weight:600; font-size:.9rem; }
+  input,select { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .total { font-size:1.6rem; font-weight:700; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; margin-top:8px; }
+
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:28px; }
+  .intro h1 { margin:0 0 6px; font-size:1.4rem; }
+  .cols { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col { flex:1; min-width:330px; max-width:400px; }
+  .col > h3 { text-align:center; font-size:1rem; margin:0 0 12px; color:#333; }
+  .badge { display:inline-block; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; margin-left:8px; }
+  .badge.int { background:#e2e3e5; color:#41464b; }
+  .badge.cust { background:#d6ecdd; color:#0f5e29; }
+  .phone { width:360px; margin:0 auto; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; }
+  .notch { height:26px; background:#1c1c1e; }
+  .screen { height:660px; overflow-y:auto; position:relative; }
+
+  /* ---- internal AFTER view (unchanged from the Tier 1 mockup) ---- */
+  .sticky-total { position:sticky; top:0; z-index:5; background:#1a7f37; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  .sticky-total .num { font-size:1.5rem; font-weight:800; }
+  .sticky-total .lbl { font-size:.8rem; opacity:.9; }
+  .disc-strip { display:flex; align-items:center; gap:8px; margin:20px 0 4px; }
+  .disc-lbl { font-size:.8rem; font-weight:700; color:#444; }
+  .pct-row { display:flex; gap:6px; flex:1; }
+  .pct-row .pchip { flex:1; text-align:center; padding:6px 4px; border:1px solid #1a7f37; border-radius:6px; font-weight:600; font-size:.82rem; background:#fff; color:#1a7f37; }
+  .pct-row .pchip.on { background:#1a7f37; color:#fff; }
+  .hl { outline:2px solid #1a7f37; outline-offset:2px; border-radius:8px; }
+
+  /* ---- customer present view ---- */
+  .present { background:#fff; min-height:100%; }
+  .p-hero { background:#1a7f37; color:#fff; padding:26px 20px 30px; text-align:center; }
+  .p-logo { font-size:1.15rem; font-weight:800; letter-spacing:.04em; }
+  .p-sub { font-size:.8rem; opacity:.9; margin-top:2px; }
+  .p-body { padding:20px; }
+  .p-client { font-size:1.25rem; font-weight:700; }
+  .p-addr { color:#666; font-size:.9rem; margin-top:2px; }
+  .p-fence-card { border:2px solid #1a7f37; border-radius:14px; padding:20px; text-align:center; margin:18px 0; }
+  .p-fence-label { font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:#1a7f37; font-weight:700; }
+  .p-fence-name { font-size:1.5rem; font-weight:800; margin:6px 0 14px; }
+  .p-total-label { font-size:.85rem; color:#666; }
+  .p-total { font-size:2.6rem; font-weight:800; color:#1a7f37; line-height:1.1; }
+  .p-included h4 { font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:#999; margin:20px 0 8px; }
+  .p-line { display:flex; justify-content:space-between; padding:10px 2px; border-bottom:1px solid #eee; font-size:.95rem; }
+  .p-line.disc { color:#1a7f37; font-weight:600; }
+  .p-line .v { font-weight:600; }
+  .p-foot { text-align:center; color:#999; font-size:.78rem; padding:18px 20px 28px; }
+  .p-foot .biz { color:#1a7f37; font-weight:700; }
+  .annot { background:#1a7f37; color:#fff; font-size:.78rem; border-radius:8px; padding:10px 12px; margin:12px auto 0; max-width:360px; }
+  .annot b { display:block; margin-bottom:3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Option A — the customer "Present" screen</h1>
+    <p class="muted" style="font-size:.9rem">Left: your internal view, <b>unchanged</b> from the Tier 1 mockup (sticky total, price-to-close, the price board). Right: what the <b>customer</b> sees when you tap <b>Present →</b> in the green bar. Only the Present page is new.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- INTERNAL (Tier 1 AFTER, unchanged) -->
+    <div class="col">
+      <h3>Your view <span class="badge int">INTERNAL — unchanged</span></h3>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <!-- sticky total + Present entry point -->
+          <div class="sticky-total">
+            <div><div class="lbl">Project Total · Dog Ear</div><div class="num">$3,600</div></div>
+            <button style="background:#fff;color:#1a7f37;font-weight:700;padding:8px 12px">Present →</button>
+          </div>
+          <div class="phone-main">
+            <div class="spread"><h1 style="margin:0">Frank Theye</h1><button>Edit</button></div>
+            <!-- internal levers shown bare & inconspicuous — no labels (Anthony knows what they are) -->
+            <p class="muted">1820 NW 5th St, Miami · Jun 6, 2026 · Permit · 30% | 12/ft</p>
+
+            <div class="spread"><h2>Measurements (1) — 200 ft</h2><button>+ Add</button></div>
+            <div class="card">
+              <div class="spread"><div><strong>Back yard</strong><div class="muted">200 ft · tear-down 200 ft</div></div>
+              <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div></div>
+            </div>
+
+            <h2>Price board</h2>
+            <div class="card spread hl" style="border-color:#1a7f37;border-width:2px">
+              <div><strong>Dog Ear</strong><div class="muted" style="color:#1a7f37">Active fence</div><div class="muted">$118 / section</div></div>
+              <span class="total">$3,600</span>
+            </div>
+            <div class="card spread">
+              <div><strong>Vinyl (White)</strong><div class="muted">$140 / section</div></div>
+              <div class="row" style="flex:none;gap:8px"><span class="total">$4,200</span><button>Set active</button></div>
+            </div>
+            <select style="margin-top:8px"><option>+ Add material…</option></select>
+
+            <!-- discount: the one inline lever, parked at the bottom, compact -->
+            <div class="disc-strip">
+              <span class="disc-lbl">Discount</span>
+              <div class="pct-row">
+                <div class="pchip on">$0</div><div class="pchip">−$100</div><div class="pchip">−$250</div><div class="pchip">−$500</div><div class="pchip">＋</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER PRESENT (new) -->
+    <div class="col">
+      <h3>Customer view <span class="badge cust">PRESENT — new</span></h3>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="present">
+            <div class="p-hero">
+              <div class="p-logo">HAPPY FENCE COMPANY</div>
+              <div class="p-sub">Your fence estimate</div>
+            </div>
+            <div class="p-body">
+              <div class="p-client">Frank Theye</div>
+              <div class="p-addr">1820 NW 5th St, Miami</div>
+
+              <div class="p-fence-card">
+                <div class="p-fence-label">Your fence</div>
+                <div class="p-fence-name">Dog Ear</div>
+                <div class="p-total-label">Project total</div>
+                <div class="p-total">$3,600</div>
+              </div>
+
+              <div class="p-included">
+                <h4>What's included</h4>
+                <div class="p-line"><span>Fence — Dog Ear, 200 ft</span><span class="v">included</span></div>
+                <div class="p-line"><span>Permit</span><span class="v">included</span></div>
+                <div class="p-line disc"><span>Your discount</span><span class="v">−$250</span></div>
+                <div class="p-line" style="border-bottom:none;font-size:1.1rem;font-weight:800;margin-top:4px">
+                  <span>Total</span><span class="v" style="color:#1a7f37">$3,600</span></div>
+              </div>
+            </div>
+            <div class="p-foot">
+              Estimate valid 30 days · <span class="biz">happyfencecompany.com</span><br>
+              Thank you for considering Happy Fence Company
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot">
+        <b>Hidden on this screen:</b>
+        margin, labor $/ft, the price-to-close controls, the price-board alternatives, internal notes — none of it exists here. The customer sees the <b>Active fence</b> and the <b>Project total</b>. Discount shows as a positive line.
+      </div>
+    </div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:40px">Mockup only — nothing in the app changed. Branding/logo is a placeholder.</p>
+</div>
+</body>
+</html>
