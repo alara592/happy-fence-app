@@ -9,17 +9,36 @@ import { JWT } from "google-auth-library";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 
+/**
+ * Rebuild a valid PEM from however the key was pasted into an env var:
+ * quoted or not, \n-escaped, real newlines, or newlines stripped entirely.
+ * Pulls out the base64 body, re-wraps it at 64 chars, restores the markers.
+ */
+export function normalizePrivateKey(raw: string): string {
+  let s = raw.trim().replace(/^["']|["']$/g, "").replace(/\\n/g, "\n");
+  const begin = "-----BEGIN PRIVATE KEY-----";
+  const end = "-----END PRIVATE KEY-----";
+  // If markers are present, extract whatever is between them as the body.
+  const i = s.indexOf(begin);
+  const j = s.indexOf(end);
+  let body: string;
+  if (i !== -1 && j !== -1) {
+    body = s.slice(i + begin.length, j);
+  } else {
+    body = s; // assume the whole thing is the body
+  }
+  body = body.replace(/[^A-Za-z0-9+/=]/g, ""); // keep base64 chars only
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") ?? body;
+  return `${begin}\n${wrapped}\n${end}\n`;
+}
+
 function jwtClient(): JWT {
   const email = process.env.GOOGLE_SA_CLIENT_EMAIL;
-  let key = process.env.GOOGLE_SA_PRIVATE_KEY;
-  if (!email || !key) {
+  const rawKey = process.env.GOOGLE_SA_PRIVATE_KEY;
+  if (!email || !rawKey) {
     throw new Error("Missing GOOGLE_SA_CLIENT_EMAIL / GOOGLE_SA_PRIVATE_KEY env vars");
   }
-  // Be forgiving about how the key was pasted: strip wrapping quotes, then turn
-  // literal "\n" into real newlines. Works whether pasted from .env.local
-  // (\n-escaped, often quoted) or straight from the JSON key file.
-  key = key.trim().replace(/^["']|["']$/g, "").replace(/\\n/g, "\n");
-  return new JWT({ email, key, scopes: SCOPES });
+  return new JWT({ email, key: normalizePrivateKey(rawKey), scopes: SCOPES });
 }
 
 export interface CalEvent {

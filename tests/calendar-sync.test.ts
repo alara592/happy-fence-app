@@ -6,6 +6,22 @@ import {
   parseClient,
   syncFields,
 } from "../lib/server/calendar-sync";
+import { normalizePrivateKey } from "../lib/server/calendar";
+
+test("normalizePrivateKey rebuilds a valid PEM from any paste form", () => {
+  const body = "A".repeat(200); // stand-in base64 body
+  const canonical =
+    "-----BEGIN PRIVATE KEY-----\n" +
+    (body.match(/.{1,64}/g) as string[]).join("\n") +
+    "\n-----END PRIVATE KEY-----\n";
+  const real = "-----BEGIN PRIVATE KEY-----\n" + body.match(/.{1,64}/g)!.join("\n") + "\n-----END PRIVATE KEY-----\n";
+  const escaped = real.replace(/\n/g, "\\n");
+  const stripped = real.replace(/\n/g, ""); // newlines removed entirely
+  const quoted = '"' + escaped + '"';
+  for (const form of [real, escaped, stripped, quoted]) {
+    assert.equal(normalizePrivateKey(form), canonical);
+  }
+});
 
 test("isSiteVisit matches prefix case-insensitively, ignores others", () => {
   assert.equal(isSiteVisit("Site Visit - Frank Theye"), true);
