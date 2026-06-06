@@ -151,6 +151,13 @@ real DB via dev preview; `npm test` 17/17 and `npm run build` green.
     `{margin}% | {labor}/ft` readout (no "margin"/"labor" labels — Anthony reads it at a glance,
     customers don't clock it). Margin/labor are still edited only on the project form.
   - "Sections" heading renamed **Measurements** (form titles + spec unchanged).
+  - Each measurement shows its **computed price under the Active fence** as small green
+    subtext, left of the footage (`$5,700 · 120 ft · …`). Computed server-side in
+    `getProjectBundle` via the engine's `sectionPrice` and returned as `sections[].price`
+    (null when no/unpriced active fence). It's exact, not an estimate: the engine rounds
+    each section to $100 individually and the fence subtotal is their sum, so per-section
+    prices add up to the sections portion (NB: that's fence-only — permit/gates/extras are
+    project-level, so they sum to the board subtotal minus permit/extras, not the grand total).
   - Price board rows show `$X / section` (from reference `perSection`) and a **delta vs the
     Active fence** (`+$200` etc.) on non-active rows.
   - Empty **Gates/Extras** collapse to a single quiet line; expand to full list once populated.

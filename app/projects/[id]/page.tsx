@@ -26,6 +26,7 @@ interface Bundle {
     tear_down: boolean;
     dump: boolean;
     take_down_ft: number;
+    price: number | null;
   }[];
   gates: { id: string; name: string; type: string; style: string; actual_price: number; quantity: number }[];
   extras: { id: string; name: string; price: number }[];
@@ -212,6 +213,7 @@ export default function ProjectDetailPage() {
             <div>
               <strong>{s.name}</strong>
               <div className="muted">
+                {s.price !== null && <><span className="sec-price">{fmtUSD(s.price)}</span> · </>}
                 {s.linear_ft} ft
                 {s.tear_down ? ` · tear-down ${s.take_down_ft} ft` : ""}
                 {s.dump ? " · dump" : ""}

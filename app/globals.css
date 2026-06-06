@@ -82,6 +82,9 @@ button:disabled { opacity: 0.5; }
 /* Price-board option delta */
 .delta { color: #1a7f37; font-weight: 700; font-size: .85rem; }
 
+/* Per-section computed price (small, green, inline left of the footage) */
+.sec-price { color: #1a7f37; font-weight: 700; }
+
 /* Collapsed empty section (gates/extras) */
 .collapsed {
   display: flex; justify-content: space-between; align-items: center;

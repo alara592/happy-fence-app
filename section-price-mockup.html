@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — per-section computed price</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#fafafa; color:#111; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; }
+  h2 { font-size:1.05rem; margin:0; }
+
+  .wrap { max-width:680px; margin:0 auto; padding:28px 18px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:16px 20px; margin-bottom:24px; }
+  .intro h1 { margin:0 0 6px; font-size:1.3rem; }
+  .lbl { text-align:center; font-size:.8rem; font-weight:700; letter-spacing:.05em; color:#888; margin:18px 0 6px; }
+
+  /* the new bit: small green computed price, left of the footage */
+  .sec-price { color:#1a7f37; font-weight:700; }
+
+  .annot { background:#7a5b00; color:#fff; font-size:.8rem; border-radius:8px; padding:10px 12px; margin:14px 0; }
+  .annot b { display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Per-section price — small, green, left of the footage</h1>
+    <p class="muted" style="font-size:.9rem">Computed cost of the measurement under the Active fence, tucked onto the front of the existing grey line.</p>
+  </div>
+
+  <div class="lbl">BEFORE</div>
+  <div class="spread"><h2>Measurements (1) — 295 ft</h2><button>+ Add</button></div>
+  <div class="card">
+    <div class="spread">
+      <div>
+        <strong>Full Fence backyard</strong>
+        <div class="muted">295 ft · tear-down 295 ft · dump</div>
+      </div>
+      <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div>
+    </div>
+  </div>
+
+  <div class="lbl" style="margin-top:28px">AFTER</div>
+  <div class="spread"><h2>Measurements (1) — 295 ft</h2><button>+ Add</button></div>
+  <div class="card">
+    <div class="spread">
+      <div>
+        <strong>Full Fence backyard</strong>
+        <div class="muted"><span class="sec-price">$13,900</span> · 295 ft · tear-down 295 ft · dump</div>
+      </div>
+      <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div>
+    </div>
+  </div>
+
+  <div class="annot" style="background:#1a7f37"><b>No estimation needed — it's exact</b>The engine already rounds each section to $100 individually and the fence subtotal is the sum of those section prices. So each line is a real exact price and they add up perfectly. No “≈”, no engine change. (Price hides when no Active fence is set.)</div>
+
+  <p class="muted" style="text-align:center;margin-top:20px">Mockup only — nothing in the app changed. $13,900 is a placeholder figure.</p>
+</div>
+</body>
+</html>

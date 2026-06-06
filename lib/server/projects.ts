@@ -2,6 +2,7 @@ import { db } from "./db";
 import { loadReference, ReferenceData } from "./reference";
 import {
   projectTotal,
+  sectionPrice,
   type ProjectPricingInput,
   type SectionInput,
 } from "@/lib/pricing";
@@ -175,9 +176,36 @@ export async function getProjectBundle(id: string) {
   // Project total = active fence row (sections+permit+extras+discount) + gates.
   const total = activeRow && activeRow.total !== null ? activeRow.total + gatesTotal : null;
 
+  // Per-section computed price under the Active fence (null when no/unpriced active fence).
+  // Each is the engine's exact, $100-rounded section price — they sum to the fence subtotal.
+  const activeFp =
+    activeRow && !activeRow.unpriced
+      ? ref.fencePrices.find((f) => f.type === activeRow.type) ?? null
+      : null;
+  const sectionsOut = sectionRows.map((s) => ({
+    ...s,
+    price:
+      activeFp && s.linear_ft > 0
+        ? sectionPrice(
+            {
+              linearFt: s.linear_ft,
+              type: activeFp.type,
+              tearDown: s.tear_down,
+              dump: s.dump,
+              takeDownFt: s.take_down_ft,
+              tearDownRate: s.tear_down_rate,
+              dumpRate: s.dump_rate,
+            },
+            activeFp,
+            { laborCostFt: project.labor_cost_ft, profitMargin: project.profit_margin },
+            ref.settings,
+          ).price
+        : null,
+  }));
+
   return {
     project,
-    sections: sectionRows,
+    sections: sectionsOut,
     gates: gateRows,
     extras: extraRows,
     materials: materialRows,
