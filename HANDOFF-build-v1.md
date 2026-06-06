@@ -85,7 +85,13 @@ Replaces the AppSheet `calendar-sync.gs`. One-way, upserts on `calendar_event_id
 - **Scheduler:** **Supabase pg_cron**, every 15 min, calling
   `GET /api/cron/calendar-sync` (Bearer `CRON_SECRET`; exempt from the PIN middleware).
   Chosen because Vercel **Hobby** caps crons at once/day; pg_cron is free + matches
-  AppSheet's cadence. SQL job below (apply AFTER deploy + env vars are live).
+  AppSheet's cadence. **LIVE since 2026-06-06** — `cron.job` jobname
+  `calendar-sync-15min` (active). pg_cron + pg_net extensions enabled (migration
+  `enable_pg_cron_and_pg_net`). Verified in prod: a manual `net.http_get` to the
+  deployed endpoint returned `200 {ok:true, siteVisits:20, updated:20}`. To inspect
+  runs: `select * from cron.job_run_details order by start_time desc limit 5;`.
+  (The `CRON_SECRET` is embedded in the job body in `cron.job` — rotate there if changed.)
+  SQL job below for reference / re-creation:
 
   ```sql
   -- one-time: enable extensions (Supabase: Database → Extensions, or)
