@@ -6,10 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test tests/pricing.test.ts"
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
+    "google-auth-library": "^9.15.1",
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

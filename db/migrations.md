@@ -67,6 +67,35 @@ create unique index uniq_active_material_per_project on project_materials(projec
 alter table project_gates add column quantity integer not null default 1 check (quantity > 0);
 ```
 
+## 6. appointments_table (2026-06-06)
+
+Calendar-sync target — Google Calendar "Site Visit" events land here. `calendar_event_id`
+is the unique upsert key. `project_id` links an appointment to the project created from it
+(null = not yet created → "Create Project" button shows; set = linked). Replaces the AppSheet
+pre-generated-Project-ID hack: the link is set at project-creation time instead.
+
+```sql
+create table appointments (
+  id uuid primary key default gen_random_uuid(),
+  calendar_event_id text not null unique,
+  client text not null default '',
+  address text,
+  start_at timestamptz,
+  end_at timestamptz,
+  meeting_title text,
+  notes text,
+  source text not null default 'Google Calendar',
+  status text not null default 'Scheduled',
+  created_by text,
+  project_id uuid references projects(id) on delete set null,
+  last_synced timestamptz,
+  created_at timestamptz not null default now()
+);
+create index idx_appointments_start on appointments(start_at desc);
+create index idx_appointments_project on appointments(project_id);
+alter table appointments enable row level security;
+```
+
 ## Data updates outside migrations (2026-06-05)
 
 ```sql

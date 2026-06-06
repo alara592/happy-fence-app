@@ -9,7 +9,13 @@ import { AUTH_COOKIE, pinToken } from "./lib/auth-token";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname === "/unlock" || pathname === "/api/unlock") {
+  // Open: the unlock screen/API, and the cron sync route (it guards itself with
+  // CRON_SECRET, and the scheduler/pg_cron can't carry the PIN cookie).
+  if (
+    pathname === "/unlock" ||
+    pathname === "/api/unlock" ||
+    pathname.startsWith("/api/cron/")
+  ) {
     return NextResponse.next();
   }
 

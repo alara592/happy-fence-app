@@ -33,9 +33,14 @@ export default function ProjectListPage() {
     <>
       <div className="spread">
         <h1>Projects</h1>
-        <Link href="/projects/new">
-          <button className="primary">+ New Project</button>
-        </Link>
+        <div className="actions">
+          <Link href="/appointments">
+            <button>Appointments</button>
+          </Link>
+          <Link href="/projects/new">
+            <button className="primary">+ New Project</button>
+          </Link>
+        </div>
       </div>
       {error && <p className="error">{error}</p>}
       {projects === null && !error && <p className="muted">Loading…</p>}

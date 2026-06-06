@@ -18,14 +18,16 @@ Anthony retires it.
 - **App:** https://happy-fence-app.vercel.app (Vercel project `happy-fence-app`, team "Anthony Lara's projects", framework preset **Next.js** — must stay Next.js, see gotchas)
 - **Repo:** https://github.com/alara592/happy-fence-app (private; Anthony pushes — the sandbox has no git credentials; pushes auto-deploy)
 - **DB:** Supabase "Happy Fence Calculator", ref `knbyonagksvaqpqkkehj`, us-east-1, Postgres 17, owner anthony@happyfencecompany.com. Supabase MCP connector is connected — use it directly. Vercel MCP connector also connected (logs, deployments).
-- **Env vars** (Vercel + `.env.local`): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PIN`.
+- **Env vars** (Vercel + `.env.local`): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PIN`, and for calendar sync: `GOOGLE_SA_CLIENT_EMAIL`, `GOOGLE_SA_PRIVATE_KEY` (PEM with `\n`-escaped newlines), `GOOGLE_CALENDAR_ID` (`anthony@happyfencecompany.com`), `CRON_SECRET`.
 - **Auth:** one shared device PIN (D1; revisited 2026-06-05 — Anthony considered no-PIN, risk explained, PIN kept). RLS on all tables with NO policies: the service-role key via server routes is the only path in.
+- **Google service account:** `claude@happy-fence-company.iam.gserviceaccount.com` (GCP project `happy-fence-company`). The HFC calendar is shared to it ("See all event details"). Key file `happy-fence-company-71cfc78820ed.json` lives in the repo root, **git-ignored** — its `client_email`/`private_key` are the source for the `GOOGLE_SA_*` env vars. If sync ever 401s on Google, re-share the calendar or regenerate the key.
 
 ## Current data model (v1.1 price board — replaced per-section materials)
 
 - `projects` — client, address, date, permit, labor_cost_ft, profit_margin (decimal), discount (signed), notes, price_mod_notes.
 - `project_sections` — **pure measurements**: name, description, linear_ft, tear_down, dump, take_down_ft, tear_down_rate/dump_rate (null = global default). No material, no stored price.
 - `project_materials` — the board. Row = (project, fence type); `is_active` marks the Active fence (partial unique index, max one per project). Removing the active row clears the total.
+- `appointments` — calendar-sync target (migration #6). `calendar_event_id` unique = upsert key; `project_id` (FK, on delete set null) links to the project created from it. See Calendar sync below.
 - `project_gates` — type+style flat lookup; `actual_price` is the UNIT price, `quantity` multiplies it.
 - `project_extras` — name+price copied from `extras` catalog at add time.
 - `fence_prices` — type (named **"Material - Style - Color"**, bare vinyls = Privacy), per_section ($0 = unpriced flag), ft_per_section, sort_order (dropdown + board order).
@@ -60,8 +62,59 @@ field renders inside the tear-down block (or dump block if tear-down is off).
 3. `price_board_sections_lose_material`
 4. `active_material_on_board`
 5. `gate_quantity`
+6. `appointments_table` (2026-06-06) — calendar-sync target.
 Plus data updates 2026-06-05: Cypress 121 (confirmed), new Vinyl(Sand) 112 @ 6 ft.
 Current state + drift notes: `seed/price-tables-2026-06-04.json`.
+
+## Calendar sync (Google Calendar → appointments) — built 2026-06-06
+
+Replaces the AppSheet `calendar-sync.gs`. One-way, upserts on `calendar_event_id`.
+
+- **Engine:** `lib/server/calendar.ts` (service-account JWT → Calendar REST) +
+  `lib/server/calendar-sync.ts` (the port: `Site Visit` prefix filter, field mapping,
+  HTML-strip on notes, ±14/120-day window). Pure helpers unit-tested in
+  `tests/calendar-sync.test.ts` (5 tests). Times stored UTC; displayed in
+  `America/New_York` via `lib/format.ts` (`fmtApptTime` / `etDate`).
+- **On update**, only sync fields refresh — `status` and `project_id` are preserved.
+- **Create Project** (`/api/appointments/[id]/create-project`): copies client/address,
+  seeds project `date` from the visit (ET), links `project_id`. No-duplicate guard =
+  the link itself (set → button hidden, FK `on delete set null` re-opens it if the
+  project is deleted). Drops the AppSheet pre-generated-Project-ID hack.
+- **Screen:** `app/appointments/page.tsx` — list (newest first) + **Sync now** button
+  (`POST /api/appointments/sync`, behind the PIN). Reached from a link on the home screen.
+- **Scheduler:** **Supabase pg_cron**, every 15 min, calling
+  `GET /api/cron/calendar-sync` (Bearer `CRON_SECRET`; exempt from the PIN middleware).
+  Chosen because Vercel **Hobby** caps crons at once/day; pg_cron is free + matches
+  AppSheet's cadence. SQL job below (apply AFTER deploy + env vars are live).
+
+  ```sql
+  -- one-time: enable extensions (Supabase: Database → Extensions, or)
+  create extension if not exists pg_cron;
+  create extension if not exists pg_net;
+  -- the job:
+  select cron.schedule('calendar-sync-15min', '*/15 * * * *', $$
+    select net.http_get(
+      'https://happy-fence-app.vercel.app/api/cron/calendar-sync',
+      headers := '{"Authorization":"Bearer <CRON_SECRET>"}'::jsonb
+    ); $$);
+  ```
+
+- **WHEN ANTHONY UPGRADES TO VERCEL PRO** (planned): native Vercel cron becomes the
+  cleaner home for the schedule. Swap = add a `vercel.json` with
+  `{"crons":[{"path":"/api/cron/calendar-sync","schedule":"*/15 * * * *"}]}` (Vercel
+  cron auto-sends `Authorization: Bearer $CRON_SECRET`), redeploy, then drop the
+  pg_cron job: `select cron.unschedule('calendar-sync-15min');`. The route code is
+  identical either way — only the trigger moves.
+
+### Deploy checklist (Anthony)
+
+1. Vercel → project `happy-fence-app` → Settings → Environment Variables, add:
+   `GOOGLE_SA_CLIENT_EMAIL`, `GOOGLE_SA_PRIVATE_KEY` (paste the PEM; Vercel handles
+   newlines), `GOOGLE_CALENDAR_ID`, `CRON_SECRET` (any long random string). Values are
+   in local `.env.local`.
+2. `git push` (auto-deploys). Verify `/appointments` loads and **Sync now** populates it.
+3. Tell Claude the deploy is live → Claude creates the pg_cron job with the real
+   `CRON_SECRET` and verifies a scheduled run.
 
 ## Decided, not yet built
 
@@ -82,7 +135,7 @@ stay flat lookups.
 - Address autocomplete on project form (Google Places or similar; needs API key; also fixes city parsing).
 - Home-page upgrades (mocked, deferred): project status + filter chips, search, stats strip, call/map buttons (needs phone field), month grouping, brand styling.
 - Admin screen for price tables (today: edit via Supabase dashboard or ask Claude).
-- Present-to-Customer screen, calendar sync, photos (migration plan §6–7).
+- Present-to-Customer screen, photos (migration plan §6–7). *(Calendar sync — DONE 2026-06-06, see above.)*
 - Quote freezing for sent quotes (board recomputes live by design — revisit when quotes are presented to customers).
 
 ## Process rules (project conventions)
