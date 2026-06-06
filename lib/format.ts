@@ -43,7 +43,7 @@ export function fmtApptClock(iso: string | null): string {
 }
 
 /** YYYY-MM-DD of an instant in Miami time — seeds a project's date column. */
-export function etDate(iso: string): string {
+export function etDate(iso: string | Date): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/New_York",
     year: "numeric",

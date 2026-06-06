@@ -23,11 +23,18 @@ export default function AppointmentsPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
-  function load() {
-    api<Appointment[]>("/api/appointments").then(setAppts).catch((e) => setError(e.message));
+  function load(all = showAll) {
+    setAppts(null);
+    api<Appointment[]>(`/api/appointments${all ? "?all=1" : ""}`)
+      .then(setAppts)
+      .catch((e) => setError(e.message));
   }
-  useEffect(load, []);
+  useEffect(() => {
+    load(showAll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAll]);
 
   async function syncNow() {
     setSyncing(true);
@@ -70,11 +77,25 @@ export default function AppointmentsPage() {
           </Link>
         </div>
       </div>
+      <div className="spread" style={{ marginTop: 4, marginBottom: 4 }}>
+        <span className="muted">
+          {showAll ? "Showing all appointments" : "Last 3 days + today & tomorrow"}
+        </span>
+        <button
+          onClick={() => setShowAll((v) => !v)}
+          style={{ padding: "4px 10px", fontSize: "0.85rem" }}
+        >
+          {showAll ? "Show recent" : "Show all"}
+        </button>
+      </div>
       {error && <p className="error">{error}</p>}
       {appts === null && !error && <p className="muted">Loading…</p>}
-      {appts?.length === 0 && (
-        <p className="muted">No appointments yet. They sync from your calendar’s “Site Visit” events.</p>
-      )}
+      {appts?.length === 0 &&
+        (showAll ? (
+          <p className="muted">No appointments yet. They sync from your calendar’s “Site Visit” events.</p>
+        ) : (
+          <p className="muted">Nothing scheduled in this window. Tap “Show all” to see future estimates.</p>
+        ))}
       {appts?.map((a) => (
         <div key={a.id} className="card">
           <div className="spread">

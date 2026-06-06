@@ -82,6 +82,9 @@ Replaces the AppSheet `calendar-sync.gs`. One-way, upserts on `calendar_event_id
   project is deleted). Drops the AppSheet pre-generated-Project-ID hack.
 - **Screen:** `app/appointments/page.tsx` — list (newest first) + **Sync now** button
   (`POST /api/appointments/sync`, behind the PIN). Reached from a link on the home screen.
+  **Default view is windowed** to [today−3 … tomorrow] in Miami time (far-out estimates
+  clog the screen); a quiet **Show all** toggle (`GET /api/appointments?all=1`) reveals
+  everything. All appointments stay synced regardless — the window only narrows display.
 - **Scheduler:** **Supabase pg_cron**, every 15 min, calling
   `GET /api/cron/calendar-sync` (Bearer `CRON_SECRET`; exempt from the PIN middleware).
   Chosen because Vercel **Hobby** caps crons at once/day; pg_cron is free + matches
