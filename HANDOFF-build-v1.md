@@ -192,6 +192,18 @@ NOT done (deferred, riskier): RSC/server-rendered pages (would remove the load-o
 "Loading…" flash entirely); optimistic UI (rejected — would misreport saves on field signal
 and can't predict prices without duplicating the engine).
 
+**Client cache + prefetch (2026-06-06):** new `lib/cache.ts` — a ~90-line homegrown
+stale-while-revalidate cache keyed by API path (no new dependency). `useCached(key)`
+renders cached data instantly and revalidates in the background; `load(key)` refreshes in
+place (keeps old data visible, dedupes); `prefetch(key)` warms a key; `setCache`/`invalidate`
+for mutations. Anthony's preference: **pay a longer first load for instant use after** — so
+the home screen prefetches `/api/reference` AND every project bundle on entry. The detail
+page and all forms (Section/Gate/Extra/Project) read reference/bundles from the cache; after
+a save, forms call `load(bundleKey)` so returning to the detail shows fresh data without a
+spinner; detail mutations revalidate via `load`. Module cache persists across client-side
+navigation (one session). Verified live: home warms all bundles, project opens with no
+loading flash, discount edit revalidates total/board correctly.
+
 Not built (open for later): per-material "show to customer" flag to present multiple options;
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).

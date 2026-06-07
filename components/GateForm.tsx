@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
+import { useCached, load } from "@/lib/cache";
 import { fmtUSD } from "@/lib/format";
 import type { GatePriceRow } from "@/lib/pricing";
 
@@ -28,15 +29,10 @@ export default function GateForm({
 }) {
   const router = useRouter();
   const [v, setV] = useState(initial);
-  const [gatePrices, setGatePrices] = useState<GatePriceRow[] | null>(null);
+  const { data: ref } = useCached<{ gatePrices: GatePriceRow[] }>("/api/reference");
+  const gatePrices = ref?.gatePrices ?? null;
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    api<{ gatePrices: GatePriceRow[] }>("/api/reference")
-      .then((r) => setGatePrices(r.gatePrices))
-      .catch((e) => setError(e.message));
-  }, []);
 
   const types = useMemo(
     () => Array.from(new Set((gatePrices ?? []).map((g) => g.type))),
@@ -72,6 +68,7 @@ export default function GateForm({
           body: JSON.stringify(body),
         });
       }
+      load(`/api/projects/${projectId}`).catch(() => {}); // refresh cache so detail is fresh
       router.push(`/projects/${projectId}`);
     } catch (err) {
       setError((err as Error).message);

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/client";
+import { useCached, load, invalidate } from "@/lib/cache";
 import { fmtUSD, fmtDate, mapsUrl, earthUrl } from "@/lib/format";
 
 interface Bundle {
@@ -43,23 +44,20 @@ interface Bundle {
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [b, setB] = useState<Bundle | null>(null);
+  const bundleKey = `/api/projects/${id}`;
+  const { data: b, error: loadError } = useCached<Bundle>(bundleKey);
   const [pick, setPick] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // mutation errors (load errors handled below)
   const [discount, setDiscount] = useState("");
   const [toast, setToast] = useState("");
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
-  const reload = useCallback(() => {
-    api<Bundle>(`/api/projects/${id}`)
-      .then((bundle) => {
-        setB(bundle);
-        setDiscount(String(bundle.project.discount));
-      })
-      .catch((e) => setError(e.message));
-  }, [id]);
+  const reload = () => load<Bundle>(bundleKey).catch(() => {});
 
-  useEffect(reload, [reload]);
+  // Keep the discount field in sync with the server value (after a save it matches).
+  useEffect(() => {
+    if (b) setDiscount(String(b.project.discount));
+  }, [b?.project.discount]);
 
   function flash(msg: string) {
     setToast(msg);
@@ -139,6 +137,8 @@ export default function ProjectDetailPage() {
       run: async () => {
         try {
           await api(`/api/projects/${id}`, { method: "DELETE" });
+          invalidate(bundleKey);
+          load("/api/projects").catch(() => {});
           router.push("/");
         } catch (e) {
           setError((e as Error).message);
@@ -147,11 +147,11 @@ export default function ProjectDetailPage() {
     });
   }
 
-  if (error && !b)
+  if (loadError && !b)
     return (
       <>
         <p><Link href="/">‹ Projects</Link></p>
-        <p className="error">{error}</p>
+        <p className="error">{loadError.message}</p>
       </>
     );
   if (!b) return <p className="muted">Loading…</p>;

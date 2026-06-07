@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
+import { useCached, load } from "@/lib/cache";
 import type { GlobalSettings } from "@/lib/pricing";
 
 export interface SectionFormValues {
@@ -39,15 +40,10 @@ export default function SectionForm({
 }) {
   const router = useRouter();
   const [v, setV] = useState(initial);
-  const [settings, setSettings] = useState<GlobalSettings | null>(null);
+  const { data: ref } = useCached<{ settings: GlobalSettings }>("/api/reference");
+  const settings = ref?.settings ?? null;
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    api<{ settings: GlobalSettings }>("/api/reference")
-      .then((r) => setSettings(r.settings))
-      .catch((e) => setError(e.message));
-  }, []);
 
   const set = (k: keyof SectionFormValues, val: string | boolean) =>
     setV((p) => ({ ...p, [k]: val }));
@@ -97,6 +93,7 @@ export default function SectionForm({
           body: JSON.stringify(body),
         });
       }
+      load(`/api/projects/${projectId}`).catch(() => {}); // refresh cache so detail is fresh
       router.push(`/projects/${projectId}`);
     } catch (err) {
       setError((err as Error).message);

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/client";
+import { useCached, prefetch } from "@/lib/cache";
 import { fmtDate, mapsUrl } from "@/lib/format";
 
 interface ProjectListItem {
@@ -37,13 +37,15 @@ function bucket(dateStr: string): Group {
 
 /** Screen 2 — project list: search + date grouping. No totals (price-board model). */
 export default function ProjectListPage() {
-  const [projects, setProjects] = useState<ProjectListItem[] | null>(null);
-  const [error, setError] = useState("");
+  const { data: projects, error } = useCached<ProjectListItem[]>("/api/projects");
   const [q, setQ] = useState("");
 
+  // Warm up everything on entry so the rest of the app feels instant (Anthony's pref:
+  // a longer first load in exchange for instant navigation afterward).
   useEffect(() => {
-    api<ProjectListItem[]>("/api/projects").then(setProjects).catch((e) => setError(e.message));
-  }, []);
+    prefetch("/api/reference");
+    if (projects) for (const p of projects) prefetch(`/api/projects/${p.id}`);
+  }, [projects]);
 
   const grouped = useMemo(() => {
     if (!projects) return null;
@@ -88,8 +90,8 @@ export default function ProjectListPage() {
         />
       </div>
 
-      {error && <p className="error">{error}</p>}
-      {projects === null && !error && <p className="muted">Loading…</p>}
+      {error && !projects && <p className="error">{error.message}</p>}
+      {!projects && !error && <p className="muted">Loading…</p>}
       {projects?.length === 0 && <p className="muted">No projects yet.</p>}
       {grouped && projects && projects.length > 0 && grouped.count === 0 && (
         <p className="muted">No matches.</p>

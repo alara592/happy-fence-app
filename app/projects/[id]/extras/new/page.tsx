@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/client";
+import { useCached, load } from "@/lib/cache";
 import { fmtUSD } from "@/lib/format";
 
 interface ExtraCatalogRow {
@@ -15,16 +16,11 @@ interface ExtraCatalogRow {
 export default function NewExtraPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [extras, setExtras] = useState<ExtraCatalogRow[] | null>(null);
+  const { data: ref } = useCached<{ extras: ExtraCatalogRow[] }>("/api/reference");
+  const extras = ref?.extras ?? null;
   const [extraId, setExtraId] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    api<{ extras: ExtraCatalogRow[] }>("/api/reference")
-      .then((r) => setExtras(r.extras))
-      .catch((e) => setError(e.message));
-  }, []);
 
   const selected = extras?.find((x) => x.id === extraId);
 
@@ -37,6 +33,7 @@ export default function NewExtraPage() {
         method: "POST",
         body: JSON.stringify({ extra_id: extraId }),
       });
+      load(`/api/projects/${id}`).catch(() => {}); // refresh cache so detail is fresh
       router.push(`/projects/${id}`);
     } catch (err) {
       setError((err as Error).message);

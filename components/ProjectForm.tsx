@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
+import { load } from "@/lib/cache";
 
 export interface ProjectFormValues {
   client: string;
@@ -68,12 +69,15 @@ export default function ProjectForm({
       };
       if (projectId) {
         await api(`/api/projects/${projectId}`, { method: "PATCH", body: JSON.stringify(body) });
+        load(`/api/projects/${projectId}`).catch(() => {}); // refresh detail
+        load("/api/projects").catch(() => {}); // client/date/etc may have changed the list
         router.push(`/projects/${projectId}`);
       } else {
         const created = await api<{ id: string }>("/api/projects", {
           method: "POST",
           body: JSON.stringify(body),
         });
+        load("/api/projects").catch(() => {}); // new project appears in the list
         router.push(`/projects/${created.id}`);
       }
     } catch (err) {
