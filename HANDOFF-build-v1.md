@@ -204,6 +204,14 @@ spinner; detail mutations revalidate via `load`. Module cache persists across cl
 navigation (one session). Verified live: home warms all bundles, project opens with no
 loading flash, discount edit revalidates total/board correctly.
 
+**localStorage persistence (2026-06-06):** the cache also persists to `localStorage`
+(`hfc-cache-v2`) and `hydrate()`s synchronously at module load, so a full app reopen /
+refresh / deep-link shows last-known data **instantly** (no "Loading…" flash) then
+revalidates. Only the very first launch ever (empty storage) shows a spinner. **BUMP the
+`PERSIST_KEY` version** whenever the bundle/list payload shape changes, so a deploy doesn't
+render stale-shaped data before revalidation. Verified live: cold full-load directly onto a
+project rendered client/total/section price with no loading flash.
+
 Not built (open for later): per-material "show to customer" flag to present multiple options;
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).

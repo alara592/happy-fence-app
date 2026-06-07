@@ -22,6 +22,39 @@ interface Entry {
 const store = new Map<string, Entry>();
 const listeners = new Map<string, Set<() => void>>();
 
+/**
+ * Persist the cache to localStorage so it survives a full app reopen / refresh —
+ * the screen then shows last-known data instantly instead of a "Loading…" flash,
+ * and revalidates in the background. BUMP the version when the cached payload shape
+ * changes (project bundle / list), so stale shapes are discarded after a deploy.
+ */
+const PERSIST_KEY = "hfc-cache-v2";
+
+function hydrate(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(PERSIST_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, { data: unknown; at: number }>;
+    for (const [k, v] of Object.entries(parsed)) store.set(k, { data: v.data, at: v.at });
+  } catch {
+    /* ignore corrupt/blocked storage */
+  }
+}
+
+function persist(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const obj: Record<string, { data: unknown; at: number }> = {};
+    for (const [k, e] of store) if (e.data !== undefined) obj[k] = { data: e.data, at: e.at };
+    window.localStorage.setItem(PERSIST_KEY, JSON.stringify(obj));
+  } catch {
+    /* quota/private-mode — caching just falls back to in-memory */
+  }
+}
+
+hydrate();
+
 function notify(key: string): void {
   const set = listeners.get(key);
   if (set) for (const fn of set) fn();
@@ -34,11 +67,13 @@ export function peek<T>(key: string): T | undefined {
 /** Overwrite an entry directly (e.g. data returned from a mutation). */
 export function setCache<T>(key: string, data: T): void {
   store.set(key, { data, at: Date.now() });
+  persist();
   notify(key);
 }
 
 export function invalidate(key: string): void {
   store.delete(key);
+  persist();
   notify(key);
 }
 
@@ -53,6 +88,7 @@ export function load<T>(key: string): Promise<T> {
   const promise = api<T>(key).then(
     (data) => {
       store.set(key, { data, at: Date.now() });
+      persist();
       notify(key);
       return data;
     },
