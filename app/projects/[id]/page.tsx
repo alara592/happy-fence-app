@@ -147,7 +147,13 @@ export default function ProjectDetailPage() {
     });
   }
 
-  if (error && !b) return <p className="error">{error}</p>;
+  if (error && !b)
+    return (
+      <>
+        <p><Link href="/">‹ Projects</Link></p>
+        <p className="error">{error}</p>
+      </>
+    );
   if (!b) return <p className="muted">Loading…</p>;
   const { project: p } = b;
   const onBoard = new Set(b.materials.map((m) => m.type));
@@ -160,7 +166,10 @@ export default function ProjectDetailPage() {
       {toast && <div className="toast">{toast}</div>}
 
       <div className="sticky-total">
-        <div>
+        <Link href="/" aria-label="Back to Projects">
+          <button className="back-chip">‹</button>
+        </Link>
+        <div style={{ flex: 1 }}>
           <div className="lbl">
             Project Total{b.activeType ? ` · ${b.activeType}` : ""}
           </div>

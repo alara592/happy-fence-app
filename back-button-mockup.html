@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — back button placement options</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 20px; }
+  h1 { font-size:1.3rem; margin:0; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+  .wrap { max-width:920px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .grid { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; }
+  .opt { width:300px; }
+  .opt h3 { text-align:center; font-size:1rem; margin:0 0 4px; }
+  .opt .tag { display:block; text-align:center; font-size:.78rem; color:#666; margin-bottom:10px; min-height:32px; }
+  .phone { border:9px solid #1c1c1e; border-radius:30px; overflow:hidden; box-shadow:0 8px 22px rgba(0,0,0,.22); background:#fafafa; position:relative; }
+  .notch { height:22px; background:#1c1c1e; }
+  .screen { height:300px; position:relative; overflow:hidden; }
+
+  .sticky-total { background:#1a7f37; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .sticky-total .num { font-size:1.4rem; font-weight:800; line-height:1.1; }
+  .sticky-total .lbl { font-size:.76rem; opacity:.9; }
+  .sticky-total .present { background:#fff; color:#1a7f37; border-color:#fff; font-weight:700; padding:7px 11px; white-space:nowrap; }
+  .back-chip { background:rgba(255,255,255,.18); border:0; color:#fff; font-size:1.3rem; font-weight:700; padding:4px 10px; border-radius:8px; line-height:1; }
+
+  .topnav { display:flex; align-items:center; gap:10px; background:#fff; border-bottom:1px solid #e2e2e2; padding:10px 14px; }
+  .topnav .b { color:#0a58ca; font-weight:700; font-size:.95rem; text-decoration:none; }
+  .topnav .ttl { font-weight:700; color:#333; }
+
+  .crumb { display:inline-block; color:#0a58ca; font-weight:600; font-size:.95rem; margin:0 0 6px; }
+
+  .fab { position:absolute; left:14px; bottom:14px; width:50px; height:50px; border-radius:50%; background:#1a7f37; color:#fff; border:0; font-size:1.5rem; box-shadow:0 4px 12px rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center; }
+
+  .hl { outline:3px solid #ffd23f; outline-offset:-3px; }
+
+  .rec { display:inline-block; font-size:.66rem; font-weight:800; background:#d6ecdd; color:#0f5e29; border-radius:10px; padding:1px 7px; margin-left:6px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Where to put “back” on the project page</h1>
+    <p class="muted" style="font-size:.9rem">Four placements (yellow = the back affordance). All would go “Up → Projects” by default. Pick one.</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- A: in the sticky bar -->
+    <div class="opt">
+      <h3>A · In the sticky bar <span class="rec">recommended</span></h3>
+      <span class="tag">Always visible (the bar is pinned), top-left = the universal back spot. Costs no extra space.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="sticky-total">
+          <button class="back-chip hl">‹</button>
+          <div style="flex:1"><div class="lbl">Project Total · DuraFence</div><div class="num">$6,534</div></div>
+          <button class="present">Present →</button>
+        </div>
+        <div class="phone-main">
+          <div class="spread"><h1>Anthony Lara</h1><button>Edit</button></div>
+          <p class="muted">11211 sw 62nd ln · Jun 5 · Permit · 30% | 10/ft</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- B: global top nav -->
+    <div class="opt">
+      <h3>B · Slim top nav bar</h3>
+      <span class="tag">A thin bar on every screen (back + page name). Most consistent app-wide, but adds a row of height.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="topnav hl"><a class="b" href="#">‹ Projects</a><span class="ttl" style="margin-left:auto"></span></div>
+        <div class="sticky-total">
+          <div style="flex:1"><div class="lbl">Project Total · DuraFence</div><div class="num">$6,534</div></div>
+          <button class="present">Present →</button>
+        </div>
+        <div class="phone-main">
+          <div class="spread"><h1>Anthony Lara</h1><button>Edit</button></div>
+          <p class="muted">11211 sw 62nd ln · Jun 5 · Permit</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- C: text link above header -->
+    <div class="opt">
+      <h3>C · Text link above the name</h3>
+      <span class="tag">The original “‹ Projects” link, restored under the bar. Simple &amp; conventional, but scrolls away with the page.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="sticky-total">
+          <div style="flex:1"><div class="lbl">Project Total · DuraFence</div><div class="num">$6,534</div></div>
+          <button class="present">Present →</button>
+        </div>
+        <div class="phone-main">
+          <a class="crumb hl" href="#">‹ Projects</a>
+          <div class="spread"><h1>Anthony Lara</h1><button>Edit</button></div>
+          <p class="muted">11211 sw 62nd ln · Jun 5 · Permit · 30% | 10/ft</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- D: floating button -->
+    <div class="opt">
+      <h3>D · Floating button (bottom-left)</h3>
+      <span class="tag">Thumb-reachable one-handed, always there without scrolling up. Less conventional for “back”; floats over content.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="sticky-total">
+          <div style="flex:1"><div class="lbl">Project Total · DuraFence</div><div class="num">$6,534</div></div>
+          <button class="present">Present →</button>
+        </div>
+        <div class="phone-main">
+          <div class="spread"><h1>Anthony Lara</h1><button>Edit</button></div>
+          <p class="muted">11211 sw 62nd ln · Jun 5 · Permit · 30% | 10/ft</p>
+        </div>
+        <button class="fab hl">‹</button>
+      </div></div>
+    </div>
+
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:28px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>

@@ -145,8 +145,10 @@ real DB via dev preview; `npm test` 17/17 and `npm run build` green.
   still off the list. The card layout splits into a text `<Link>` + a sibling pin `<a>` to
   avoid nested anchors. "Needs quote" badge was considered and **deliberately dropped** (Anthony).
 - **Project** (`app/projects/[id]/page.tsx`):
-  - Sticky green **Project Total** bar (full-bleed via negative margins) with a **Present →**
-    link; replaces the old total card. Shows `—` until an Active fence is set.
+  - Sticky green **Project Total** bar (full-bleed via negative margins) with a **‹** back
+    chip (left, → Projects list — "Up", not history-back) and a **Present →** link; replaces
+    the old total card. Shows `—` until an Active fence is set. The not-found/error state also
+    carries a "‹ Projects" link so a dead link never strands you.
   - Header line is inconspicuous: address + 📍 (Maps) / 🌐 (Google Earth) icons, then a bare
     `{margin}% | {labor}/ft` readout (no "margin"/"labor" labels — Anthony reads it at a glance,
     customers don't clock it). Margin/labor are still edited only on the project form.
