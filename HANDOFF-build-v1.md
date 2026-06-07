@@ -224,6 +224,14 @@ Not built (open for later): per-material "show to customer" flag to present mult
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).
 
+## Appointments grouped by date (2026-06-06)
+
+`app/appointments/page.tsx` now groups the list by Miami-time date: **Today / Tomorrow /
+Upcoming / Previous** (empty groups hidden; Today first). Today & Tomorrow show just the
+clock time (`fmtApptClock`); Upcoming/Previous show date + time (`fmtApptTime`). Today/Tomorrow/
+Upcoming sort soonest-first; Previous most-recent-first. Client-only change; the window +
+"Show all" toggle still control which appointments are fetched, grouping is presentational on top.
+
 ## Present page redesign — itemized proposal (2026-06-06)
 
 The customer Present page was reworked from a single-number card to an **itemized proposal
