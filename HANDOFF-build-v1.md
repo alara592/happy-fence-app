@@ -232,6 +232,11 @@ clock time (`fmtApptClock`); Upcoming/Previous show date + time (`fmtApptTime`).
 Upcoming sort soonest-first; Previous most-recent-first. Client-only change; the window +
 "Show all" toggle still control which appointments are fetched, grouping is presentational on top.
 
+Cards also reworked to **match the projects scan design**: compact row with client + `time · city`
+(city = tail of address), a 📍 map pin, and the action on the right (Create → for unlinked, › to
+the project for linked). The long calendar notes (job description + booking URLs) are tucked into
+a native `<details>` "Notes ▸" expander so the list stays scannable — full notes one tap away.
+
 ## Present page redesign — itemized proposal (2026-06-06)
 
 The customer Present page was reworked from a single-number card to an **itemized proposal

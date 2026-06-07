@@ -142,6 +142,14 @@ button:disabled { opacity: 0.5; }
 .group-h { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: #999; font-weight: 800; margin: 18px 0 4px; }
 .pin { color: #0a58ca; text-decoration: none; font-size: 1.1rem; }
 
+/* Appointment notes — tucked behind a tap so the list stays scannable */
+.appt-notes { margin-top: 8px; }
+.appt-notes summary { cursor: pointer; color: #1a7f37; font-size: .82rem; font-weight: 600; list-style: none; }
+.appt-notes summary::-webkit-details-marker { display: none; }
+.appt-notes summary::after { content: " ▸"; }
+.appt-notes[open] summary::after { content: " ▾"; }
+.appt-notes > div { margin-top: 6px; }
+
 /* "Saved ✓" toast */
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); top: 16px; z-index: 50;

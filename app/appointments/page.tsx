@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/client";
-import { fmtApptTime, fmtApptClock, etDate } from "@/lib/format";
+import { fmtApptTime, fmtApptClock, etDate, mapsUrl } from "@/lib/format";
+
+/** City = tail of the address; matches the projects list line. */
+function city(address: string | null): string {
+  if (!address) return "";
+  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
+  return parts.length > 1 ? parts[1] : "";
+}
 
 interface Appointment {
   id: string;
@@ -132,34 +139,52 @@ export default function AppointmentsPage() {
           grouped[g].length === 0 ? null : (
             <div key={g}>
               <div className="group-h">{g}</div>
-              {grouped[g].map((a) => (
-                <div key={a.id} className="card">
-                  <div className="spread">
-                    <strong>{a.client || "—"}</strong>
-                    <span className="muted">
-                      {g === "Today" || g === "Tomorrow" ? fmtApptClock(a.start_at) : fmtApptTime(a.start_at)}
-                    </span>
-                  </div>
-                  <div className="muted">{a.address || "No address"}</div>
-                  {a.notes && <div className="muted" style={{ marginTop: 6, whiteSpace: "pre-line" }}>{a.notes}</div>}
-                  <div className="actions">
-                    {a.project_id ? (
-                      <Link href={`/projects/${a.project_id}`} style={{ flex: 1 }}>
-                        <button style={{ width: "100%" }}>View project →</button>
-                      </Link>
-                    ) : (
-                      <button
-                        className="primary"
-                        style={{ flex: 1 }}
-                        disabled={busy === a.id}
-                        onClick={() => createProject(a)}
-                      >
-                        {busy === a.id ? "Creating…" : "Create Project →"}
-                      </button>
+              {grouped[g].map((a) => {
+                const c = city(a.address);
+                const time = g === "Today" || g === "Tomorrow" ? fmtApptClock(a.start_at) : fmtApptTime(a.start_at);
+                return (
+                  <div key={a.id} className="card">
+                    <div className="spread">
+                      <div>
+                        <strong>{a.client || "—"}</strong>
+                        <div className="muted">{[time, c].filter(Boolean).join(" · ") || "—"}</div>
+                      </div>
+                      <div className="actions" style={{ margin: 0, alignItems: "center" }}>
+                        {a.address && (
+                          <a className="pin" href={mapsUrl(a.address)} target="_blank" rel="noopener noreferrer" title="Directions">
+                            📍
+                          </a>
+                        )}
+                        {a.project_id ? (
+                          <Link
+                            href={`/projects/${a.project_id}`}
+                            className="muted"
+                            style={{ textDecoration: "none", fontSize: "1.3rem" }}
+                            title="View project"
+                          >
+                            ›
+                          </Link>
+                        ) : (
+                          <button
+                            className="primary"
+                            style={{ padding: "6px 12px" }}
+                            disabled={busy === a.id}
+                            onClick={() => createProject(a)}
+                          >
+                            {busy === a.id ? "…" : "Create →"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {a.notes && (
+                      <details className="appt-notes">
+                        <summary>Notes</summary>
+                        <div className="muted" style={{ whiteSpace: "pre-line" }}>{a.notes}</div>
+                      </details>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ),
         )}
