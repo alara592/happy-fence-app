@@ -31,7 +31,7 @@ Anthony retires it.
 - `project_gates` — type+style flat lookup; `actual_price` is the UNIT price, `quantity` multiplies it.
 - `project_extras` — name+price copied from `extras` catalog at add time.
 - `fence_prices` — type (named **"Material - Style - Color"**, bare vinyls = Privacy), per_section ($0 = unpriced flag), ft_per_section, sort_order (dropdown + board order).
-- `gate_prices`, `extras`, `settings` (GLOBAL: tear-down 3, dump 3, permit 300).
+- `gate_prices`, `extras`, `settings` (GLOBAL: tear-down 3, dump 3, permit 800 — was 300, raised 2026-06-06).
 
 **Board math (server glue, `lib/server/projects.ts`):** each board row = engine
 `projectTotal` with all sections typed as that material and **gates excluded** →
@@ -240,9 +240,10 @@ hero (placeholder text today — drop in from `../Logo`).
 - **Defaults** are now labor **$12/ft**, margin **30%** — in `emptyProject`, the `POST
   /api/projects` fallback, and the appointment `create-project` route (which previously relied
   on DB column defaults).
-- **NOT done — permit fee → $800**: this is a *global pricing* change (settings.permit_fee,
-  currently 300) that would re-price every permitted project on read. Awaiting Anthony's call
-  on scope (all projects vs new-only/per-project permit amount) before applying.
+- **Permit fee → $800** (DONE 2026-06-06, Anthony's call: all projects). `settings.permit_fee`
+  raised 300 → 800 via SQL — a global value, so every permitted project re-prices on read
+  (+$500). Verified live: Manoah Made $14,534 → $15,034. Data-only change (no code); picked up
+  within the reference cache TTL (~60s).
 
 ## Open data questions (Anthony/Mimi)
 
