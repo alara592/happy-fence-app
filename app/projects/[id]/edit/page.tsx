@@ -19,8 +19,8 @@ export default function EditProjectPage() {
           date: String(p.date ?? "").slice(0, 10),
           permit: !!p.permit,
           labor_cost_ft: String(p.labor_cost_ft),
-          profit_margin: String(p.profit_margin),
-          discount: String(p.discount),
+          // stored as a decimal (0.30); the form edits it as a percent (30)
+          profit_margin: String(+(Number(p.profit_margin) * 100).toFixed(6)),
           notes: String(p.notes ?? ""),
           price_mod_notes: String(p.price_mod_notes ?? ""),
         }),

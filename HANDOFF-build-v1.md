@@ -174,6 +174,12 @@ real DB via dev preview; `npm test` 17/17 and `npm run build` green.
   price board, and internal notes are simply not rendered on this screen, so nothing leaks if
   the phone is handed over. Falls back to a "no fence selected" message when there's no Active
   fence. Still behind the PIN (shown on Anthony's device, not truly public).
+- **Project form** (`components/ProjectForm.tsx`): Profit Margin is now entered as a
+  **percent** (`30`, with a `%` suffix) and converted to the stored decimal (0.30) on
+  submit; the edit page converts decimal→percent when loading. Labor gets a `$/ft` suffix;
+  both use `inputMode="decimal"` for the phone number pad. **Discount removed from this form**
+  — it lives only on the project page now (PATCH leaves it untouched when omitted; create
+  defaults to 0). `ProjectFormValues` no longer has a `discount` field.
 - **Shared helpers** added to `lib/format.ts`: `mapsUrl()`, `earthUrl()`.
 
 **Perf pass (2026-06-06):** `loadReference()` now caches the price tables in-process

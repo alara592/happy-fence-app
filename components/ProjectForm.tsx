@@ -10,8 +10,8 @@ export interface ProjectFormValues {
   date: string;
   permit: boolean;
   labor_cost_ft: string;
+  /** Held as a PERCENT in the form (e.g. "30"); converted to a decimal on submit. */
   profit_margin: string;
-  discount: string;
   notes: string;
   price_mod_notes: string;
 }
@@ -24,8 +24,7 @@ export const emptyProject: ProjectFormValues = {
   date: today(),
   permit: false,
   labor_cost_ft: "10",
-  profit_margin: "0.30",
-  discount: "0",
+  profit_margin: "30",
   notes: "",
   price_mod_notes: "",
 };
@@ -50,9 +49,9 @@ export default function ProjectForm({
     e.preventDefault();
     setBusy(true);
     setError("");
-    const margin = Number(v.profit_margin);
+    const margin = Number(v.profit_margin) / 100; // form is a percent; engine wants a decimal
     if (!(margin >= 0 && margin < 1)) {
-      setError("Profit margin must be a decimal from 0 to 0.99 (e.g. 0.30 = 30%)");
+      setError("Profit margin must be 0–99 (e.g. 30 for 30%)");
       setBusy(false);
       return;
     }
@@ -64,7 +63,6 @@ export default function ProjectForm({
         permit: v.permit,
         labor_cost_ft: Number(v.labor_cost_ft),
         profit_margin: margin,
-        discount: Number(v.discount || 0),
         notes: v.notes,
         price_mod_notes: v.price_mod_notes,
       };
@@ -114,34 +112,34 @@ export default function ProjectForm({
 
       <div className="row">
         <div>
-          <label>Labor Cost / Ft ($)</label>
-          <input
-            type="number"
-            step="any"
-            value={v.labor_cost_ft}
-            onChange={(e) => set("labor_cost_ft", e.target.value)}
-          />
+          <label>Labor Cost / Ft</label>
+          <div className="field-suffix">
+            <input
+              type="number"
+              step="any"
+              inputMode="decimal"
+              value={v.labor_cost_ft}
+              onChange={(e) => set("labor_cost_ft", e.target.value)}
+            />
+            <span className="unit">$/ft</span>
+          </div>
         </div>
         <div>
-          <label>Profit Margin (0.30 = 30%)</label>
-          <input
-            type="number"
-            step="any"
-            min="0"
-            max="0.99"
-            value={v.profit_margin}
-            onChange={(e) => set("profit_margin", e.target.value)}
-          />
+          <label>Profit Margin</label>
+          <div className="field-suffix">
+            <input
+              type="number"
+              step="any"
+              min="0"
+              max="99"
+              inputMode="decimal"
+              value={v.profit_margin}
+              onChange={(e) => set("profit_margin", e.target.value)}
+            />
+            <span className="unit">%</span>
+          </div>
         </div>
       </div>
-
-      <label>Discount ($, negative = discount)</label>
-      <input
-        type="number"
-        step="any"
-        value={v.discount}
-        onChange={(e) => set("discount", e.target.value)}
-      />
 
       <label>Notes</label>
       <textarea value={v.notes} onChange={(e) => set("notes", e.target.value)} />

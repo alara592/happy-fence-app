@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — project form UX</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#fafafa; color:#111; }
+  h1 { font-size:1.3rem; }
+  label { display:block; margin:12px 0 4px; font-weight:600; font-size:.9rem; }
+  input, textarea { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  textarea { min-height:60px; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  .row { display:flex; gap:12px; }
+  .row > div { flex:1; }
+  .check { display:flex; align-items:center; gap:8px; margin:14px 0; font-weight:600; }
+  .check input { width:22px; height:22px; }
+  .actions { display:flex; gap:8px; margin-top:16px; }
+  .muted { color:#666; font-size:.82rem; }
+
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { margin:0 0 6px; font-size:1.4rem; }
+  .cols { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col { flex:1; min-width:340px; max-width:420px; }
+  .col > h3 { text-align:center; font-size:1rem; margin:0 0 12px; }
+  .badge { display:inline-block; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; margin-left:8px; }
+  .badge.before { background:#f1d6d6; color:#8a1f2b; }
+  .badge.after { background:#d6ecdd; color:#0f5e29; }
+  .panel { background:#fff; border:1px solid #ddd; border-radius:12px; padding:18px; }
+  .suffix { display:flex; }
+  .suffix input { border-radius:6px 0 0 6px; border-right:0; }
+  .suffix .u { display:flex; align-items:center; padding:0 14px; border:1px solid #bbb; border-left:0; border-radius:0 6px 6px 0; background:#f3f3f3; font-weight:700; color:#444; }
+  .bad { color:#8a1f2b; font-size:.8rem; font-weight:600; margin:4px 0 0; }
+  .good { color:#1a7f37; font-size:.8rem; font-weight:600; margin:4px 0 0; }
+  .annot { background:#1a7f37; color:#fff; font-size:.8rem; border-radius:8px; padding:9px 12px; margin:10px 0; }
+  .annot b { display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Edit / New Project form — cleanup</h1>
+    <p class="muted" style="font-size:.9rem">Same fields, friendlier inputs. Left = today, right = proposed.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- BEFORE -->
+    <div class="col">
+      <h3>Today <span class="badge before">BEFORE</span></h3>
+      <div class="panel">
+        <label>Labor Cost / Ft ($)</label>
+        <input value="12">
+        <label>Profit Margin (0.30 = 30%)</label>
+        <input value="0.3">
+        <p class="bad">↑ Type “30” → error. Type “3” → 300% blowup. Full keyboard on mobile.</p>
+        <label>Discount ($, negative = discount)</label>
+        <input value="0">
+        <p class="bad">↑ Also lives on the project page now — two places to set the same thing.</p>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="col">
+      <h3>Proposed <span class="badge after">AFTER</span></h3>
+      <div class="panel">
+        <label>Labor Cost / Ft</label>
+        <div class="suffix"><input value="12" inputmode="decimal"><span class="u">$/ft</span></div>
+        <label>Profit Margin</label>
+        <div class="suffix"><input value="30" inputmode="decimal"><span class="u">%</span></div>
+        <p class="good">↑ Type 30, stored as 0.30. Big numeric keypad on phone.</p>
+        <p class="muted" style="margin-top:18px">Discount is set on the project page (small field at the bottom), so it's removed here — one place, no confusion.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:560px;margin:24px auto 0">
+    <div class="annot"><b>1 · Margin as a percent</b>“30 %” instead of “0.30”. Stored unchanged (0.30) — engine and saved quotes are unaffected.</div>
+    <div class="annot"><b>2 · Numeric keypads</b>Labor / margin get the big number pad on the phone (inputMode=decimal).</div>
+    <div class="annot" style="background:#7a5b00"><b>3 · Discount — your call</b>Remove it here (it's on the project page now), or keep it in both places? I'd remove it to avoid two sources of truth.</div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:24px">Mockup only — nothing in the app changed. Client / Address / Date / Permit / Notes are unchanged.</p>
+</div>
+</body>
+</html>
