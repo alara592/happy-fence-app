@@ -214,6 +214,9 @@ export async function getProjectBundle(id: string) {
     activeType: activeRow?.type ?? null,
     total,
     totalLinearFt: sectionRows.reduce((sum, s) => sum + s.linear_ft, 0),
+    // Catalog for the add-material dropdown + board $/section — folded in so the
+    // detail page needs one request, not a second /api/reference round trip.
+    fencePrices: ref.fencePrices,
     ref,
   };
 }

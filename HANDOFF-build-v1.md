@@ -174,6 +174,16 @@ real DB via dev preview; `npm test` 17/17 and `npm run build` green.
   fence. Still behind the PIN (shown on Anthony's device, not truly public).
 - **Shared helpers** added to `lib/format.ts`: `mapsUrl()`, `earthUrl()`.
 
+**Perf pass (2026-06-06):** `loadReference()` now caches the price tables in-process
+for 60s (`clearReferenceCache()` to bust) — they change rarely and never in the field, so
+this collapses the repeated reference loads per page into one DB hit. `getProjectBundle`
+also returns `fencePrices`, so the project detail page reads the catalog from the bundle
+instead of a second `/api/reference` round trip (one request per project open, was two).
+Vercel functions confirmed on default `iad1` = co-located with Supabase us-east-1.
+NOT done (deferred, riskier): RSC/server-rendered pages (would remove the load-on-mount
+"Loading…" flash entirely); optimistic UI (rejected — would misreport saves on field signal
+and can't predict prices without duplicating the engine).
+
 Not built (open for later): per-material "show to customer" flag to present multiple options;
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).

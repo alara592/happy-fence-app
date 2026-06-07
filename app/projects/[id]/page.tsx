@@ -36,11 +36,7 @@ interface Bundle {
   activeType: string | null;
   total: number | null;
   totalLinearFt: number;
-}
-
-interface FencePriceRow {
-  type: string;
-  perSection: number;
+  fencePrices: { type: string; perSection: number }[];
 }
 
 /** Screen 4 — project: measurements + the price board (whole job per material). */
@@ -48,7 +44,6 @@ export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [b, setB] = useState<Bundle | null>(null);
-  const [allTypes, setAllTypes] = useState<FencePriceRow[] | null>(null);
   const [pick, setPick] = useState("");
   const [error, setError] = useState("");
   const [discount, setDiscount] = useState("");
@@ -65,11 +60,6 @@ export default function ProjectDetailPage() {
   }, [id]);
 
   useEffect(reload, [reload]);
-  useEffect(() => {
-    api<{ fencePrices: FencePriceRow[] }>("/api/reference")
-      .then((r) => setAllTypes(r.fencePrices))
-      .catch((e) => setError(e.message));
-  }, []);
 
   function flash(msg: string) {
     setToast(msg);
@@ -161,8 +151,8 @@ export default function ProjectDetailPage() {
   if (!b) return <p className="muted">Loading…</p>;
   const { project: p } = b;
   const onBoard = new Set(b.materials.map((m) => m.type));
-  const available = (allTypes ?? []).filter((t) => !onBoard.has(t.type));
-  const perSection = new Map((allTypes ?? []).map((t) => [t.type, t.perSection]));
+  const available = b.fencePrices.filter((t) => !onBoard.has(t.type));
+  const perSection = new Map(b.fencePrices.map((t) => [t.type, t.perSection]));
   const activeTotal = b.board.find((r) => r.active)?.total ?? null;
 
   return (
@@ -272,10 +262,10 @@ export default function ProjectDetailPage() {
       <select
         value={pick}
         onChange={(e) => addMaterial(e.target.value)}
-        disabled={!allTypes || available.length === 0}
+        disabled={available.length === 0}
       >
         <option value="" disabled>
-          {allTypes ? "+ Add material…" : "Loading materials…"}
+          + Add material…
         </option>
         {available.map((t) => (
           <option key={t.type} value={t.type}>
