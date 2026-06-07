@@ -217,6 +217,16 @@ export async function getProjectBundle(id: string) {
     // Catalog for the add-material dropdown + board $/section — folded in so the
     // detail page needs one request, not a second /api/reference round trip.
     fencePrices: ref.fencePrices,
+    // For the customer Present page: the fence-only subtotal (board row = sections +
+    // permit + extras + discount, so back those out) and the permit fee line amount.
+    fenceSubtotal:
+      activeRow && activeRow.total !== null
+        ? activeRow.total -
+          (project.permit ? ref.settings.permitFee : 0) -
+          extraRows.reduce((s, e) => s + e.price, 0) -
+          project.discount
+        : null,
+    permitFee: ref.settings.permitFee,
     ref,
   };
 }

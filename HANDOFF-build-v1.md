@@ -224,6 +224,25 @@ Not built (open for later): per-material "show to customer" flag to present mult
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).
 
+## Present page redesign — itemized proposal (2026-06-06)
+
+The customer Present page was reworked from a single-number card to an **itemized proposal
+grouped by category** (Anthony picked this over a minimal one-number layout). Sections:
+**Fence & installation** (active type + linear ft → fence-only price), **Gates** (each gate
+name/style → unit×qty), **Add-ons** (extras), **Permits & fees** (permit), then a discount
+line (green "Your discount −$X" when `discount < 0`) and a highlighted **Total estimate** box.
+Header is a green band with the company wordmark + contact; footer has validity + a back link.
+Still customer-safe — margin/labor/board never render. Now reads the cached bundle via
+`useCached`, so Present opens instantly. Styles are `.pv-*` in globals.css (replaced the old
+`.p-*`). The line items sum exactly to the total (verified live: Manoah Made = 12,700 + 534 +
+1,000 + 800 = $15,034).
+
+- **Bundle additions** (`getProjectBundle`): `fenceSubtotal` (board active total minus permit,
+  extras, discount = the fence-only line) and `permitFee` (the permit line amount from settings).
+- **Company contact** is a `COMPANY` const at the top of the present page: `{ name, phone, web }`.
+  `phone` is intentionally blank (we don't show a fake number) — **fill it with the real phone to
+  surface it on the estimate.** Web = happyfencecompany.com.
+
 ## Workflow speed-ups (2026-06-06)
 
 - **Quick-add measurement** (`components/QuickAddMeasurement.tsx`): an in-flow add that never

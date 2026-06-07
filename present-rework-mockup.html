@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Present page: two options</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .wrap { max-width:920px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .muted { color:#666; font-size:.9rem; }
+  .cols { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col { width:360px; }
+  .col > h3 { text-align:center; font-size:1.05rem; margin:0 0 4px; }
+  .tag { display:block; text-align:center; font-size:.8rem; color:#666; margin-bottom:10px; min-height:34px; }
+  .phone { border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fff; }
+  .notch { height:24px; background:#1c1c1e; }
+  .screen { height:660px; overflow-y:auto; background:#fff; }
+
+  /* ============ OPTION A — minimal / premium ============ */
+  .a-hero { background:#1a7f37; color:#fff; padding:30px 22px 34px; text-align:center; }
+  .a-logo { font-size:1.05rem; font-weight:800; letter-spacing:.12em; opacity:.95; }
+  .a-for { font-size:.85rem; opacity:.85; margin-top:18px; }
+  .a-client { font-size:1.45rem; font-weight:700; margin-top:2px; }
+  .a-body { padding:30px 24px; text-align:center; }
+  .a-fence-label { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:#1a7f37; font-weight:700; }
+  .a-fence { font-size:1.6rem; font-weight:800; margin:8px 0 26px; }
+  .a-total-label { font-size:.85rem; color:#999; letter-spacing:.04em; }
+  .a-total { font-size:3.2rem; font-weight:800; color:#1a7f37; line-height:1; margin-top:4px; }
+  .a-incl { color:#555; font-size:.95rem; margin-top:24px; line-height:1.6; }
+  .a-divider { height:1px; background:#eee; margin:28px 24px; }
+  .a-cta { text-align:center; padding:0 24px 8px; }
+  .a-cta .q { color:#999; font-size:.85rem; }
+  .a-cta .ph { font-size:1.2rem; font-weight:700; color:#111; margin-top:2px; }
+  .a-foot { text-align:center; color:#aaa; font-size:.75rem; padding:18px 24px 30px; }
+
+  /* ============ OPTION B — itemized proposal ============ */
+  .b-head { background:#1a7f37; color:#fff; padding:18px 20px; display:flex; justify-content:space-between; align-items:flex-start; }
+  .b-logo { font-size:1rem; font-weight:800; letter-spacing:.04em; }
+  .b-contact { font-size:.7rem; opacity:.9; text-align:right; line-height:1.5; }
+  .b-sub { padding:16px 20px 6px; }
+  .b-est { font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:#999; font-weight:700; }
+  .b-client { font-size:1.2rem; font-weight:700; }
+  .b-meta { color:#666; font-size:.82rem; }
+  .b-items { padding:8px 20px; }
+  .b-row { display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #eee; font-size:.92rem; }
+  .b-row .d { color:#333; }
+  .b-row .d small { display:block; color:#999; font-size:.78rem; }
+  .b-row .v { font-weight:600; white-space:nowrap; }
+  .b-subtotal { display:flex; justify-content:space-between; padding:10px 0 2px; font-size:.9rem; color:#666; }
+  .b-disc { display:flex; justify-content:space-between; padding:2px 0; font-size:.9rem; color:#1a7f37; font-weight:600; }
+  .b-total { display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:14px 16px; background:#f0f7f2; border-radius:10px; }
+  .b-total .l { font-weight:700; }
+  .b-total .n { font-size:1.6rem; font-weight:800; color:#1a7f37; }
+  .b-next { padding:16px 20px; }
+  .b-next h4 { font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:#999; margin:0 0 8px; }
+  .b-next p { font-size:.85rem; color:#555; margin:0; line-height:1.5; }
+  .b-foot { text-align:center; color:#aaa; font-size:.74rem; padding:8px 20px 26px; }
+
+  .pros { background:#fff; border:1px solid #ddd; border-radius:10px; padding:12px 14px; margin-top:14px; font-size:.84rem; }
+  .pros b { color:#1a7f37; }
+  .pros .con b { color:#8a1f2b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Present page — two reworks</h1>
+    <p class="muted">Both stay customer-safe (no margin / labor / price board). The real difference: <b>Option A shows one confident number</b>; <b>Option B is an itemized proposal</b> with each line priced.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- OPTION A -->
+    <div class="col">
+      <h3>Option A · Clean &amp; premium</h3>
+      <span class="tag">One big number. Minimal, confident, low-haggle.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="a-hero">
+          <div class="a-logo">HAPPY FENCE CO.</div>
+          <div class="a-for">Estimate prepared for</div>
+          <div class="a-client">Manoah Made</div>
+        </div>
+        <div class="a-body">
+          <div class="a-fence-label">Your fence</div>
+          <div class="a-fence">DuraFence — Horizontal</div>
+          <div class="a-total-label">Total estimate</div>
+          <div class="a-total">$15,034</div>
+          <div class="a-incl">
+            295 ft of new fence<br>Permit included · 2 gates<br>17583 SW 288th St, Homestead
+          </div>
+        </div>
+        <div class="a-divider"></div>
+        <div class="a-cta">
+          <div class="q">Questions about your estimate?</div>
+          <div class="ph">(305) 555-0142</div>
+        </div>
+        <div class="a-foot">Valid 30 days · happyfencecompany.com</div>
+      </div></div>
+      <div class="pros">
+        <div><b>Good:</b> looks premium, fast to read, keeps the conversation on the one number (less line-by-line haggling).</div>
+        <div class="con" style="margin-top:6px"><b>Trade:</b> less transparency — some customers want to see what each piece costs.</div>
+      </div>
+    </div>
+
+    <!-- OPTION B -->
+    <div class="col">
+      <h3>Option B · Itemized proposal</h3>
+      <span class="tag">A clean priced breakdown — feels like a formal quote.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="b-head">
+          <div class="b-logo">HAPPY FENCE COMPANY</div>
+          <div class="b-contact">(305) 555-0142<br>happyfencecompany.com</div>
+        </div>
+        <div class="b-sub">
+          <div class="b-est">Estimate · Jun 6, 2026</div>
+          <div class="b-client">Manoah Made</div>
+          <div class="b-meta">17583 SW 288th St, Homestead, FL</div>
+        </div>
+        <div class="b-items">
+          <div class="b-row"><span class="d">Fence — DuraFence Horizontal<small>295 ft</small></span><span class="v">$12,700</span></div>
+          <div class="b-row"><span class="d">Permit</span><span class="v">$800</span></div>
+          <div class="b-row"><span class="d">Gate — Left<small>Single</small></span><span class="v">$534</span></div>
+          <div class="b-row"><span class="d">Gate — Right<small>Double</small></span><span class="v">$1,000</span></div>
+          <div class="b-subtotal"><span>Subtotal</span><span>$15,034</span></div>
+          <div class="b-total"><span class="l">Total estimate</span><span class="n">$15,034</span></div>
+        </div>
+        <div class="b-next">
+          <h4>What happens next</h4>
+          <p>Approve this estimate and we’ll schedule your install. Pricing held for 30 days.</p>
+        </div>
+        <div class="b-foot">Thank you for considering Happy Fence Company</div>
+      </div></div>
+      <div class="pros">
+        <div><b>Good:</b> transparent, professional, builds trust; the breakdown justifies the total.</div>
+        <div class="con" style="margin-top:6px"><b>Trade:</b> more to read; each line invites “can you drop the gate price?” questions.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:26px">Mockup only. Phone &amp; email are placeholders; logo would replace the text wordmark. A discount, if any, shows as a green “Your discount −$X” line in both.</p>
+</div>
+</body>
+</html>
