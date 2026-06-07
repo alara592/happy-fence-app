@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import GateForm, { GateFormValues } from "@/components/GateForm";
-import { api } from "@/lib/client";
+import { useCached } from "@/lib/cache";
 
 interface Bundle {
   gates: {
@@ -18,26 +17,21 @@ interface Bundle {
 
 export default function EditGatePage() {
   const { id, gateId } = useParams<{ id: string; gateId: string }>();
-  const [initial, setInitial] = useState<GateFormValues | null>(null);
-  const [error, setError] = useState("");
+  // Read the gate from the cached project bundle so editing opens instantly.
+  const { data: b, error } = useCached<Bundle>(`/api/projects/${id}`);
 
-  useEffect(() => {
-    api<Bundle>(`/api/projects/${id}`)
-      .then((b) => {
-        const g = b.gates.find((x) => x.id === gateId);
-        if (!g) throw new Error("Gate not found");
-        setInitial({
-          name: g.name,
-          description: g.description ?? "",
-          type: g.type,
-          style: g.style,
-          quantity: String(g.quantity ?? 1),
-        });
-      })
-      .catch((e) => setError(e.message));
-  }, [id, gateId]);
+  if (error && !b) return <p className="error">{error.message}</p>;
+  if (!b) return <p className="muted">Loading…</p>;
 
-  if (error) return <p className="error">{error}</p>;
-  if (!initial) return <p className="muted">Loading…</p>;
+  const g = b.gates.find((x) => x.id === gateId);
+  if (!g) return <p className="error">Gate not found</p>;
+
+  const initial: GateFormValues = {
+    name: g.name,
+    description: g.description ?? "",
+    type: g.type,
+    style: g.style,
+    quantity: String(g.quantity ?? 1),
+  };
   return <GateForm projectId={id} gateId={gateId} initial={initial} />;
 }

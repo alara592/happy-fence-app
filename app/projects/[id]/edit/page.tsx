@@ -1,34 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ProjectForm, { ProjectFormValues } from "@/components/ProjectForm";
-import { api } from "@/lib/client";
+import { useCached } from "@/lib/cache";
+
+interface Bundle {
+  project: Record<string, unknown>;
+}
 
 export default function EditProjectPage() {
   const { id } = useParams<{ id: string }>();
-  const [initial, setInitial] = useState<ProjectFormValues | null>(null);
-  const [error, setError] = useState("");
+  // Read from the cached project bundle so the edit screen opens instantly.
+  const { data: b, error } = useCached<Bundle>(`/api/projects/${id}`);
 
-  useEffect(() => {
-    api<{ project: Record<string, unknown> }>(`/api/projects/${id}`)
-      .then(({ project: p }) =>
-        setInitial({
-          client: String(p.client ?? ""),
-          address: String(p.address ?? ""),
-          date: String(p.date ?? "").slice(0, 10),
-          permit: !!p.permit,
-          labor_cost_ft: String(p.labor_cost_ft),
-          // stored as a decimal (0.30); the form edits it as a percent (30)
-          profit_margin: String(+(Number(p.profit_margin) * 100).toFixed(6)),
-          notes: String(p.notes ?? ""),
-          price_mod_notes: String(p.price_mod_notes ?? ""),
-        }),
-      )
-      .catch((e) => setError(e.message));
-  }, [id]);
+  if (error && !b) return <p className="error">{error.message}</p>;
+  if (!b) return <p className="muted">Loading…</p>;
 
-  if (error) return <p className="error">{error}</p>;
-  if (!initial) return <p className="muted">Loading…</p>;
+  const p = b.project;
+  const initial: ProjectFormValues = {
+    client: String(p.client ?? ""),
+    address: String(p.address ?? ""),
+    date: String(p.date ?? "").slice(0, 10),
+    permit: !!p.permit,
+    labor_cost_ft: String(p.labor_cost_ft),
+    // stored as a decimal (0.30); the form edits it as a percent (30)
+    profit_margin: String(+(Number(p.profit_margin) * 100).toFixed(6)),
+    notes: String(p.notes ?? ""),
+    price_mod_notes: String(p.price_mod_notes ?? ""),
+  };
   return <ProjectForm initial={initial} projectId={id} />;
 }

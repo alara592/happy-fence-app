@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import SectionForm, { SectionFormValues } from "@/components/SectionForm";
-import { api } from "@/lib/client";
+import { useCached } from "@/lib/cache";
 
 interface Bundle {
   sections: {
@@ -21,29 +20,24 @@ interface Bundle {
 
 export default function EditSectionPage() {
   const { id, sectionId } = useParams<{ id: string; sectionId: string }>();
-  const [initial, setInitial] = useState<SectionFormValues | null>(null);
-  const [error, setError] = useState("");
+  // Read the section from the cached project bundle so editing opens instantly.
+  const { data: b, error } = useCached<Bundle>(`/api/projects/${id}`);
 
-  useEffect(() => {
-    api<Bundle>(`/api/projects/${id}`)
-      .then((b) => {
-        const s = b.sections.find((x) => x.id === sectionId);
-        if (!s) throw new Error("Section not found");
-        setInitial({
-          name: s.name,
-          description: s.description ?? "",
-          linear_ft: String(s.linear_ft),
-          tear_down: s.tear_down,
-          take_down_ft: String(s.take_down_ft),
-          dump: s.dump,
-          tear_down_rate: s.tear_down_rate === null ? "" : String(s.tear_down_rate),
-          dump_rate: s.dump_rate === null ? "" : String(s.dump_rate),
-        });
-      })
-      .catch((e) => setError(e.message));
-  }, [id, sectionId]);
+  if (error && !b) return <p className="error">{error.message}</p>;
+  if (!b) return <p className="muted">Loading…</p>;
 
-  if (error) return <p className="error">{error}</p>;
-  if (!initial) return <p className="muted">Loading…</p>;
+  const s = b.sections.find((x) => x.id === sectionId);
+  if (!s) return <p className="error">Section not found</p>;
+
+  const initial: SectionFormValues = {
+    name: s.name,
+    description: s.description ?? "",
+    linear_ft: String(s.linear_ft),
+    tear_down: s.tear_down,
+    take_down_ft: String(s.take_down_ft),
+    dump: s.dump,
+    tear_down_rate: s.tear_down_rate === null ? "" : String(s.tear_down_rate),
+    dump_rate: s.dump_rate === null ? "" : String(s.dump_rate),
+  };
   return <SectionForm projectId={id} sectionId={sectionId} initial={initial} />;
 }

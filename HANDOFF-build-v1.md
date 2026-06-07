@@ -212,6 +212,14 @@ revalidates. Only the very first launch ever (empty storage) shows a spinner. **
 render stale-shaped data before revalidation. Verified live: cold full-load directly onto a
 project rendered client/total/section price with no loading flash.
 
+**Edit screens read the cache too (2026-06-06):** the project-settings edit, section/measurement
+edit, and gate edit pages previously did their own fresh bundle fetch (own "Loading…"), so
+opening an edit screen always flashed a spinner even with the project cached. They now derive
+their initial form values from the cached bundle via `useCached`, so editing opens instantly.
+(The form components seed their state from `initial` once on mount, so a background revalidate
+won't clobber in-progress edits.) Verified live: section/project/gate edit all open populated
+with no loading flash.
+
 Not built (open for later): per-material "show to customer" flag to present multiple options;
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).
