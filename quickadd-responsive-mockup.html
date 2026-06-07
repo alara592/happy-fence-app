@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — responsive quick-add</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  h2 { font-size:1.05rem; margin:0 0 8px; }
+  input { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .sec-price { color:#1a7f37; font-weight:700; }
+
+  .wrap { max-width:1040px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .cols { display:flex; gap:36px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col > h3 { text-align:center; font-size:1.05rem; margin:0 0 4px; }
+  .tag { display:block; text-align:center; font-size:.8rem; color:#666; margin-bottom:10px; }
+
+  /* shared quick-add form bits */
+  .qa-lbl { display:block; font-size:.8rem; font-weight:700; color:#444; margin:10px 0 4px; }
+  .toggles { display:flex; gap:8px; margin-top:12px; }
+  .toggle { flex:1; display:flex; align-items:center; gap:6px; justify-content:center; padding:9px; border:1px solid #1a7f37; border-radius:8px; font-weight:600; font-size:.9rem; background:#fff; color:#1a7f37; }
+  .toggle.on { background:#1a7f37; color:#fff; }
+  .toggle .box { width:16px; height:16px; border-radius:4px; border:2px solid currentColor; display:inline-flex; align-items:center; justify-content:center; font-size:.7rem; }
+  .qa-btns { display:flex; gap:8px; margin-top:14px; }
+  .qa-btns button { flex:1; }
+  .qa-title { text-align:center; font-size:1.1rem; font-weight:700; margin:0 0 10px; }
+
+  /* MOBILE phone frame */
+  .phone { position:relative; width:340px; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; }
+  .notch { height:24px; background:#1c1c1e; }
+  .screen { height:470px; position:relative; overflow:hidden; }
+  .pm { padding:12px 16px; }
+  .scrim { position:absolute; inset:0; background:rgba(0,0,0,.35); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:18px 18px 0 0; padding:14px 16px 18px; box-shadow:0 -6px 24px rgba(0,0,0,.25); }
+  .grip { width:40px; height:4px; background:#ccc; border-radius:2px; margin:0 auto 10px; }
+
+  /* DESKTOP browser frame */
+  .browser { width:560px; border:1px solid #ccc; border-radius:10px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.2); background:#fff; }
+  .chrome { height:34px; background:#e8e8e8; display:flex; align-items:center; gap:6px; padding:0 12px; border-bottom:1px solid #ddd; }
+  .dot { width:11px; height:11px; border-radius:50%; }
+  .urlbar { flex:1; margin-left:10px; background:#fff; border:1px solid #ddd; border-radius:12px; font-size:.72rem; color:#888; padding:3px 10px; }
+  .viewport { position:relative; height:440px; background:#fafafa; overflow:hidden; }
+  .desk-content { max-width:380px; margin:0 auto; padding:16px; } /* the app's centered 640-ish column, scaled */
+  .modal-scrim { position:absolute; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; }
+  .modal { width:360px; background:#fff; border-radius:14px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,.3); }
+
+  .hl { outline:3px solid #ffd23f; outline-offset:3px; }
+
+  .rec { background:#1a7f37; color:#fff; font-size:.86rem; border-radius:10px; padding:12px 14px; margin:22px auto 0; max-width:780px; }
+  .rec b { display:block; margin-bottom:3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>One quick-add form, responsive to the device</h1>
+    <p class="muted" style="font-size:.9rem">Same fields and logic. On a phone it’s a bottom sheet (thumb zone); on desktop it’s a centered modal. A CSS breakpoint switches between them — no duplicate code.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- MOBILE -->
+    <div class="col">
+      <h3>📱 Mobile → bottom sheet</h3>
+      <span class="tag">Rises from the bottom, under your thumb.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="pm">
+          <div class="spread"><h2>Measurements (1) — 120 ft</h2><button class="primary" style="padding:6px 12px">+ Add</button></div>
+          <div class="card"><div class="spread"><div><strong>Back yard</strong>
+            <div class="muted"><span class="sec-price">$5,700</span> · 120 ft</div></div></div></div>
+        </div>
+        <div class="scrim"></div>
+        <div class="sheet hl">
+          <div class="grip"></div>
+          <div class="qa-title">Add measurement</div>
+          <input placeholder="Name (e.g. Side)" />
+          <span class="qa-lbl">Linear Ft</span>
+          <input inputmode="decimal" value="60" />
+          <div class="toggles">
+            <div class="toggle on"><span class="box">✓</span> Tear Down</div>
+            <div class="toggle"><span class="box"></span> Dump</div>
+          </div>
+          <div class="qa-btns">
+            <button>Save &amp; add another</button>
+            <button class="primary">Save</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div class="col">
+      <h3>🖥️ Desktop → centered modal</h3>
+      <span class="tag">Centered over the content, like a normal dialog.</span>
+      <div class="browser">
+        <div class="chrome">
+          <span class="dot" style="background:#ff5f57"></span>
+          <span class="dot" style="background:#febc2e"></span>
+          <span class="dot" style="background:#28c840"></span>
+          <span class="urlbar">happy-fence-app.vercel.app/projects/…</span>
+        </div>
+        <div class="viewport">
+          <div class="desk-content">
+            <div class="spread"><h2>Measurements (1) — 120 ft</h2><button class="primary" style="padding:6px 12px">+ Add</button></div>
+            <div class="card"><div class="spread"><div><strong>Back yard</strong>
+              <div class="muted"><span class="sec-price">$5,700</span> · 120 ft</div></div></div></div>
+          </div>
+          <div class="modal-scrim">
+            <div class="modal hl">
+              <div class="qa-title">Add measurement</div>
+              <input placeholder="Name (e.g. Side)" />
+              <span class="qa-lbl">Linear Ft</span>
+              <input inputmode="decimal" value="60" />
+              <div class="toggles">
+                <div class="toggle on"><span class="box">✓</span> Tear Down</div>
+                <div class="toggle"><span class="box"></span> Dump</div>
+              </div>
+              <div class="qa-btns">
+                <button>Save &amp; add another</button>
+                <button class="primary">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rec">
+    <b>Why this is the best of both</b>
+    It keeps Option B’s mobile win (thumb-zone sheet, “Save &amp; add another” for rapid entry) and gives desktop a proper centered dialog instead of a sheet stuck to the bottom of a wide screen. It’s literally the same form — only the container’s position changes at a screen-width breakpoint, so there’s no extra logic to maintain. Same pattern can be reused for gates/extras later.
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:20px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>

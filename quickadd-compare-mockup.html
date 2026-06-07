@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — quick-add: two options</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 24px; }
+  h2 { font-size:1.05rem; margin:0 0 8px; }
+  input { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; }
+  .sec-price { color:#1a7f37; font-weight:700; }
+
+  .wrap { max-width:920px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .cols { display:flex; gap:36px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .col { width:360px; }
+  .col > h3 { text-align:center; font-size:1.05rem; margin:0 0 4px; }
+  .tag { display:block; text-align:center; font-size:.8rem; color:#666; margin-bottom:10px; min-height:34px; }
+  .phone { position:relative; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; }
+  .notch { height:24px; background:#1c1c1e; }
+  .screen { height:480px; position:relative; overflow:hidden; }
+
+  /* A: inline */
+  .quick-add { display:flex; gap:6px; margin:8px 0 6px; }
+  .quick-add .qname { flex:2; }
+  .quick-add .qft { flex:1; min-width:0; }
+  .quick-add button { padding:10px 12px; }
+  .more { display:inline-block; color:#1a7f37; font-weight:600; font-size:.85rem; }
+  .opts { background:#f0f7f2; border:1px dashed #1a7f37; border-radius:10px; padding:10px; margin:6px 0; }
+  .toggles { display:flex; gap:8px; }
+  .toggle { flex:1; display:flex; align-items:center; gap:6px; justify-content:center; padding:8px; border:1px solid #1a7f37; border-radius:8px; font-weight:600; font-size:.88rem; background:#fff; color:#1a7f37; }
+  .toggle.on { background:#1a7f37; color:#fff; }
+  .toggle .box { width:16px; height:16px; border-radius:4px; border:2px solid currentColor; display:inline-flex; align-items:center; justify-content:center; font-size:.7rem; }
+
+  /* B: bottom sheet */
+  .scrim { position:absolute; inset:0; background:rgba(0,0,0,.35); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:18px 18px 0 0; padding:16px 16px 20px; box-shadow:0 -6px 24px rgba(0,0,0,.25); }
+  .sheet h3 { margin:2px 0 12px; font-size:1.1rem; text-align:center; }
+  .grip { width:40px; height:4px; background:#ccc; border-radius:2px; margin:0 auto 12px; }
+  .lbl { display:block; font-size:.8rem; font-weight:700; color:#444; margin:10px 0 4px; }
+  .sheet-btns { display:flex; gap:8px; margin-top:14px; }
+  .sheet-btns button { flex:1; }
+
+  .hl { outline:3px solid #ffd23f; outline-offset:3px; border-radius:10px; }
+
+  .cmp { max-width:760px; margin:26px auto 0; background:#fff; border:1px solid #ddd; border-radius:12px; overflow:hidden; }
+  .cmp table { width:100%; border-collapse:collapse; font-size:.86rem; }
+  .cmp th, .cmp td { padding:10px 12px; text-align:left; border-bottom:1px solid #eee; vertical-align:top; }
+  .cmp th { background:#f6f6f6; }
+  .cmp td:first-child { font-weight:700; width:34%; }
+  .rec { background:#1a7f37; color:#fff; font-size:.85rem; border-radius:10px; padding:12px 14px; margin:16px auto 0; max-width:760px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Quick-add a measurement — two UX options</h1>
+    <p class="muted" style="font-size:.9rem">Both stay on the project page (no separate screen). Same data, different feel.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- OPTION A -->
+    <div class="col">
+      <h3>Option A · Inline row</h3>
+      <span class="tag">A compact row in the list; tear-down/dump tucked behind a tap.</span>
+      <div class="phone"><div class="notch"></div><div class="screen"><div class="phone-main">
+        <h2>Measurements (1) — 120 ft</h2>
+        <div class="card">
+          <div class="spread">
+            <div><strong>Back yard</strong>
+              <div class="muted"><span class="sec-price">$5,700</span> · 120 ft · tear-down 120 ft</div></div>
+            <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div>
+          </div>
+        </div>
+        <div class="quick-add hl">
+          <input class="qname" placeholder="Name" />
+          <input class="qft" inputmode="decimal" placeholder="Ft" />
+          <button class="primary">Add</button>
+        </div>
+        <span class="more">▾ tear-down / dump</span>
+        <div class="opts">
+          <div class="toggles">
+            <div class="toggle on"><span class="box">✓</span> Tear Down</div>
+            <div class="toggle"><span class="box"></span> Dump</div>
+          </div>
+        </div>
+      </div></div></div>
+    </div>
+
+    <!-- OPTION B -->
+    <div class="col">
+      <h3>Option B · Slide-up sheet</h3>
+      <span class="tag">Tap “+ Add” → a sheet rises from the bottom with everything visible at once.</span>
+      <div class="phone"><div class="notch"></div><div class="screen">
+        <div class="phone-main">
+          <div class="spread"><h2>Measurements (1) — 120 ft</h2><button class="primary" style="padding:6px 12px">+ Add</button></div>
+          <div class="card">
+            <div class="spread">
+              <div><strong>Back yard</strong>
+                <div class="muted"><span class="sec-price">$5,700</span> · 120 ft</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="scrim"></div>
+        <div class="sheet hl">
+          <div class="grip"></div>
+          <h3>Add measurement</h3>
+          <input placeholder="Name (e.g. Side)" />
+          <span class="lbl">Linear Ft</span>
+          <input inputmode="decimal" value="60" />
+          <div class="toggles" style="margin-top:12px">
+            <div class="toggle on"><span class="box">✓</span> Tear Down</div>
+            <div class="toggle"><span class="box"></span> Dump</div>
+          </div>
+          <div class="sheet-btns">
+            <button>Save &amp; add another</button>
+            <button class="primary">Save</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="cmp">
+    <table>
+      <tr><th>&nbsp;</th><th>A · Inline row</th><th>B · Slide-up sheet</th></tr>
+      <tr><td>Taps for a plain run</td><td>Name → Ft → Add (in list)</td><td>+Add → Ft → Save</td></tr>
+      <tr><td>Tear-down / dump</td><td>One extra tap to reveal toggles</td><td>Always visible in the sheet</td></tr>
+      <tr><td>Adding all 3 runs</td><td>Row stays; retype each</td><td>“Save &amp; add another” keeps sheet open — rapid-fire</td></tr>
+      <tr><td>One-handed reach</td><td>Mid-page row</td><td>Bottom of screen (thumb zone)</td></tr>
+      <tr><td>See the list while adding</td><td>Yes — row sits in the list</td><td>Partly — sheet covers lower half</td></tr>
+      <tr><td>Screen real estate</td><td>Tightest; 3 inputs share one row</td><td>Roomy; each field full width</td></tr>
+      <tr><td>Feel</td><td>Lightweight, “just a row”</td><td>Focused mini-form, more polished</td></tr>
+    </table>
+  </div>
+
+  <div class="rec">
+    <b>My take:</b> For up to 3 runs where tear-down is usually on, <b>Option B (slide-up sheet)</b> is likely faster — everything’s visible (no expand step), it’s in the thumb zone, and “Save &amp; add another” lets you bang out all 3 runs without re-tapping +Add. Option A is the lighter touch if you usually add just one run and like seeing the list. Your call.
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:20px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>

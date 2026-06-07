@@ -10,9 +10,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     const b = await req.json();
     if (!b.type) return NextResponse.json({ error: "Pick a material" }, { status: 400 });
 
+    // Auto-activate when the board has no Active fence yet (saves a "Set active" tap on
+    // the common single-material job; partial unique index allows one active per project).
+    const { data: activeExisting } = await db()
+      .from("project_materials")
+      .select("id")
+      .eq("project_id", id)
+      .eq("is_active", true)
+      .maybeSingle();
+
     const { data, error } = await db()
       .from("project_materials")
-      .insert({ project_id: id, type: b.type })
+      .insert({ project_id: id, type: b.type, is_active: !activeExisting })
       .select()
       .single();
     if (error) {

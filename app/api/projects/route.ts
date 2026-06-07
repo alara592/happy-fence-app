@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         address: b.address || null,
         date: b.date || undefined,
         permit: !!b.permit,
-        labor_cost_ft: Number(b.labor_cost_ft ?? 10),
+        labor_cost_ft: Number(b.labor_cost_ft ?? 12),
         profit_margin: Number(b.profit_margin ?? 0.3),
         discount: Number(b.discount ?? 0),
         notes: b.notes || null,

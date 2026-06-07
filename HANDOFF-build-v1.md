@@ -224,6 +224,26 @@ Not built (open for later): per-material "show to customer" flag to present mult
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).
 
+## Workflow speed-ups (2026-06-06)
+
+- **Quick-add measurement** (`components/QuickAddMeasurement.tsx`): an in-flow add that never
+  leaves the project page. Opens instantly (no fetch — it's a blank entry). **Responsive via
+  CSS only** (`.qa-*` in globals.css): bottom sheet on phones (<560px), centered modal on
+  desktop. Fields: name, linear ft, Tear Down (default ON), Dump (default OFF); `take_down_ft`
+  mirrors the footage when either is on. **"Save & add another"** keeps it open for the next
+  run (jobs run ≤3). Per-run rate overrides still live on the full Edit screen. POSTs to the
+  same `/api/projects/[id]/sections` endpoint; parent refreshes the cache + flashes "Saved ✓".
+  The Measurements "+ Add" now opens this instead of routing to `/sections/new` (that route
+  still exists, just unlinked).
+- **First material auto-active**: `POST /api/projects/[id]/materials` now sets `is_active` when
+  the board has no Active fence yet — saves a "Set active" tap on the common single-material job.
+- **Defaults** are now labor **$12/ft**, margin **30%** — in `emptyProject`, the `POST
+  /api/projects` fallback, and the appointment `create-project` route (which previously relied
+  on DB column defaults).
+- **NOT done — permit fee → $800**: this is a *global pricing* change (settings.permit_fee,
+  currently 300) that would re-price every permitted project on read. Awaiting Anthony's call
+  on scope (all projects vs new-only/per-project permit amount) before applying.
+
 ## Open data questions (Anthony/Mimi)
 
 - Vinyl/Double gate $1,429 unconfirmed (CHANGELOG said 1,395).

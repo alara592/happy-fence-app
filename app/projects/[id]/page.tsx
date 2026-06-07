@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import { useCached, load, invalidate } from "@/lib/cache";
 import { fmtUSD, fmtDate, mapsUrl, earthUrl } from "@/lib/format";
+import QuickAddMeasurement from "@/components/QuickAddMeasurement";
 
 interface Bundle {
   project: {
@@ -50,6 +51,7 @@ export default function ProjectDetailPage() {
   const [error, setError] = useState(""); // mutation errors (load errors handled below)
   const [discount, setDiscount] = useState("");
   const [toast, setToast] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
   const reload = () => load<Bundle>(bundleKey).catch(() => {});
@@ -204,7 +206,7 @@ export default function ProjectDetailPage() {
 
       <div className="spread">
         <h2>Measurements ({b.sections.length}) — {b.totalLinearFt} ft</h2>
-        <Link href={`/projects/${id}/sections/new`}><button>+ Add</button></Link>
+        <button onClick={() => setAddOpen(true)}>+ Add</button>
       </div>
       {b.sections.map((s) => (
         <div key={s.id} className="card">
@@ -360,6 +362,16 @@ export default function ProjectDetailPage() {
 
       <h2>Danger zone</h2>
       <button className="danger" onClick={delProject}>Delete Project</button>
+
+      <QuickAddMeasurement
+        projectId={id}
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSaved={() => {
+          reload();
+          flash("Saved ✓");
+        }}
+      />
 
       {confirmAsk && (
         <div className="modal-backdrop" onClick={() => setConfirmAsk(null)}>

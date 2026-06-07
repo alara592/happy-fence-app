@@ -24,7 +24,7 @@ export const emptyProject: ProjectFormValues = {
   address: "",
   date: today(),
   permit: false,
-  labor_cost_ft: "10",
+  labor_cost_ft: "12",
   profit_margin: "30",
   notes: "",
   price_mod_notes: "",

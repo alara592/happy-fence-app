@@ -32,6 +32,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
         address: appt.address || null,
         date: appt.start_at ? etDate(appt.start_at) : undefined,
         permit: false,
+        labor_cost_ft: 12,
+        profit_margin: 0.3,
       })
       .select("id")
       .single();

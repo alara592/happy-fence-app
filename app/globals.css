@@ -89,6 +89,35 @@ button:disabled { opacity: 0.5; }
 /* Per-section computed price (small, green, inline left of the footage) */
 .sec-price { color: #1a7f37; font-weight: 700; }
 
+/* Quick-add: bottom sheet on phones, centered modal on desktop (≥560px) */
+.qa-overlay {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(0,0,0,.4);
+  display: flex; align-items: flex-end;
+}
+.qa-panel {
+  background: #fff; width: 100%;
+  padding: 14px 16px 18px;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -6px 24px rgba(0,0,0,.25);
+}
+.qa-grip { width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 0 auto 10px; }
+.qa-title { text-align: center; font-size: 1.1rem; font-weight: 700; margin: 0 0 6px; }
+.qa-toggles { display: flex; gap: 8px; margin-top: 12px; }
+.qa-toggle {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px; border: 1px solid #1a7f37; border-radius: 8px;
+  font-weight: 600; font-size: 1rem; background: #fff; color: #1a7f37; cursor: pointer;
+}
+.qa-toggle.on { background: #1a7f37; color: #fff; }
+.qa-btns { display: flex; gap: 8px; margin-top: 14px; }
+.qa-btns button { flex: 1; }
+@media (min-width: 560px) {
+  .qa-overlay { align-items: center; justify-content: center; padding: 24px; }
+  .qa-panel { max-width: 380px; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.3); }
+  .qa-grip { display: none; }
+}
+
 /* Input with a unit suffix (e.g. % or $/ft) */
 .field-suffix { display: flex; }
 .field-suffix input { flex: 1; min-width: 0; border-radius: 6px 0 0 6px; border-right: 0; }

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — faster quoting workflow</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  .phone-main { background:#fafafa; padding:12px 16px 24px; }
+  h1 { font-size:1.3rem; margin:0; }
+  h2 { font-size:1.05rem; margin:18px 0 8px; }
+  input,select { width:100%; padding:10px; font-size:1rem; border:1px solid #bbb; border-radius:6px; background:#fff; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .muted { color:#666; font-size:.85rem; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; }
+  .sec-price { color:#1a7f37; font-weight:700; }
+
+  .wrap { max-width:880px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .stage { display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .phone { width:360px; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; }
+  .notch { height:24px; background:#1c1c1e; }
+  .screen { min-height:480px; }
+
+  /* inline quick-add row */
+  .quick-add { display:flex; gap:6px; margin:8px 0 2px; }
+  .quick-add .qname { flex:2; }
+  .quick-add .qft { flex:1; min-width:0; }
+  .quick-add button { padding:10px 14px; white-space:nowrap; }
+  .more { color:#1a7f37; font-weight:600; font-size:.82rem; text-decoration:none; }
+
+  .active-badge { color:#1a7f37; font-size:.85rem; }
+  .hl { outline:3px solid #ffd23f; outline-offset:2px; border-radius:10px; }
+
+  .annot { background:#1a7f37; color:#fff; font-size:.8rem; border-radius:8px; padding:10px 12px; margin:10px 0; }
+  .annot b { display:block; margin-bottom:2px; }
+  .side { width:330px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Faster quoting — fewer taps per job</h1>
+    <p class="muted" style="font-size:.9rem">Two in-flow changes shown on the project page. Yellow = what's new.</p>
+  </div>
+
+  <div class="stage">
+
+    <!-- PHONE -->
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="phone-main">
+          <div class="spread"><h1>Manoah Made</h1><button>Edit</button></div>
+          <p class="muted">17583 SW 288th St, Homestead 📍 🌐<br>Jun 6, 2026 · Permit · 30% | 12/ft</p>
+
+          <!-- Measurements with inline quick-add -->
+          <h2>Measurements (1) — 120 ft</h2>
+          <div class="card">
+            <div class="spread">
+              <div>
+                <strong>Back yard</strong>
+                <div class="muted"><span class="sec-price">$5,700</span> · 120 ft · tear-down 120 ft</div>
+              </div>
+              <div class="actions" style="margin:0"><button>Edit</button><button class="danger">Delete</button></div>
+            </div>
+          </div>
+
+          <div class="quick-add hl">
+            <input class="qname" placeholder="Name (e.g. Side)" />
+            <input class="qft" inputmode="decimal" placeholder="Ft" />
+            <button class="primary">Add</button>
+          </div>
+          <a class="more" href="#">+ tear-down / dump options</a>
+
+          <!-- Board with auto-active -->
+          <h2>Price board</h2>
+          <div class="card spread hl" style="border-color:#1a7f37;border-width:2px">
+            <div>
+              <strong>DuraFence - Horizontal</strong>
+              <div class="active-badge">Active fence — set automatically</div>
+              <div class="muted">$70 / section</div>
+            </div>
+            <span style="font-size:1.3rem;font-weight:700">$13,000</span>
+          </div>
+          <select style="margin-top:8px"><option>+ Add another to compare…</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="side">
+      <div class="annot"><b>#1 · Inline quick-add measurement</b>Type a name + footage and tap Add — no separate screen. Add up to your 3 runs without leaving the page. Tear-down/dump still one tap away via “+ options”.</div>
+      <div class="annot"><b>#2 · First material = Active automatically</b>The moment you add a material it becomes the Active fence — no extra “Set active” tap. You only switch when you’re comparing options.</div>
+      <div class="annot" style="background:#444"><b>Also baked in (values, not shown)</b>New projects default to <b>labor $12/ft, margin 30%</b>. Permit fee → <b>$800</b> (global — affects every permitted job; I’ll confirm before applying).</div>
+    </div>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:28px">Mockup only — nothing in the app changed.</p>
+</div>
+</body>
+</html>
