@@ -21,6 +21,18 @@ interface Bundle {
     notes: string | null;
     price_mod_notes: string | null;
   };
+  dumpIncluded: boolean;
+  dumpPrice: number | null;
+  dumpTotal: number | null;
+  costBreakdown: {
+    material: number;
+    hardware: number;
+    labor: number;
+    tearDown: number;
+    dump: number;
+    permit: number;
+    extras: number;
+  } | null;
   sections: {
     id: string;
     name: string;
@@ -54,6 +66,7 @@ export default function ProjectDetailPage() {
   const [discount, setDiscount] = useState("");
   const [toast, setToast] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [showCost, setShowCost] = useState(false);
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
   const reload = () => load<Bundle>(bundleKey).catch(() => {});
@@ -113,6 +126,19 @@ export default function ProjectDetailPage() {
         body: JSON.stringify({ is_active: true }),
       });
       flash("Active fence set");
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function toggleDump(next: boolean) {
+    try {
+      await api(`/api/projects/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ dump_included: next }),
+      });
+      flash(next ? "Dump added ✓" : "Dump removed");
       reload();
     } catch (e) {
       setError((e as Error).message);
@@ -200,9 +226,13 @@ export default function ProjectDetailPage() {
         {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"} · {(p.profit_margin * 100).toFixed(0)}% | {p.labor_cost_ft}/ft
       </p>
       {b.estCost !== null && (
-        <p className="est-cost" title="Internal — your estimated cost for this job (materials, hardware, labor, tear-down/dump, permit, extras). Gates not included. Never shown to customers.">
-          Est. cost {fmtUSD(Math.round(b.estCost))}
-        </p>
+        <button
+          className="est-cost"
+          onClick={() => setShowCost(true)}
+          title="Tap for the full cost breakdown. Internal — never shown to customers."
+        >
+          Est. cost {fmtUSD(Math.round(b.estCost))} <span aria-hidden>›</span>
+        </button>
       )}
       <Link href={`/projects/${id}/site`} className="site-row">
         {b.photos.length > 0 && (
@@ -370,6 +400,25 @@ export default function ProjectDetailPage() {
         </>
       )}
 
+      {b.dumpPrice !== null && b.dumpPrice > 0 && (
+        <div className="card spread" style={{ marginTop: 24 }}>
+          <div>
+            <strong>Haul away &amp; dump old fence</strong>
+            <div className="muted">
+              {fmtUSD(b.dumpPrice)} · {b.dumpIncluded ? "in the quote" : "not in the quote"}
+            </div>
+          </div>
+          <label className="check" style={{ margin: 0 }}>
+            <input
+              type="checkbox"
+              checked={b.dumpIncluded}
+              onChange={(e) => toggleDump(e.target.checked)}
+            />
+            {b.dumpIncluded ? "Included" : "Off"}
+          </label>
+        </div>
+      )}
+
       <label htmlFor="discount" style={{ marginTop: 24 }}>Discount $</label>
       <input
         id="discount"
@@ -414,6 +463,58 @@ export default function ProjectDetailPage() {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCost && b.costBreakdown && b.estCost !== null && (
+        <div className="modal-backdrop" onClick={() => setShowCost(false)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="cost-modal">
+              <div className="cm-title">
+                Cost breakdown <span className="muted">· internal</span>
+              </div>
+              {(
+                [
+                  ["Materials", b.costBreakdown.material],
+                  ["Hardware", b.costBreakdown.hardware],
+                  ["Labor", b.costBreakdown.labor],
+                  ["Tear-down", b.costBreakdown.tearDown],
+                  ["Dump", b.costBreakdown.dump],
+                  ["Permit", b.costBreakdown.permit],
+                  ["Extras", b.costBreakdown.extras],
+                ] as [string, number][]
+              )
+                .filter(([, v]) => v > 0)
+                .map(([label, v]) => (
+                  <div key={label} className="cm-row">
+                    <span>{label}</span>
+                    <span>{fmtUSD(Math.round(v))}</span>
+                  </div>
+                ))}
+              <div className="cm-row cm-est">
+                <span>Est. cost</span>
+                <span>{fmtUSD(Math.round(b.estCost))}</span>
+              </div>
+              {b.total !== null && (
+                <>
+                  <div className="cm-row cm-quote">
+                    <span>Quote <small>excl. gates</small></span>
+                    <span>{fmtUSD(Math.round(b.total - b.gatesTotal))}</span>
+                  </div>
+                  <div className="cm-row cm-profit">
+                    <span>Est. profit</span>
+                    <span>{fmtUSD(Math.round(b.total - b.gatesTotal - b.estCost))}</span>
+                  </div>
+                </>
+              )}
+              <div className="cm-note">
+                Gates excluded — their cost isn’t derivable. Never shown to customers.
+              </div>
+            </div>
+            <div className="btns">
+              <button onClick={() => setShowCost(false)}>Close</button>
             </div>
           </div>
         </div>

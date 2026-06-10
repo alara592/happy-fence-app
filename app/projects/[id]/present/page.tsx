@@ -17,6 +17,7 @@ interface Bundle {
   total: number | null;
   totalLinearFt: number;
   fenceSubtotal: number | null;
+  dumpTotal: number | null;
   permitFee: number;
 }
 
@@ -56,6 +57,16 @@ export default function PresentPage() {
               <span>{b.activeType}<small>{b.totalLinearFt} linear ft</small></span>
               <span className="v">{b.fenceSubtotal !== null ? fmtUSD(b.fenceSubtotal) : "—"}</span>
             </div>
+
+            {b.dumpTotal !== null && b.dumpTotal > 0 && (
+              <>
+                <div className="pv-grp">Removal &amp; disposal</div>
+                <div className="pv-row">
+                  <span>Haul away &amp; dump old fence</span>
+                  <span className="v">{fmtUSD(b.dumpTotal)}</span>
+                </div>
+              </>
+            )}
 
             {b.gates.length > 0 && (
               <>

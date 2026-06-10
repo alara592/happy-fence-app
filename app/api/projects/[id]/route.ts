@@ -30,6 +30,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (b.labor_cost_ft !== undefined) update.labor_cost_ft = Number(b.labor_cost_ft);
     if (b.profit_margin !== undefined) update.profit_margin = Number(b.profit_margin);
     if (b.discount !== undefined) update.discount = Number(b.discount);
+    if (b.dump_included !== undefined) update.dump_included = !!b.dump_included;
     if (b.notes !== undefined) update.notes = b.notes || null;
     if (b.price_mod_notes !== undefined) update.price_mod_notes = b.price_mod_notes || null;
 

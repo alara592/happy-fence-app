@@ -60,6 +60,9 @@ export interface ProjectPricingInput {
   permit: boolean;
   /** Signed: negative = discount, positive = surcharge. */
   discount: number;
+  /** Whether haul-away/dump is billed on this quote. Default true. When false the dump
+   *  line is $0 and its cost drops out of estCost (you don't haul it, you don't charge). */
+  dumpIncluded?: boolean;
   sections: SectionInput[];
   gates: { type: string; style: "Single" | "Double" }[];
   extras: { price: number }[];
@@ -89,8 +92,9 @@ export interface SectionPriceBreakdown {
   labor: number;
   tearDownCost: number;
   dumpCost: number;
-  subtotalCost: number; // pre-markup COGS
-  price: number; // marked up, CEIL'd to $100 — what the customer sees
+  costExDump: number; // pre-markup COGS WITHOUT dump (dump is billed as its own line)
+  subtotalCost: number; // full pre-markup COGS (= costExDump + dumpCost)
+  price: number; // marked up, CEIL'd to $100 — the fence price, EXCLUDING dump
 }
 
 export function sectionPrice(
@@ -113,10 +117,11 @@ export function sectionPrice(
     ? section.takeDownFt * effectiveRate(section.dumpRate, settings.defaultDumpRate)
     : 0;
 
-  const subtotalCost = material + hardware + labor + tearDownCost + dumpCost;
-  const price = ceil100(subtotalCost / (1 - project.profitMargin));
+  const costExDump = material + hardware + labor + tearDownCost; // dump billed separately
+  const subtotalCost = costExDump + dumpCost; // full COGS
+  const price = ceil100(costExDump / (1 - project.profitMargin)); // fence price excludes dump
 
-  return { sections, material, hardware, labor, tearDownCost, dumpCost, subtotalCost, price };
+  return { sections, material, hardware, labor, tearDownCost, dumpCost, costExDump, subtotalCost, price };
 }
 
 /** Flat lookup — current gate model (How-It-Works §8). Returns null if no match (caller must handle). */
@@ -138,10 +143,28 @@ export interface ProjectTotalBreakdown {
   total: number;
   /** Σ pre-markup section COGS (material + hardware + labor + tear-down + dump). */
   sectionsCost: number;
-  /** Estimated job cost (COGS): sections + permit + extras. Gates are excluded — their
-   *  price is a flat lookup with margin already baked in, so cost isn't derivable (How-It-Works
-   *  §8). Discount excluded — it's a price adjustment, not a cost. Internal-only figure. */
+  /** Σ pre-markup dump COGS across sections (take-down ft × dump rate). Independent of the
+   *  include toggle — the raw cost of hauling, used for the breakdown. */
+  dumpCost: number;
+  /** Marked-up, $100-rounded dump line amount IF billed (regardless of the toggle) — what the
+   *  "Dump old fence" line would read. 0 when no section is flagged for dump. */
+  dumpPrice: number;
+  /** The dump line actually applied to the total: dumpPrice when included, else 0. */
+  dumpTotal: number;
+  /** Estimated job cost (COGS): sections (incl. dump only when billed) + permit + extras. Gates
+   *  are excluded — flat lookup with margin baked in, cost not derivable (How-It-Works §8).
+   *  Discount excluded — a price adjustment, not a cost. Internal-only figure. */
   estCost: number;
+  /** Internal cost line items that sum to estCost (for the breakdown modal). */
+  costBreakdown: {
+    material: number;
+    hardware: number;
+    labor: number;
+    tearDown: number;
+    dump: number; // 0 when dumping isn't billed on this quote
+    permit: number;
+    extras: number;
+  };
   /** Types that failed lookup — UI must surface these, never silently price at $0. */
   unmatchedGateTypes: string[];
 }
@@ -152,13 +175,27 @@ export function projectTotal(
   gatePrices: GatePriceRow[],
   settings: GlobalSettings,
 ): ProjectTotalBreakdown {
-  let sectionsCost = 0;
+  const dumpIncluded = input.dumpIncluded ?? true;
+
+  // Accumulate per-section components so we can both price the fence (ex-dump) and bill dump
+  // as one separate line, and itemize the cost breakdown.
+  let material = 0,
+    hardware = 0,
+    labor = 0,
+    tearDown = 0,
+    dumpCost = 0,
+    sectionsCostExDump = 0;
   const sectionsTotal = input.sections.reduce((sum, s) => {
     const fp = fencePrices.find((f) => f.type === s.type);
     if (!fp) throw new Error(`Unknown fence type: ${s.type}`); // FK makes this impossible in the DB; belt-and-braces
-    const breakdown = sectionPrice(s, fp, input, settings);
-    sectionsCost += breakdown.subtotalCost;
-    return sum + breakdown.price;
+    const bd = sectionPrice(s, fp, input, settings);
+    material += bd.material;
+    hardware += bd.hardware;
+    labor += bd.labor;
+    tearDown += bd.tearDownCost;
+    dumpCost += bd.dumpCost;
+    sectionsCostExDump += bd.costExDump;
+    return sum + bd.price; // section price excludes dump
   }, 0);
 
   const unmatchedGateTypes: string[] = [];
@@ -173,8 +210,38 @@ export function projectTotal(
 
   const permitFee = input.permit ? settings.permitFee : 0;
   const extrasTotal = input.extras.reduce((sum, e) => sum + e.price, 0);
-  const total = sectionsTotal + permitFee + gatesTotal + input.discount + extrasTotal;
-  const estCost = sectionsCost + permitFee + extrasTotal;
 
-  return { sectionsTotal, permitFee, gatesTotal, discount: input.discount, extrasTotal, total, sectionsCost, estCost, unmatchedGateTypes };
+  // Dump billed as its own optional line: marked up + $100-rounded ONCE (not per section).
+  const dumpPrice = dumpCost > 0 ? ceil100(dumpCost / (1 - input.profitMargin)) : 0;
+  const dumpTotal = dumpIncluded ? dumpPrice : 0;
+  const dumpCostBilled = dumpIncluded ? dumpCost : 0;
+
+  const total = sectionsTotal + dumpTotal + permitFee + gatesTotal + input.discount + extrasTotal;
+  const sectionsCost = sectionsCostExDump + dumpCost; // full section COGS (unchanged meaning)
+  const estCost = sectionsCostExDump + dumpCostBilled + permitFee + extrasTotal;
+  const costBreakdown = {
+    material,
+    hardware,
+    labor,
+    tearDown,
+    dump: dumpCostBilled,
+    permit: permitFee,
+    extras: extrasTotal,
+  };
+
+  return {
+    sectionsTotal,
+    permitFee,
+    gatesTotal,
+    discount: input.discount,
+    extrasTotal,
+    total,
+    sectionsCost,
+    dumpCost,
+    dumpPrice,
+    dumpTotal,
+    estCost,
+    costBreakdown,
+    unmatchedGateTypes,
+  };
 }

@@ -184,3 +184,86 @@ test("permit off adds nothing; positive discount = surcharge", () => {
   );
   assert.equal(r.total, 3750);
 });
+
+// ── Dump as a separate, optional, per-foot line (2026-06) ─────────────
+// Wood - Dog Ear @ 100ft, labor 10, 30%, tear-down + dump 100ft @ $3:
+//   material 25×60=1500, hw 50, labor 1000, tear 300 → costExDump 2850 → price ceil(2850/.7)=4100
+//   dump cost 300 → dump line ceil(300/.7)=500
+
+test("section price EXCLUDES dump; dump kept as its own component", () => {
+  const r = sectionPrice(
+    { linearFt: 100, type: "Wood - Dog Ear", tearDown: true, dump: true, takeDownFt: 100 },
+    FENCE_PRICES[2],
+    { laborCostFt: 10, profitMargin: 0.3 },
+    SETTINGS,
+  );
+  assert.equal(r.costExDump, 2850);
+  assert.equal(r.subtotalCost, 3150); // full COGS still available
+  assert.equal(r.dumpCost, 300);
+  assert.equal(r.price, 4100); // fence price no longer includes dump
+});
+
+test("dump billed as one marked-up, $100-rounded line; included by default", () => {
+  const r = projectTotal(
+    {
+      laborCostFt: 10,
+      profitMargin: 0.3,
+      permit: false,
+      discount: 0,
+      sections: [{ linearFt: 100, type: "Wood - Dog Ear", tearDown: true, dump: true, takeDownFt: 100 }],
+      gates: [],
+      extras: [],
+    },
+    FENCE_PRICES,
+    GATE_PRICES,
+    SETTINGS,
+  );
+  assert.equal(r.sectionsTotal, 4100); // fence, ex-dump
+  assert.equal(r.dumpPrice, 500);
+  assert.equal(r.dumpTotal, 500); // applied (default included)
+  assert.equal(r.total, 4600); // 4100 + 500
+  assert.equal(r.estCost, 3150); // 2850 ex-dump + 300 dump cost
+  assert.equal(r.costBreakdown.dump, 300);
+});
+
+test("dump excluded → no dump line, dump cost drops out (you don't haul, you don't charge)", () => {
+  const r = projectTotal(
+    {
+      laborCostFt: 10,
+      profitMargin: 0.3,
+      permit: false,
+      discount: 0,
+      dumpIncluded: false,
+      sections: [{ linearFt: 100, type: "Wood - Dog Ear", tearDown: true, dump: true, takeDownFt: 100 }],
+      gates: [],
+      extras: [],
+    },
+    FENCE_PRICES,
+    GATE_PRICES,
+    SETTINGS,
+  );
+  assert.equal(r.dumpPrice, 500); // would-be amount still surfaced (for the toggle label)
+  assert.equal(r.dumpTotal, 0); // but not applied
+  assert.equal(r.total, 4100); // fence only
+  assert.equal(r.estCost, 2850); // dump cost excluded too
+  assert.equal(r.costBreakdown.dump, 0);
+});
+
+test("costBreakdown line items sum to estCost", () => {
+  const r = projectTotal(
+    {
+      laborCostFt: 10,
+      profitMargin: 0.3,
+      permit: true,
+      discount: -150,
+      sections: [{ linearFt: 100, type: "Wood - Dog Ear", tearDown: true, dump: true, takeDownFt: 100 }],
+      gates: [{ type: "Vinyl", style: "Single" }],
+      extras: [{ price: 200 }],
+    },
+    FENCE_PRICES,
+    GATE_PRICES,
+    SETTINGS,
+  );
+  const c = r.costBreakdown;
+  assert.equal(c.material + c.hardware + c.labor + c.tearDown + c.dump + c.permit + c.extras, r.estCost);
+});

@@ -277,3 +277,17 @@ button:disabled { opacity: 0.5; }
 .viewer .v-actions button { flex: 1; }
 .viewer .v-actions .del { background: #2a1416; color: #ff8c92; border-color: #5a2a2e; font-weight: 700; }
 .viewer .v-actions .save { background: #1a7f37; border-color: #1a7f37; color: #fff; font-weight: 700; }
+
+/* ---- Cost breakdown modal (internal) ---- */
+.est-cost { font-family: inherit; cursor: pointer; }
+.cost-modal { padding: 18px 18px 6px; }
+.cm-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 10px; }
+.cm-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f1f1f1; font-size: .92rem; }
+.cm-row small { display: block; color: #9a9a9a; font-size: .74rem; }
+.cm-row span:last-child { font-weight: 600; white-space: nowrap; }
+.cm-est { border-top: 2px solid #222; border-bottom: none; margin-top: 4px; padding-top: 10px; font-weight: 800; }
+.cm-est span:last-child { font-weight: 800; }
+.cm-quote { color: #555; }
+.cm-profit { color: #1a7f37; font-weight: 700; border-bottom: none; }
+.cm-profit span:last-child { color: #1a7f37; }
+.cm-note { color: #999; font-size: .76rem; margin: 8px 0 4px; line-height: 1.4; }

@@ -121,6 +121,16 @@ values ('project-photos', 'project-photos', false)
 on conflict (id) do nothing;
 ```
 
+## 8. project_dump_included (2026-06-09)
+
+Dump/haul-away becomes a separate, optional, per-foot line on the quote (pulled out of the
+fence price; see lib/pricing.ts). This project-level flag is the customer's include/exclude
+choice. Default true so existing quotes are unchanged.
+
+```sql
+alter table projects add column dump_included boolean not null default true;
+```
+
 ## Data updates outside migrations (2026-06-05)
 
 ```sql

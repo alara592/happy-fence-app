@@ -18,10 +18,22 @@ export interface ProjectRow {
   labor_cost_ft: number;
   profit_margin: number;
   discount: number;
+  dump_included: boolean;
   notes: string | null;
   price_mod_notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Internal cost line items that sum to estCost — fed to the breakdown modal. */
+export interface CostBreakdown {
+  material: number;
+  hardware: number;
+  labor: number;
+  tearDown: number;
+  dump: number;
+  permit: number;
+  extras: number;
 }
 
 export interface SectionRow {
@@ -72,6 +84,12 @@ export interface BoardRow {
   total: number | null;
   /** Internal estimated job cost (COGS) under this material — null when unpriced. */
   estCost: number | null;
+  /** Dump line (marked-up, $100-rounded) that WOULD apply if billed — null when unpriced. */
+  dumpPrice: number | null;
+  /** Dump line actually in `total`: dumpPrice when included on the quote, else 0. */
+  dumpTotal: number | null;
+  /** Cost line items summing to estCost — null when unpriced. */
+  costBreakdown: CostBreakdown | null;
   unpriced: boolean;
   active: boolean;
 }
@@ -130,19 +148,45 @@ export function computeBoard(
   return sorted.map((m) => {
     const fp = ref.fencePrices.find((f) => f.type === m.type);
     if (!fp || fp.perSection === 0) {
-      return { materialId: m.id, type: m.type, total: null, estCost: null, unpriced: true, active: m.is_active };
+      return {
+        materialId: m.id,
+        type: m.type,
+        total: null,
+        estCost: null,
+        dumpPrice: null,
+        dumpTotal: null,
+        costBreakdown: null,
+        unpriced: true,
+        active: m.is_active,
+      };
     }
     const input: ProjectPricingInput = {
       laborCostFt: project.labor_cost_ft,
       profitMargin: project.profit_margin,
       permit: project.permit,
       discount: project.discount,
+      dumpIncluded: project.dump_included,
       sections: sectionInputs(sections, m.type),
       gates: [], // gates excluded from board rows by design
       extras: extras.map((e) => ({ price: num(e.price) })),
     };
-    const { total, estCost } = projectTotal(input, ref.fencePrices, ref.gatePrices, ref.settings);
-    return { materialId: m.id, type: m.type, total, estCost, unpriced: false, active: m.is_active };
+    const { total, estCost, dumpPrice, dumpTotal, costBreakdown } = projectTotal(
+      input,
+      ref.fencePrices,
+      ref.gatePrices,
+      ref.settings,
+    );
+    return {
+      materialId: m.id,
+      type: m.type,
+      total,
+      estCost,
+      dumpPrice,
+      dumpTotal,
+      costBreakdown,
+      unpriced: false,
+      active: m.is_active,
+    };
   });
 }
 
@@ -243,15 +287,25 @@ export async function getProjectBundle(id: string) {
     // Internal-only estimated job cost (COGS) under the active fence — what the job costs
     // Anthony before markup. Gates excluded (cost not derivable). null when no active fence.
     estCost: activeRow?.estCost ?? null,
+    // Cost line items (sum to estCost) for the internal breakdown modal.
+    costBreakdown: activeRow?.costBreakdown ?? null,
+    // Dump / haul-away billed as its own optional line (per the project's dump_included flag).
+    // dumpPrice = the line amount that WOULD apply (shown even when off, for the toggle);
+    // dumpTotal = the amount actually in `total` (0 when excluded).
+    dumpIncluded: project.dump_included,
+    dumpPrice: activeRow?.dumpPrice ?? null,
+    dumpTotal: activeRow?.dumpTotal ?? null,
     totalLinearFt: sectionRows.reduce((sum, s) => sum + s.linear_ft, 0),
     // Catalog for the add-material dropdown + board $/section — folded in so the
     // detail page needs one request, not a second /api/reference round trip.
     fencePrices: ref.fencePrices,
-    // For the customer Present page: the fence-only subtotal (board row = sections +
-    // permit + extras + discount, so back those out) and the permit fee line amount.
+    // For the customer Present page: the fence-only subtotal (board row = sections + dump +
+    // permit + extras + discount, so back those out — dump shows as its own line) and the
+    // permit fee line amount.
     fenceSubtotal:
       activeRow && activeRow.total !== null
         ? activeRow.total -
+          (activeRow.dumpTotal ?? 0) -
           (project.permit ? ref.settings.permitFee : 0) -
           extraRows.reduce((s, e) => s + e.price, 0) -
           project.discount
