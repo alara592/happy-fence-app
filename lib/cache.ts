@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { api } from "./client";
 
 /**
@@ -110,11 +110,22 @@ export function prefetch(key: string): void {
 }
 
 /**
+ * Flips true after the first client mount. The server has no localStorage, so it renders
+ * the "loading" branch; without this gate the first client render would already show the
+ * localStorage-hydrated data and mismatch the server HTML (React hydration error). Holding
+ * data back for that one render keeps server and first client render identical. Screens
+ * opened LATER via client-side navigation read `true` at mount, so they still show cached
+ * data instantly with no loading flash.
+ */
+let hasHydrated = false;
+
+/**
  * Read a cached key + subscribe to updates. Revalidates in the background on mount,
- * showing cached data instantly meanwhile.
+ * showing cached data instantly meanwhile (after the initial hydration; see hasHydrated).
  */
 export function useCached<T>(key: string): { data: T | undefined; error: Error | undefined } {
   const [, bump] = useReducer((x) => x + 1, 0);
+  const [hydrated, setHydrated] = useState(hasHydrated);
 
   useEffect(() => {
     let set = listeners.get(key);
@@ -127,9 +138,15 @@ export function useCached<T>(key: string): { data: T | undefined; error: Error |
   }, [key]);
 
   useEffect(() => {
+    hasHydrated = true;
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
     load(key).catch(() => {});
   }, [key]);
 
   const e = store.get(key);
+  if (!hydrated) return { data: undefined, error: undefined };
   return { data: e?.data as T | undefined, error: e?.error };
 }
