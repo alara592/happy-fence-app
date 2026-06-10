@@ -34,7 +34,8 @@
     { "sortOrder": 18, "type": "Vinyl - Privacy - Sand", "perSection": 112, "ftPerSection": 6 },
     { "sortOrder": 19, "type": "Wood - Board-on-Board", "perSection": 73, "ftPerSection": 4 },
     { "sortOrder": 20, "type": "Wood - Dog Ear", "perSection": 60, "ftPerSection": 4 },
-    { "sortOrder": 21, "type": "Wood - Shadowbox", "perSection": 73, "ftPerSection": 4 }
+    { "sortOrder": 21, "type": "Wood - Shadowbox", "perSection": 73, "ftPerSection": 4 },
+    { "sortOrder": 22, "type": "WPC - Composite", "perSection": 297, "ftPerSection": 6 }
   ],
   "gatePrices": [
     { "type": "Vinyl", "style": "Single", "price": 695 },

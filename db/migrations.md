@@ -137,3 +137,10 @@ alter table projects add column dump_included boolean not null default true;
 update fence_prices set per_section = 121 where type = 'Vinyl(Cypress)'; -- confirmed by Anthony
 insert into fence_prices (type, per_section, ft_per_section) values ('Vinyl(Sand)', 112, 6); -- new
 ```
+
+## Data updates outside migrations (2026-06-10)
+
+```sql
+insert into fence_prices (type, per_section, ft_per_section, sort_order)
+  values ('WPC - Composite', 297, 6, 22); -- new (Material - Style scheme)
+```
