@@ -150,15 +150,17 @@ export function computeBoard(
 
 export async function getProjectBundle(id: string) {
   const client = db();
-  const [proj, sections, gates, extras, materials, ref] = await Promise.all([
+  const [proj, sections, gates, extras, materials, photos, ref] = await Promise.all([
     client.from("projects").select("*").eq("id", id).maybeSingle(),
     client.from("project_sections").select("*").eq("project_id", id).order("created_at"),
     client.from("project_gates").select("*").eq("project_id", id).order("created_at"),
     client.from("project_extras").select("*").eq("project_id", id),
     client.from("project_materials").select("*").eq("project_id", id),
+    client.from("project_photos").select("*").eq("project_id", id).order("sort_order").order("created_at"),
     loadReference(),
   ]);
-  const err = proj.error ?? sections.error ?? gates.error ?? extras.error ?? materials.error;
+  const err =
+    proj.error ?? sections.error ?? gates.error ?? extras.error ?? materials.error ?? photos.error;
   if (err) throw new Error(err.message);
   if (!proj.data) return null;
 
@@ -205,9 +207,32 @@ export async function getProjectBundle(id: string) {
         : null,
   }));
 
+  // Site photos — the bucket is private, so hand the client short-lived (1h) signed URLs.
+  // The client cache revalidates on entry, so a stale/expired URL refreshes on next open.
+  const photoRows = (photos.data ?? []) as {
+    id: string;
+    storage_path: string;
+    caption: string | null;
+    created_at: string;
+  }[];
+  let photosOut: { id: string; caption: string | null; url: string | null; created_at: string }[] = [];
+  if (photoRows.length) {
+    const { data: signed } = await client.storage
+      .from("project-photos")
+      .createSignedUrls(photoRows.map((p) => p.storage_path), 3600);
+    const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl] as const));
+    photosOut = photoRows.map((p) => ({
+      id: p.id,
+      caption: p.caption,
+      url: urlByPath.get(p.storage_path) ?? null,
+      created_at: p.created_at,
+    }));
+  }
+
   return {
     project,
     sections: sectionsOut,
+    photos: photosOut,
     gates: gateRows,
     extras: extraRows,
     materials: materialRows,

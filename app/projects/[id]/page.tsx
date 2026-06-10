@@ -30,6 +30,7 @@ interface Bundle {
     take_down_ft: number;
     price: number | null;
   }[];
+  photos: { id: string; caption: string | null; url: string | null; created_at: string }[];
   gates: { id: string; name: string; type: string; style: string; actual_price: number; quantity: number }[];
   extras: { id: string; name: string; price: number }[];
   materials: { id: string; type: string; is_active: boolean }[];
@@ -203,7 +204,23 @@ export default function ProjectDetailPage() {
           Est. cost {fmtUSD(Math.round(b.estCost))}
         </p>
       )}
-      {p.notes && <p className="muted">Notes: {p.notes}</p>}
+      <Link href={`/projects/${id}/site`} className="site-row">
+        {b.photos.length > 0 && (
+          <span className="peek">
+            {b.photos.slice(0, 3).map((ph) => (
+              <span key={ph.id}>{ph.url && <img src={ph.url} alt="" />}</span>
+            ))}
+          </span>
+        )}
+        <span className="meta">
+          <span className="t">Site photos &amp; notes</span>
+          <span className="s">
+            {b.photos.length} photo{b.photos.length === 1 ? "" : "s"}
+            {p.notes ? " · note added" : b.photos.length === 0 ? " · tap to add" : ""}
+          </span>
+        </span>
+        <span className="chev">›</span>
+      </Link>
       {p.price_mod_notes && <p className="muted">Price mods: {p.price_mod_notes}</p>}
       {error && <p className="error">{error}</p>}
       {!b.activeType && (

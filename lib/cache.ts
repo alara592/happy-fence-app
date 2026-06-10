@@ -28,7 +28,7 @@ const listeners = new Map<string, Set<() => void>>();
  * and revalidates in the background. BUMP the version when the cached payload shape
  * changes (project bundle / list), so stale shapes are discarded after a deploy.
  */
-const PERSIST_KEY = "hfc-cache-v2";
+const PERSIST_KEY = "hfc-cache-v3";
 
 function hydrate(): void {
   if (typeof window === "undefined") return;

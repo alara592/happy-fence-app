@@ -96,6 +96,31 @@ create index idx_appointments_project on appointments(project_id);
 alter table appointments enable row level security;
 ```
 
+## 7. project_photos (2026-06-09)
+
+Per-project site photos + a private storage bucket. Photos are project-level (not tied to
+a section/gate). `caption` doubles as the per-photo note. Bucket is private — the app server
+(service role) mints short-lived signed URLs on read; no public access, same model as the
+RLS-locked tables. Project delete cascades the rows (FK); the storage objects are purged by
+the DELETE route.
+
+```sql
+create table project_photos (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references projects(id) on delete cascade,
+  storage_path text not null,
+  caption text,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+create index idx_photos_project on project_photos(project_id);
+alter table project_photos enable row level security;
+
+insert into storage.buckets (id, name, public)
+values ('project-photos', 'project-photos', false)
+on conflict (id) do nothing;
+```
+
 ## Data updates outside migrations (2026-06-05)
 
 ```sql

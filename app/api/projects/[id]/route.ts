@@ -46,11 +46,19 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 }
 
-/** DELETE — cascades to sections/gates/extras/materials via FK. */
+/** DELETE — cascades rows (sections/gates/extras/materials/photos) via FK; storage objects
+ *  have no cascade, so purge the project's photo folder first. */
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
-    const { error } = await db().from("projects").delete().eq("id", id);
+    const client = db();
+
+    const { data: files } = await client.storage.from("project-photos").list(id);
+    if (files && files.length) {
+      await client.storage.from("project-photos").remove(files.map((f) => `${id}/${f.name}`));
+    }
+
+    const { error } = await client.from("projects").delete().eq("id", id);
     if (error) throw new Error(error.message);
     return NextResponse.json({ ok: true });
   } catch (e) {
