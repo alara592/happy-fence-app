@@ -70,6 +70,8 @@ export interface BoardRow {
   type: string;
   /** null when the material is unpriced ($0/section) — UI shows a warning, never $0. */
   total: number | null;
+  /** Internal estimated job cost (COGS) under this material — null when unpriced. */
+  estCost: number | null;
   unpriced: boolean;
   active: boolean;
 }
@@ -128,7 +130,7 @@ export function computeBoard(
   return sorted.map((m) => {
     const fp = ref.fencePrices.find((f) => f.type === m.type);
     if (!fp || fp.perSection === 0) {
-      return { materialId: m.id, type: m.type, total: null, unpriced: true, active: m.is_active };
+      return { materialId: m.id, type: m.type, total: null, estCost: null, unpriced: true, active: m.is_active };
     }
     const input: ProjectPricingInput = {
       laborCostFt: project.labor_cost_ft,
@@ -139,8 +141,8 @@ export function computeBoard(
       gates: [], // gates excluded from board rows by design
       extras: extras.map((e) => ({ price: num(e.price) })),
     };
-    const { total } = projectTotal(input, ref.fencePrices, ref.gatePrices, ref.settings);
-    return { materialId: m.id, type: m.type, total, unpriced: false, active: m.is_active };
+    const { total, estCost } = projectTotal(input, ref.fencePrices, ref.gatePrices, ref.settings);
+    return { materialId: m.id, type: m.type, total, estCost, unpriced: false, active: m.is_active };
   });
 }
 
@@ -213,6 +215,9 @@ export async function getProjectBundle(id: string) {
     gatesTotal,
     activeType: activeRow?.type ?? null,
     total,
+    // Internal-only estimated job cost (COGS) under the active fence — what the job costs
+    // Anthony before markup. Gates excluded (cost not derivable). null when no active fence.
+    estCost: activeRow?.estCost ?? null,
     totalLinearFt: sectionRows.reduce((sum, s) => sum + s.linear_ft, 0),
     // Catalog for the add-material dropdown + board $/section — folded in so the
     // detail page needs one request, not a second /api/reference round trip.

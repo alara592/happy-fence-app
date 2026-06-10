@@ -136,6 +136,12 @@ export interface ProjectTotalBreakdown {
   discount: number;
   extrasTotal: number;
   total: number;
+  /** Σ pre-markup section COGS (material + hardware + labor + tear-down + dump). */
+  sectionsCost: number;
+  /** Estimated job cost (COGS): sections + permit + extras. Gates are excluded — their
+   *  price is a flat lookup with margin already baked in, so cost isn't derivable (How-It-Works
+   *  §8). Discount excluded — it's a price adjustment, not a cost. Internal-only figure. */
+  estCost: number;
   /** Types that failed lookup — UI must surface these, never silently price at $0. */
   unmatchedGateTypes: string[];
 }
@@ -146,10 +152,13 @@ export function projectTotal(
   gatePrices: GatePriceRow[],
   settings: GlobalSettings,
 ): ProjectTotalBreakdown {
+  let sectionsCost = 0;
   const sectionsTotal = input.sections.reduce((sum, s) => {
     const fp = fencePrices.find((f) => f.type === s.type);
     if (!fp) throw new Error(`Unknown fence type: ${s.type}`); // FK makes this impossible in the DB; belt-and-braces
-    return sum + sectionPrice(s, fp, input, settings).price;
+    const breakdown = sectionPrice(s, fp, input, settings);
+    sectionsCost += breakdown.subtotalCost;
+    return sum + breakdown.price;
   }, 0);
 
   const unmatchedGateTypes: string[] = [];
@@ -165,6 +174,7 @@ export function projectTotal(
   const permitFee = input.permit ? settings.permitFee : 0;
   const extrasTotal = input.extras.reduce((sum, e) => sum + e.price, 0);
   const total = sectionsTotal + permitFee + gatesTotal + input.discount + extrasTotal;
+  const estCost = sectionsCost + permitFee + extrasTotal;
 
-  return { sectionsTotal, permitFee, gatesTotal, discount: input.discount, extrasTotal, total, unmatchedGateTypes };
+  return { sectionsTotal, permitFee, gatesTotal, discount: input.discount, extrasTotal, total, sectionsCost, estCost, unmatchedGateTypes };
 }

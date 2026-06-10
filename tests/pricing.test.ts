@@ -147,6 +147,26 @@ test("project total = sections + permit(300) + gates + discount + extras; unmatc
   assert.deepEqual(r.unmatchedGateTypes, ["Mystery Gate/Single"]);
 });
 
+test("estCost = section COGS + permit + extras; excludes gates and discount", () => {
+  const r = projectTotal(
+    {
+      laborCostFt: 12,
+      profitMargin: 0.3,
+      permit: true,
+      discount: -200,
+      sections: [{ linearFt: 80, type: "Privacy Vinyl - White", tearDown: true, dump: false, takeDownFt: 80 }],
+      gates: [{ type: "Vinyl", style: "Single" }], // priced at 695, but contributes $0 to cost
+      extras: [{ price: 300 }],
+    },
+    FENCE_PRICES,
+    GATE_PRICES,
+    SETTINGS,
+  );
+  // Frank's section pre-markup COGS: 14×91 + 40 hardware + 960 labor + 240 tear-down = 2514
+  assert.equal(r.sectionsCost, 2514);
+  assert.equal(r.estCost, 2514 + 300 + 300); // + permit + extras; gate 695 and discount −200 excluded
+});
+
 test("permit off adds nothing; positive discount = surcharge", () => {
   const r = projectTotal(
     {

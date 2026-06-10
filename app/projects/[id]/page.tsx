@@ -37,6 +37,7 @@ interface Bundle {
   gatesTotal: number;
   activeType: string | null;
   total: number | null;
+  estCost: number | null;
   totalLinearFt: number;
   fencePrices: { type: string; perSection: number }[];
 }
@@ -197,6 +198,11 @@ export default function ProjectDetailPage() {
         <br />
         {fmtDate(p.date)} · {p.permit ? "Permit" : "No permit"} · {(p.profit_margin * 100).toFixed(0)}% | {p.labor_cost_ft}/ft
       </p>
+      {b.estCost !== null && (
+        <p className="est-cost" title="Internal — your estimated cost for this job (materials, hardware, labor, tear-down/dump, permit, extras). Gates not included. Never shown to customers.">
+          Est. cost {fmtUSD(Math.round(b.estCost))}
+        </p>
+      )}
       {p.notes && <p className="muted">Notes: {p.notes}</p>}
       {p.price_mod_notes && <p className="muted">Price mods: {p.price_mod_notes}</p>}
       {error && <p className="error">{error}</p>}
