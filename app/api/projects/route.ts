@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 
-/** GET — project list, newest first. No totals (price-board model). */
+/** GET — project list, last-edited first. No totals (price-board model). */
 export async function GET() {
   try {
     const { data, error } = await db()
       .from("projects")
-      .select("id, client, address, date, permit, created_at")
-      .order("created_at", { ascending: false });
+      .select("id, client, address, date, permit, created_at, updated_at")
+      .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
     return NextResponse.json(data ?? []);
   } catch (e) {

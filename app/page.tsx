@@ -11,6 +11,8 @@ interface ProjectListItem {
   address: string | null;
   date: string;
   permit: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 /** City = tail of the address; good enough for the list line. */
@@ -20,22 +22,21 @@ function city(address: string | null): string {
   return parts.length > 1 ? parts[1] : "";
 }
 
-const GROUPS = ["This week", "Upcoming", "Earlier"] as const;
+const GROUPS = ["Created Today", "Earlier"] as const;
 type Group = (typeof GROUPS)[number];
 
-/** Bucket a job date relative to today (This week = today → end of week). */
-function bucket(dateStr: string): Group {
-  const [y, m, d] = dateStr.slice(0, 10).split("-").map(Number);
-  const date = new Date(y, m - 1, d);
+/** Projects are created day-of, so bucket on creation date, not job date. */
+function bucket(createdAt: string): Group {
+  const d = new Date(createdAt);
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (date < today) return "Earlier";
-  const endOfWeek = new Date(today);
-  endOfWeek.setDate(today.getDate() + ((7 - today.getDay()) % 7)); // upcoming Sunday (today if Sunday)
-  return date <= endOfWeek ? "This week" : "Upcoming";
+  return d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+    ? "Created Today"
+    : "Earlier";
 }
 
-/** Screen 2 — project list: search + date grouping. No totals (price-board model). */
+/** Screen 2 — project list: search + creation grouping. No totals (price-board model). */
 export default function ProjectListPage() {
   const { data: projects, error } = useCached<ProjectListItem[]>("/api/projects");
   const [q, setQ] = useState("");
@@ -57,12 +58,10 @@ export default function ProjectListPage() {
             (p.address ?? "").toLowerCase().includes(needle),
         )
       : projects;
-    const by: Record<Group, ProjectListItem[]> = { "This week": [], Upcoming: [], Earlier: [] };
-    for (const p of filtered) by[bucket(p.date)].push(p);
-    // soonest first for current/future; most recent first for past
-    by["This week"].sort((a, b) => a.date.localeCompare(b.date));
-    by.Upcoming.sort((a, b) => a.date.localeCompare(b.date));
-    by.Earlier.sort((a, b) => b.date.localeCompare(a.date));
+    const by: Record<Group, ProjectListItem[]> = { "Created Today": [], Earlier: [] };
+    for (const p of filtered) by[bucket(p.created_at)].push(p);
+    // last edited first within each group
+    for (const g of GROUPS) by[g].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
     return { by, count: filtered.length };
   }, [projects, q]);
 
