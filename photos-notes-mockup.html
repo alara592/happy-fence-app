@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Photos &amp; Notes</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  a { color:#0a58ca; }
+  h1 { font-size:1.3rem; margin:0; } h2 { font-size:1.05rem; margin:20px 0 8px; }
+  button { padding:10px 16px; font-size:1rem; border:1px solid #999; border-radius:6px; background:#fff; cursor:pointer; }
+  button.primary { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:600; }
+  button.danger { color:#b02a37; border-color:#b02a37; }
+  .muted { color:#666; font-size:.85rem; }
+  .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:8px 0; }
+  .spread { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .actions { display:flex; gap:8px; margin-top:8px; }
+  .est-cost { display:inline-block; margin:0 0 4px; padding:2px 10px; border:1px dashed #b9b9b9; border-radius:6px; background:#f5f5f5; color:#555; font-size:.85rem; font-weight:600; }
+
+  .wrap { max-width:980px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:28px; }
+  .intro h1 { margin:0 0 6px; font-size:1.4rem; }
+  .intro p { margin:6px 0; color:#444; line-height:1.5; }
+  .intro .tag { display:inline-block; background:#f0f7f2; color:#1a7f37; border:1px solid #d7e9dd; border-radius:20px; padding:2px 10px; font-size:.75rem; font-weight:700; margin-right:6px; }
+  .stage { display:flex; gap:46px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  .frame-wrap { width:360px; }
+  .frame-cap { text-align:center; font-size:.82rem; color:#666; margin:10px 4px 0; line-height:1.45; }
+  .frame-cap b { color:#1a7f37; }
+  .phone { width:360px; border:10px solid #1c1c1e; border-radius:34px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#fafafa; position:relative; }
+  .notch { height:26px; background:#1c1c1e; }
+  .screen { height:700px; overflow-y:auto; position:relative; background:#fafafa; }
+  .pad { padding:12px 16px 40px; }
+
+  .sticky-total { position:sticky; top:0; z-index:5; background:#1a7f37; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+  .sticky-total .num { font-size:1.5rem; font-weight:800; line-height:1.1; }
+  .sticky-total .lbl { font-size:.78rem; opacity:.9; }
+  .sticky-total .present-btn { background:#fff; color:#1a7f37; border-color:#fff; font-weight:700; padding:8px 12px; }
+  .sticky-total .back-chip { background:rgba(255,255,255,.18); border:0; color:#fff; font-size:1.4rem; font-weight:700; padding:4px 11px; border-radius:8px; line-height:1; }
+  .geo { display:inline-flex; gap:8px; margin-left:6px; }
+  .geo a { text-decoration:none; }
+
+  /* Highlight ring on the new stuff */
+  .hl { outline:2px solid #1a7f37; outline-offset:4px; border-radius:10px; }
+
+  /* ---- NEW: Photos section ---- */
+  .photos-head { display:flex; justify-content:space-between; align-items:center; margin:18px 0 8px; }
+  .photos-head h2 { margin:0; }
+  .cam-btn { display:inline-flex; align-items:center; gap:6px; background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:700; padding:9px 14px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .tile { position:relative; border-radius:10px; overflow:hidden; border:1px solid #ddd; aspect-ratio:1/1; cursor:pointer; background:#ccc; }
+  .tile img { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile .cap { position:absolute; left:0; right:0; bottom:0; background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; font-size:.68rem; font-weight:600; padding:14px 6px 5px; line-height:1.2; }
+  .tile.uploading::after { content:""; position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  .tile .spin { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:2; }
+  .tile .spin div { width:26px; height:26px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:rot 1s linear infinite; }
+  @keyframes rot { to { transform:rotate(360deg); } }
+  .add-tile { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:2px dashed #1a7f37; border-radius:10px; aspect-ratio:1/1; color:#1a7f37; font-weight:700; font-size:.78rem; cursor:pointer; background:#f4faf6; }
+  .add-tile .ic { font-size:1.5rem; }
+
+  /* ---- NEW: inline-editable notes ---- */
+  .notes-box { background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px 12px; margin:8px 0 4px; }
+  .notes-box .lbl { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#999; font-weight:800; margin-bottom:4px; }
+  .notes-box textarea { width:100%; border:0; resize:none; font-family:inherit; font-size:.92rem; min-height:48px; outline:none; color:#222; background:transparent; }
+  .notes-box.editing { border-color:#1a7f37; box-shadow:0 0 0 3px rgba(26,127,55,.12); }
+  .save-hint { font-size:.72rem; color:#1a7f37; font-weight:700; }
+
+  .sec-price { color:#1a7f37; font-weight:700; }
+
+  /* ---- Full-screen photo viewer ---- */
+  .viewer { position:absolute; inset:0; z-index:30; background:#0b0b0b; display:none; flex-direction:column; }
+  .viewer.open { display:flex; }
+  .v-top { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; color:#fff; }
+  .v-top .x { font-size:1.5rem; cursor:pointer; background:none; border:0; color:#fff; padding:0 6px; }
+  .v-top .count { font-size:.85rem; opacity:.8; }
+  .v-img { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .v-img img { max-width:100%; max-height:100%; object-fit:contain; }
+  .v-bottom { padding:12px 16px 22px; background:#161616; }
+  .v-bottom .clab { color:#888; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; font-weight:800; margin-bottom:6px; }
+  .v-bottom textarea { width:100%; background:#262626; color:#fff; border:1px solid #3a3a3a; border-radius:8px; padding:9px 10px; font-family:inherit; font-size:.95rem; resize:none; min-height:42px; outline:none; }
+  .v-actions { display:flex; gap:8px; margin-top:10px; }
+  .v-actions button { flex:1; }
+  .v-actions .del { background:#2a1416; color:#ff8c92; border-color:#5a2a2e; font-weight:700; }
+  .v-actions .save { background:#1a7f37; border-color:#1a7f37; color:#fff; font-weight:700; }
+
+  .toast { position:absolute; left:50%; transform:translateX(-50%); top:14px; z-index:60; background:#1a2b1f; color:#fff; padding:8px 16px; border-radius:20px; font-size:.85rem; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,.3); opacity:0; transition:opacity .2s; }
+  .toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>Photos &amp; Notes — Project page</h1>
+    <p>
+      <span class="tag">Internal only</span>
+      <span class="tag">Single notes field + captions</span>
+      <span class="tag">Project-level photos</span>
+    </p>
+    <p>The <b>Photos</b> section sits high on the project page — right under the address, above Measurements — because photos get taken first, standing in the yard. One tap on <b>📷 Add Photo</b> opens the phone camera. Each photo's caption is its note ("gate goes here," "slope on this run"). The project's overall <b>Notes</b> field is now editable inline, no trip to the Edit form. Tap any thumbnail to open the full-screen viewer.</p>
+    <p class="muted">This is a static mockup — the camera button and tiles are clickable to demo the flow. Nothing is saved.</p>
+  </div>
+
+  <div class="stage">
+    <!-- ============ FRAME 1: project page ============ -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen" id="screen1">
+          <div class="toast" id="toast">Saved ✓</div>
+
+          <div class="sticky-total">
+            <button class="back-chip">‹</button>
+            <div style="flex:1">
+              <div class="lbl">Project Total · Privacy Vinyl - White</div>
+              <div class="num">$6,480</div>
+            </div>
+            <button class="present-btn">Present →</button>
+          </div>
+
+          <div class="pad">
+            <div class="spread">
+              <h1>Maria Delgado</h1>
+              <button>Edit</button>
+            </div>
+            <p class="muted" style="margin:6px 0">
+              812 Sycamore Ln
+              <span class="geo"><a href="#">📍</a><a href="#">🌐</a></span><br>
+              Jun 9, 2026 · Permit · 30% | 10/ft
+            </p>
+            <p class="est-cost">Est. cost $4,120</p>
+
+            <!-- NEW: inline notes -->
+            <div class="notes-box hl" id="notesBox" onclick="editNotes()">
+              <div class="lbl">Notes</div>
+              <textarea id="notes" placeholder="Add job notes…" oninput="dirtyNotes()" onblur="saveNotes()">Old chain-link to remove. Dog stays in yard — keep gate self-closing. Customer prefers crew arrive after 9am.</textarea>
+              <span class="save-hint" id="notesHint" style="display:none">Tap away to save</span>
+            </div>
+
+            <!-- NEW: photos -->
+            <div class="photos-head hl">
+              <h2>Photos (4)</h2>
+              <button class="cam-btn" onclick="addPhoto()">📷 Add Photo</button>
+            </div>
+            <div class="grid" id="grid">
+              <div class="tile" onclick="openViewer(0)">
+                <img alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%237a9b76'/><rect y='130' width='200' height='70' fill='%235e7d59'/><g stroke='%23caa46a' stroke-width='7'><line x1='25' y1='60' x2='25' y2='170'/><line x1='65' y1='60' x2='65' y2='170'/><line x1='105' y1='60' x2='105' y2='170'/><line x1='145' y1='60' x2='145' y2='170'/><line x1='185' y1='60' x2='185' y2='170'/></g><rect x='10' y='70' width='185' height='10' fill='%23caa46a'/></svg>" />
+                <div class="cap">Existing fence to tear down</div>
+              </div>
+              <div class="tile" onclick="openViewer(1)">
+                <img alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%2388a5c9'/><rect y='120' width='200' height='80' fill='%237b9a55'/><rect x='70' y='55' width='60' height='95' fill='%238a6d4f'/><rect x='66' y='50' width='68' height='10' fill='%23a8855f'/><circle cx='124' cy='105' r='4' fill='%23333'/></svg>" />
+                <div class="cap">Gate location — side yard</div>
+              </div>
+              <div class="tile" onclick="openViewer(2)">
+                <img alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23a9c47f'/><polygon points='0,200 0,120 200,70 200,200' fill='%238fae64'/><circle cx='150' cy='60' r='34' fill='%233f6b35'/><rect x='144' y='80' width='12' height='40' fill='%236b4a2e'/></svg>" />
+                <div class="cap">Slope + tree on back run</div>
+              </div>
+              <div class="tile" onclick="openViewer(3)">
+                <img alt="" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='200' height='200' fill='%23c9c2b4'/><rect y='140' width='200' height='60' fill='%239c9484'/><rect x='30' y='80' width='44' height='60' fill='%23d8d2c6'/><rect x='120' y='70' width='30' height='70' fill='%23b7b0a0'/><circle cx='150' cy='150' r='9' fill='%234a90d6'/></svg>" />
+                <div class="cap">Sprinkler line — avoid digging</div>
+              </div>
+              <div class="add-tile" onclick="addPhoto()">
+                <span class="ic">＋</span>
+                <span>Add</span>
+              </div>
+            </div>
+
+            <h2>Measurements (3) — 540 ft</h2>
+            <div class="card">
+              <div class="spread">
+                <div>
+                  <strong>Back yard run</strong>
+                  <div class="muted"><span class="sec-price">$2,184</span> · 144 ft · tear-down 144 ft</div>
+                </div>
+                <div class="actions" style="margin:0"><button>Edit</button></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="spread">
+                <div>
+                  <strong>Left side</strong>
+                  <div class="muted"><span class="sec-price">$1,365</span> · 90 ft</div>
+                </div>
+                <div class="actions" style="margin:0"><button>Edit</button></div>
+              </div>
+            </div>
+            <p class="muted" style="text-align:center;margin-top:16px">…price board, gates, extras below…</p>
+          </div>
+
+          <!-- Full-screen viewer (lives inside the phone) -->
+          <div class="viewer" id="viewer">
+            <div class="v-top">
+              <button class="x" onclick="closeViewer()">✕</button>
+              <span class="count" id="vCount">1 / 4</span>
+              <span style="width:24px"></span>
+            </div>
+            <div class="v-img"><img id="vImg" alt="" /></div>
+            <div class="v-bottom">
+              <div class="clab">Caption</div>
+              <textarea id="vCap"></textarea>
+              <div class="v-actions">
+                <button class="del" onclick="deletePhoto()">Delete</button>
+                <button class="save" onclick="saveCaption()">Save caption</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="frame-cap"><b>Project page</b> — inline Notes + the new Photos grid. Tap a thumbnail to open the viewer →</div>
+    </div>
+
+    <!-- ============ FRAME 2: capture flow note ============ -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen" style="background:#0b0b0b;">
+          <div class="v-top" style="color:#fff">
+            <span style="width:24px"></span>
+            <span class="count">Camera</span>
+            <span style="width:24px"></span>
+          </div>
+          <div style="height:430px;display:flex;align-items:center;justify-content:center;background:#1d1d1d;position:relative;">
+            <div style="position:absolute;inset:18px;border:2px solid rgba(255,255,255,.25);border-radius:14px;"></div>
+            <div style="color:#888;font-size:.85rem;text-align:center;padding:0 30px;line-height:1.5;">
+              Native phone camera<br>opens directly<br><span style="font-size:.72rem;opacity:.7">accept="image/*" capture="environment"</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;padding:26px;background:#0b0b0b;">
+            <div style="width:64px;height:64px;border-radius:50%;border:4px solid #fff;background:#fff;"></div>
+          </div>
+          <div style="background:#161616;color:#bbb;padding:16px 18px;font-size:.82rem;line-height:1.6;">
+            <div style="color:#1a7f37;font-weight:800;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em;margin-bottom:6px">The capture flow</div>
+            1. Tap <b style="color:#fff">📷 Add Photo</b><br>
+            2. Camera opens → shoot (or pick from library)<br>
+            3. Tile shows a spinner while it uploads &amp; compresses<br>
+            4. Thumbnail lands in the grid — tap it to caption
+          </div>
+        </div>
+      </div>
+      <div class="frame-cap"><b>One tap to camera.</b> Server downscales the photo before storing, so the page stays fast on cell signal.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const photos = [
+    { src: q1(), cap: "Existing fence to tear down" },
+    { src: q2(), cap: "Gate location — side yard" },
+    { src: q3(), cap: "Slope + tree on back run" },
+    { src: q4(), cap: "Sprinkler line — avoid digging" },
+  ];
+  function q1(){return document.querySelectorAll('#grid .tile img')[0].src;}
+  function q2(){return document.querySelectorAll('#grid .tile img')[1].src;}
+  function q3(){return document.querySelectorAll('#grid .tile img')[2].src;}
+  function q4(){return document.querySelectorAll('#grid .tile img')[3].src;}
+
+  let cur = 0;
+  function openViewer(i){
+    cur = i;
+    document.getElementById('vImg').src = photos[i].src;
+    document.getElementById('vCap').value = photos[i].cap;
+    document.getElementById('vCount').textContent = (i+1)+' / '+photos.length;
+    document.getElementById('viewer').classList.add('open');
+  }
+  function closeViewer(){ document.getElementById('viewer').classList.remove('open'); }
+  function saveCaption(){ photos[cur].cap = document.getElementById('vCap').value; closeViewer(); toast('Caption saved ✓'); }
+  function deletePhoto(){ closeViewer(); toast('Photo deleted'); }
+
+  function editNotes(){ document.getElementById('notesBox').classList.add('editing'); document.getElementById('notesHint').style.display='inline'; }
+  function dirtyNotes(){ document.getElementById('notesHint').style.display='inline'; }
+  function saveNotes(){ document.getElementById('notesBox').classList.remove('editing'); document.getElementById('notesHint').style.display='none'; toast('Saved ✓'); }
+
+  function addPhoto(){
+    const grid = document.getElementById('grid');
+    const t = document.createElement('div');
+    t.className = 'tile uploading';
+    t.innerHTML = '<div class="spin"><div></div></div>';
+    grid.insertBefore(t, grid.querySelector('.add-tile'));
+    toast('Uploading…');
+    setTimeout(()=>{
+      t.classList.remove('uploading');
+      t.innerHTML = '<img src="'+q2()+'"><div class="cap">New photo — tap to caption</div>';
+      t.onclick = ()=>{ photos.push({src:q2(),cap:'New photo — tap to caption'}); openViewer(photos.length-1); };
+      toast('Photo added ✓');
+    }, 1100);
+  }
+
+  let tt;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(tt); tt = setTimeout(()=>el.classList.remove('show'), 1500);
+  }
+</script>
+</body>
+</html>

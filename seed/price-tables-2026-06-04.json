@@ -10,7 +10,8 @@
     "2026-06-05 RENAMED all fence types to 'Material - Style - Color' scheme (bare vinyls assume Privacy) + added sort_order column; migration rename_fence_types_material_style_color_and_sort_order. Old names in git history.",
     "Vinyl - Walnut and Chainlink are 0 = unpriced flags; UI must warn, never quote material at $0 silently. Still unresolved.",
     "Vinyl/Double gate is 1,429 (CHANGELOG #4 recorded 1,395 — price has been updated since). Still unconfirmed.",
-    "Remaining to confirm with Anthony/Mimi: Vinyl/Double gate 1,429; Walnut & Chainlink pricing."
+    "Remaining to confirm with Anthony/Mimi: Vinyl/Double gate 1,429; Walnut & Chainlink pricing.",
+    "2026-06-10 Anthony added WPC - Composite gates to live DB: Single 1239, Double 2573 (final prices, all costs/labor/margin baked in). Matches the WPC - Composite fence type."
   ],
   "settings": { "defaultTearDownRate": 3, "defaultDumpRate": 3, "permitFee": 300 },
   "fencePrices": [
@@ -59,6 +60,8 @@
     { "type": "Privacy Vinyl - Tan", "style": "Single", "price": 700 },
     { "type": "Privacy Vinyl - Tan", "style": "Double", "price": 1489 },
     { "type": "Horizontal Vinyl - White", "style": "Single", "price": 670 },
-    { "type": "Horizontal Vinyl - White", "style": "Double", "price": 1375 }
+    { "type": "Horizontal Vinyl - White", "style": "Double", "price": 1375 },
+    { "type": "WPC - Composite", "style": "Single", "price": 1239 },
+    { "type": "WPC - Composite", "style": "Double", "price": 2573 }
   ]
 }
