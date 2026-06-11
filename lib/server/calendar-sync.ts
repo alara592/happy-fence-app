@@ -9,6 +9,12 @@ import { listEvents, type CalEvent } from "./calendar";
  * Only "Site Visit ..." events sync (personal events ignored). On update we refresh
  * ONLY the sync fields — `status` and `project_id` are preserved so app-side workflow
  * (a status change, a linked project) survives a re-sync.
+ *
+ * Deletions: after the upsert we reconcile the sync window — an in-window appointment
+ * the calendar no longer returns (deleted, renamed off "Site Visit", or moved out of
+ * window) is marked `Cancelled` instead of left stale; one that reappears flips back to
+ * `Scheduled`. The row (and any linked project) is kept either way. Reconcile only ever
+ * toggles Scheduled↔Cancelled, so it never clobbers other app-set statuses.
  */
 
 export const TITLE_PREFIX = "Site Visit";
@@ -65,11 +71,32 @@ export function syncFields(ev: CalEvent, nowIso: string) {
   };
 }
 
+/**
+ * Pure deletion-reconcile diff: given the in-window appointment rows and the set of
+ * event IDs the calendar returned this run, decide which rows to cancel (Scheduled but
+ * gone) and which to resurrect (Cancelled but back). Only toggles Scheduled↔Cancelled.
+ */
+export function reconcile(
+  rows: { id: string; calendar_event_id: string; status: string }[],
+  seenIds: Iterable<string>,
+): { toCancel: string[]; toResurrect: string[] } {
+  const seen = new Set(seenIds);
+  const toCancel: string[] = [];
+  const toResurrect: string[] = [];
+  for (const a of rows) {
+    if (a.status === "Scheduled" && !seen.has(a.calendar_event_id)) toCancel.push(a.id);
+    else if (a.status === "Cancelled" && seen.has(a.calendar_event_id)) toResurrect.push(a.id);
+  }
+  return { toCancel, toResurrect };
+}
+
 export interface SyncResult {
   total: number; // events in window
   siteVisits: number; // matched the prefix
   created: number;
   updated: number;
+  cancelled: number; // in-window rows the calendar no longer returns
+  resurrected: number; // previously-cancelled rows that reappeared
 }
 
 export async function syncAppointments(): Promise<SyncResult> {
@@ -115,5 +142,36 @@ export async function syncAppointments(): Promise<SyncResult> {
     }
   }
 
-  return { total: events.length, siteVisits: siteVisits.length, created, updated };
+  // ── Reconcile deletions across the sync window ──
+  // Compare in-window appointments against the event IDs the calendar just returned.
+  // Missing + Scheduled → Cancelled; present + Cancelled → Scheduled (reappeared).
+  const { data: inWindow, error: wErr } = await db()
+    .from("appointments")
+    .select("id, calendar_event_id, status")
+    .gte("start_at", timeMin)
+    .lt("start_at", timeMax);
+  if (wErr) throw new Error(wErr.message);
+
+  const { toCancel, toResurrect } = reconcile(
+    (inWindow ?? []) as { id: string; calendar_event_id: string; status: string }[],
+    ids,
+  );
+
+  if (toCancel.length) {
+    const { error } = await db().from("appointments").update({ status: "Cancelled" }).in("id", toCancel);
+    if (error) throw new Error(error.message);
+  }
+  if (toResurrect.length) {
+    const { error } = await db().from("appointments").update({ status: "Scheduled" }).in("id", toResurrect);
+    if (error) throw new Error(error.message);
+  }
+
+  return {
+    total: events.length,
+    siteVisits: siteVisits.length,
+    created,
+    updated,
+    cancelled: toCancel.length,
+    resurrected: toResurrect.length,
+  };
 }

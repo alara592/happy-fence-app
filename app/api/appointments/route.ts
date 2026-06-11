@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
     let q = db()
       .from("appointments")
       .select("id, client, address, start_at, end_at, status, notes, project_id, meeting_title")
+      .neq("status", "Cancelled") // deleted-in-calendar appointments are kept but hidden
       .order("start_at", { ascending: false });
 
     if (!all) {

@@ -76,6 +76,14 @@ Replaces the AppSheet `calendar-sync.gs`. One-way, upserts on `calendar_event_id
   `tests/calendar-sync.test.ts` (5 tests). Times stored UTC; displayed in
   `America/New_York` via `lib/format.ts` (`fmtApptTime` / `etDate`).
 - **On update**, only sync fields refresh — `status` and `project_id` are preserved.
+- **Deletion reconcile** (built ~2026-06-10, committed + deployed 2026-06-10): after the
+  upsert, in-window appointments the calendar no longer returns (deleted, renamed off
+  "Site Visit", or moved out of window) flip `Scheduled → Cancelled`; ones that reappear
+  flip back. Only ever toggles those two statuses; rows + linked projects are kept.
+  Cancelled appointments are hidden from the list (`GET /api/appointments` filters
+  `status != 'Cancelled'`). Pure diff helper `reconcile()` unit-tested. Verified live:
+  a manual sync returned `{updated: 22, cancelled: 2, resurrected: 0}` and the 2 were
+  genuinely-deleted same-day visits.
 - **Create Project** (`/api/appointments/[id]/create-project`): copies client/address,
   seeds project `date` from the visit (ET), links `project_id`. No-duplicate guard =
   the link itself (set → button hidden, FK `on delete set null` re-opens it if the

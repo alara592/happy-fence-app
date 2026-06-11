@@ -4,6 +4,7 @@ import {
   cleanText,
   isSiteVisit,
   parseClient,
+  reconcile,
   syncFields,
 } from "../lib/server/calendar-sync";
 import { normalizePrivateKey } from "../lib/server/calendar";
@@ -79,4 +80,16 @@ test("syncFields handles all-day events and missing fields", () => {
   assert.equal(f.end_at, null);
   assert.equal(f.address, null);
   assert.equal(f.notes, "");
+});
+
+test("reconcile cancels gone Scheduled rows, resurrects returned Cancelled rows", () => {
+  const rows = [
+    { id: "a", calendar_event_id: "e1", status: "Scheduled" }, // still on calendar → untouched
+    { id: "b", calendar_event_id: "e2", status: "Scheduled" }, // gone from calendar → cancel
+    { id: "c", calendar_event_id: "e3", status: "Cancelled" }, // back on calendar → resurrect
+    { id: "d", calendar_event_id: "e4", status: "Cancelled" }, // still gone → stays cancelled
+  ];
+  const { toCancel, toResurrect } = reconcile(rows, ["e1", "e3"]);
+  assert.deepEqual(toCancel, ["b"]);
+  assert.deepEqual(toResurrect, ["c"]);
 });
