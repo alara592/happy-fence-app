@@ -16,7 +16,11 @@ Anthony retires it.
 ## Live infrastructure
 
 - **App:** https://happy-fence-app.vercel.app (Vercel project `happy-fence-app`, team "Anthony Lara's projects", framework preset **Next.js** — must stay Next.js, see gotchas)
-- **Repo:** https://github.com/alara592/happy-fence-app (private; Anthony pushes — the sandbox has no git credentials; pushes auto-deploy)
+- **Repo:** https://github.com/alara592/happy-fence-app (pushes auto-deploy; local git
+  credentials work, so Claude can push after checking in with Anthony). **NB 2026-06-10:
+  the repo is PUBLIC** (handoff previously said private — wrong). No secrets committed
+  (SA key + .env git-ignored, never in history), but `seed/price-tables-*.json` exposes
+  real pricing — Anthony should make it private: repo Settings → General → Danger Zone.
 - **DB:** Supabase "Happy Fence Calculator", ref `knbyonagksvaqpqkkehj`, us-east-1, Postgres 17, owner anthony@happyfencecompany.com. Supabase MCP connector is connected — use it directly. Vercel MCP connector also connected (logs, deployments).
 - **Env vars** (Vercel + `.env.local`): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PIN`, and for calendar sync: `GOOGLE_SA_CLIENT_EMAIL`, `GOOGLE_SA_PRIVATE_KEY` (PEM with `\n`-escaped newlines), `GOOGLE_CALENDAR_ID` (`anthony@happyfencecompany.com`), `CRON_SECRET`.
 - **Auth:** one shared device PIN (D1; revisited 2026-06-05 — Anthony considered no-PIN, risk explained, PIN kept). RLS on all tables with NO policies: the service-role key via server routes is the only path in.
