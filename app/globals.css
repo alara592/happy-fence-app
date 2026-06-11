@@ -129,15 +129,32 @@ button:disabled { opacity: 0.5; }
   .qa-grip { display: none; }
 }
 
-/* Quick-add gate: one-tap (type, style) chips */
-.qa-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.qa-chip {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-  padding: 9px 11px; border: 1px solid #ccc; border-radius: 10px;
-  background: #fff; text-align: left; cursor: pointer;
+/* Quick-add gates: stacked type cards with Single/Double stepper buttons */
+.gc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gc-head > div:last-child { font-size: .9rem; }
+.gc-list { max-height: 56vh; overflow-y: auto; padding: 10px 2px 4px; margin: 0 -2px; }
+.gc-card { background: #fff; border: 1px solid #e2e2e2; border-radius: 11px; padding: 9px 10px 10px; margin-bottom: 7px; }
+.gc-name { font-weight: 700; font-size: .92rem; margin-bottom: 7px; }
+.gc-btns { display: flex; gap: 8px; }
+.gc-btn {
+  flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  border: 1px solid #1a7f37; border-radius: 9px; background: #fff; color: #1a7f37;
+  padding: 7px 4px; cursor: pointer;
 }
-.qa-chip .t { font-weight: 700; font-size: .88rem; line-height: 1.2; }
-.qa-chip .s { color: #1a7f37; font-weight: 600; font-size: .8rem; }
+.gc-btn.on { background: #1a7f37; color: #fff; }
+.gc-btn .l { font-size: .8rem; font-weight: 600; }
+.gc-btn .p { font-size: .88rem; font-weight: 700; }
+.gc-qty {
+  position: absolute; top: -8px; left: -6px; min-width: 22px; height: 22px; border-radius: 11px;
+  background: #0a58ca; color: #fff; font-size: .72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+.gc-minus {
+  position: absolute; top: -8px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid #b02a37; color: #b02a37; background: #fff; font-size: .9rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.gc-divider { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: #999; font-weight: 800; margin: 9px 0 7px; }
 .qa-more { color: #1a7f37; font-weight: 600; text-decoration: none; font-size: .9rem; }
 
 /* Add-material picker — whole catalog priced for this job */

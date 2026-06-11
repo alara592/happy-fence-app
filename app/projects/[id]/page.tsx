@@ -455,13 +455,12 @@ export default function ProjectDetailPage() {
 
       <QuickAddGate
         projectId={id}
-        gateCount={b.gates.length}
         open={gateOpen}
         onClose={() => setGateOpen(false)}
-        onSaved={() => {
-          reload();
-          flash("Saved ✓");
-        }}
+        gates={b.gates}
+        gatesTotal={b.gatesTotal}
+        activeType={b.activeType}
+        onChanged={reload}
       />
 
       {confirmAsk && (

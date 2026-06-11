@@ -268,6 +268,36 @@ material cycler — were REJECTED, see product rules below).
   him into an easy-to-compare commodity price. (Per-SECTION $ on board rows is fine.)
 - No total-bar material cycler — tap-row-to-set-active covers it.
 
+## Gate picker — stacked cards + quantity stepper (2026-06-11)
+
+Anthony sketched the layout himself (card per gate type, name on top, big Single/Double
+buttons under it) after rejecting two earlier mockups (chips truncated names; a
+Single/Double segmented switch hid the other style's price). UX = material picker ×
+quick-add measurement, with quantity folded into repeated taps.
+
+- **`components/QuickAddGate.tsx` (rewritten):** sheet lists every gate type as a card —
+  full name header, Single/Double buttons showing catalog prices (Single always left).
+  Tap = add one; tap again = +1 (blue `×N` badge); red `−` = −1, row deleted at zero.
+  **Duplicates merge into quantity on one row** (Anthony's call), auto-named by TYPE
+  (Present renders "Vinyl / Single · ×2" cleanly). Implemented client-side as
+  find-or-bump over the bundle's gate rows: existing (type,style) row → PATCH
+  quantity±1, else POST / DELETE — NO server changes. Each tap awaits the bundle reload
+  so badges/subtotal stay truthful (no optimistic UI, per the field-signal rule).
+- **Fence-match ordering:** gate types containing the active fence's material keyword
+  (first token, e.g. "Vinyl", "Wood", "Aluminum", "WPC", "DuraFence") sort first with an
+  "Other gates" divider — soft ordering, heuristic, nothing hidden. Hint line shows
+  "X gates first — matches your active fence".
+- Running `Gates: $X` subtotal in the sheet header (= bundle `gatesTotal`); the sticky
+  project total updates live behind the sheet. "More options →" still links to the full
+  form (`gates/new`) for custom name/description; Edit on gate rows unchanged.
+- `/api/reference` reverted to plain `loadReference()` — the gate usage counts that
+  ordered the v1 chips are gone (fence-match replaced them). CSS: `.gc-*` replaces
+  `.qa-chip*` in globals.css.
+- Verified live (dev preview, real DB): 12 type cards, 7 vinyl-matched first + divider;
+  3 taps → 2 merged rows (Single ×2 $695, Double $1,429), gates $2,819, total $4,000+
+  gates correct at every step; minus stepped ×2→×1→row deleted; no console errors; test
+  project deleted, no orphan gate rows. `npm test` 23/23, `npm run build` green.
+
 ## Appointments grouped by date (2026-06-06)
 
 `app/appointments/page.tsx` now groups the list by Miami-time date: **Today / Tomorrow /
@@ -332,12 +362,8 @@ avoid duplicating quote/pipeline features that belong to Jobber.
   `project_materials` / `project_gates` (two extra cheap selects per call; `loadReference()`
   itself untouched so the pricing cache stays pure). Additive + read with optional chaining,
   so the persisted client cache needed no `PERSIST_KEY` bump.
-- **Quick-add gate** (`components/QuickAddGate.tsx`, NEW): same responsive `.qa-*` sheet as
-  measurements. Top 8 (type, style) combos by usage (stable-sort ties keep catalog order) as
-  one-tap chips showing `Type / Style · $price`; tap = POST qty 1, auto-named `Gate N`
-  (N = existing count + 1), toast, close. "More options →" links to `/gates/new` (full form:
-  name/description/quantity + whole catalog — route unchanged, still used for Edit). Both
-  Gates "+ Add" triggers on the project page open the sheet now.
+- **Quick-add gate v1** (`components/QuickAddGate.tsx`, NEW): top-8 usage-ordered one-tap
+  chips. SUPERSEDED same week by the stepper sheet (see "Gate picker" 2026-06-11 below).
 - **Material chips — REMOVED same day** (Anthony: "extremely non-problem", the dropdown was
   already easy). Replaced by the material picker below. The reference route's usage payload
   now counts gates only.
