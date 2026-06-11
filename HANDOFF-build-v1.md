@@ -236,6 +236,38 @@ Not built (open for later): per-material "show to customer" flag to present mult
 shareable/PDF quote (pairs with quote-freezing); home status/stats; brand logo on the Present
 hero (placeholder text today — drop in from `../Logo`).
 
+## Material picker with live totals + tap-row-to-set-active (2026-06-10)
+
+Anthony's pick from a mockup round (the others — $/ft on board rows and a total-bar
+material cycler — were REJECTED, see product rules below).
+
+- **Picker** (`components/MaterialPicker.tsx`, NEW; `.mp-*` in globals.css): "+ Add
+  material — see all prices" replaces the old dropdown. Bottom sheet lists the WHOLE
+  catalog with this job's computed total per material, cheapest first (toggle to catalog
+  order), delta vs the Active fence on every row (green when cheaper), unpriced types
+  labeled and sorted last. Tap adds to the board, tap again removes — so "what would it
+  cost in X?" is answerable without board churn. Sheet stays open across taps; Done closes.
+- **Server:** `getProjectBundle` returns `catalog` (type, perSection, total, unpriced) for
+  every fence type, computed via a new shared `rowPricing()` helper in
+  `lib/server/projects.ts` that `computeBoard` also uses — picker and board totals come from
+  the same code path and CANNOT drift. (~20 extra pure-math `projectTotal` calls per bundle
+  read; negligible.) `catalog` is optional in the client `Bundle` type — stale persisted
+  caches just show "Loading prices…" until revalidation, so no PERSIST_KEY bump.
+- **Tap row = set active:** the whole non-active board card is the tap target
+  (`onClick` → existing `setActive`); the "Set active" button is gone; ✕ keeps working via
+  `stopPropagation`. Heading hint: "tap a row to set active".
+- `addMaterial`/`removeMaterial` now `await reload()` so the picker's ✓ state flips with
+  the data.
+- Verified live (dev preview, real DB): 22 catalog rows sorted $8,000→$16,200 with unpriced
+  last; first add auto-actived; second add showed +$300 delta; board row tap flipped active
+  fence + total + deltas; ✕ removed without setting active; no console errors; test project
+  deleted. `npm test` 23/23, `npm run build` green.
+
+**Product rules (Anthony, 2026-06-10):**
+- **Never display $/ft anywhere.** He doesn't charge by the foot and a memorable $/ft turns
+  him into an easy-to-compare commodity price. (Per-SECTION $ on board rows is fine.)
+- No total-bar material cycler — tap-row-to-set-active covers it.
+
 ## Appointments grouped by date (2026-06-06)
 
 `app/appointments/page.tsx` now groups the list by Miami-time date: **Today / Tomorrow /
@@ -306,12 +338,10 @@ avoid duplicating quote/pipeline features that belong to Jobber.
   (N = existing count + 1), toast, close. "More options →" links to `/gates/new` (full form:
   name/description/quantity + whole catalog — route unchanged, still used for Edit). Both
   Gates "+ Add" triggers on the project page open the sheet now.
-- **Material chips** (project page): top 5 most-used *priced* fence types not already on the
-  board render as tap chips (`.mat-chips`) above the `+ Add material…` dropdown; tap =
-  existing `addMaterial()`. Only types with usage > 0 show (so chips are honestly "most-used",
-  never alphabetical filler); dropdown keeps the full catalog. Chips read usage via
-  `useCached("/api/reference")` — prefetched from home, so no extra round trip in practice.
-- CSS: `.qa-chips`/`.qa-chip`, `.mat-chips`, `.qa-more`, `.linkbtn` in globals.css.
+- **Material chips — REMOVED same day** (Anthony: "extremely non-problem", the dropdown was
+  already easy). Replaced by the material picker below. The reference route's usage payload
+  now counts gates only.
+- CSS: `.qa-chips`/`.qa-chip`, `.qa-more`, `.linkbtn` in globals.css.
 - Verified live (dev preview, real DB): throwaway project → material chip tap put DuraFence
   on the board (auto-active) and the chip backfilled with the next most-used; gate chip tap
   added `Gate 1 · Durafence · Single · $534` and the total updated to $534; no console
@@ -345,3 +375,6 @@ avoid duplicating quote/pipeline features that belong to Jobber.
 - Vercel framework preset MUST be "Next.js" — "Other" breaks middleware (`__dirname` / alias bundling errors).
 - `middleware.ts` imports `./lib/auth-token` RELATIVELY on purpose — Vercel's edge bundler rejects the `@/` alias there.
 - Stale `.git/*.lock` files from sandbox commits: delete via `find .git -name "*.lock" -delete`.
+- NEVER run `npm run build` while the dev server is running — they share `.next/` and the
+  prod build clobbers the dev chunks (every route 500s with `Cannot find module './NNN.js'`).
+  Fix: stop dev, `rm -rf .next`, restart dev. Build first or stop the preview first.

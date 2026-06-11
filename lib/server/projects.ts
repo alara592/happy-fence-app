@@ -3,6 +3,7 @@ import { loadReference, ReferenceData } from "./reference";
 import {
   projectTotal,
   sectionPrice,
+  type FencePriceRow,
   type ProjectPricingInput,
   type SectionInput,
 } from "@/lib/pricing";
@@ -132,6 +133,30 @@ function sectionInputs(sections: SectionRow[], material: string): SectionInput[]
   }));
 }
 
+/** Board-row pricing for one fence type (sections + permit + extras + discount, NO gates).
+    Null when the type is unpriced/unknown. Shared by the board and the catalog picker so
+    their totals can never drift. */
+function rowPricing(
+  project: ProjectRow,
+  sections: SectionRow[],
+  extras: ExtraRow[],
+  fp: FencePriceRow | undefined,
+  ref: ReferenceData,
+) {
+  if (!fp || fp.perSection === 0) return null;
+  const input: ProjectPricingInput = {
+    laborCostFt: project.labor_cost_ft,
+    profitMargin: project.profit_margin,
+    permit: project.permit,
+    discount: project.discount,
+    dumpIncluded: project.dump_included,
+    sections: sectionInputs(sections, fp.type),
+    gates: [], // gates excluded from board rows by design
+    extras: extras.map((e) => ({ price: num(e.price) })),
+  };
+  return projectTotal(input, ref.fencePrices, ref.gatePrices, ref.settings);
+}
+
 export function computeBoard(
   project: ProjectRow,
   sections: SectionRow[],
@@ -147,7 +172,8 @@ export function computeBoard(
 
   return sorted.map((m) => {
     const fp = ref.fencePrices.find((f) => f.type === m.type);
-    if (!fp || fp.perSection === 0) {
+    const priced = rowPricing(project, sections, extras, fp, ref);
+    if (!priced) {
       return {
         materialId: m.id,
         type: m.type,
@@ -160,22 +186,7 @@ export function computeBoard(
         active: m.is_active,
       };
     }
-    const input: ProjectPricingInput = {
-      laborCostFt: project.labor_cost_ft,
-      profitMargin: project.profit_margin,
-      permit: project.permit,
-      discount: project.discount,
-      dumpIncluded: project.dump_included,
-      sections: sectionInputs(sections, m.type),
-      gates: [], // gates excluded from board rows by design
-      extras: extras.map((e) => ({ price: num(e.price) })),
-    };
-    const { total, estCost, dumpPrice, dumpTotal, costBreakdown } = projectTotal(
-      input,
-      ref.fencePrices,
-      ref.gatePrices,
-      ref.settings,
-    );
+    const { total, estCost, dumpPrice, dumpTotal, costBreakdown } = priced;
     return {
       materialId: m.id,
       type: m.type,
@@ -296,9 +307,18 @@ export async function getProjectBundle(id: string) {
     dumpPrice: activeRow?.dumpPrice ?? null,
     dumpTotal: activeRow?.dumpTotal ?? null,
     totalLinearFt: sectionRows.reduce((sum, s) => sum + s.linear_ft, 0),
-    // Catalog for the add-material dropdown + board $/section — folded in so the
-    // detail page needs one request, not a second /api/reference round trip.
+    // Catalog for the board $/section readout — folded in so the detail page needs one
+    // request, not a second /api/reference round trip.
     fencePrices: ref.fencePrices,
+    // The whole catalog priced for THIS job (same rowPricing path as board rows, so the
+    // numbers can never disagree) — feeds the add-material picker: pick from prices, not
+    // names. total null = unpriced.
+    catalog: ref.fencePrices.map((fp) => ({
+      type: fp.type,
+      perSection: fp.perSection,
+      total: rowPricing(project, sectionRows, extraRows, fp, ref)?.total ?? null,
+      unpriced: fp.perSection === 0,
+    })),
     // For the customer Present page: the fence-only subtotal (board row = sections + dump +
     // permit + extras + discount, so back those out — dump shows as its own line) and the
     // permit fee line amount.

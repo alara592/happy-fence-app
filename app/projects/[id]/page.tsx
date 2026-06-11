@@ -8,6 +8,7 @@ import { useCached, load, invalidate } from "@/lib/cache";
 import { fmtUSD, fmtDate, mapsUrl, earthUrl } from "@/lib/format";
 import QuickAddMeasurement from "@/components/QuickAddMeasurement";
 import QuickAddGate from "@/components/QuickAddGate";
+import MaterialPicker, { type CatalogRow } from "@/components/MaterialPicker";
 
 interface Bundle {
   project: {
@@ -54,6 +55,8 @@ interface Bundle {
   estCost: number | null;
   totalLinearFt: number;
   fencePrices: { type: string; perSection: number }[];
+  /** Optional: absent in stale persisted caches from before the picker shipped. */
+  catalog?: CatalogRow[];
 }
 
 /** Screen 4 — project: measurements + the price board (whole job per material). */
@@ -62,14 +65,12 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const bundleKey = `/api/projects/${id}`;
   const { data: b, error: loadError } = useCached<Bundle>(bundleKey);
-  // Usage counts for the quick-pick chips (prefetched from home, so no extra round trip).
-  const { data: ref } = useCached<{ usage?: { materials: Record<string, number> } }>("/api/reference");
-  const [pick, setPick] = useState("");
   const [error, setError] = useState(""); // mutation errors (load errors handled below)
   const [discount, setDiscount] = useState("");
   const [toast, setToast] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [showCost, setShowCost] = useState(false);
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
@@ -87,13 +88,12 @@ export default function ProjectDetailPage() {
 
   async function addMaterial(type: string) {
     if (!type) return;
-    setPick("");
     try {
       await api(`/api/projects/${id}/materials`, {
         method: "POST",
         body: JSON.stringify({ type }),
       });
-      reload();
+      await reload(); // picker's on-board state reads the bundle — wait so the ✓ flips promptly
     } catch (e) {
       setError((e as Error).message);
     }
@@ -117,7 +117,7 @@ export default function ProjectDetailPage() {
   async function removeMaterial(materialId: string) {
     try {
       await api(`/api/projects/${id}/materials/${materialId}`, { method: "DELETE" });
-      reload();
+      await reload();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -190,16 +190,9 @@ export default function ProjectDetailPage() {
     );
   if (!b) return <p className="muted">Loading…</p>;
   const { project: p } = b;
-  const onBoard = new Set(b.materials.map((m) => m.type));
-  const available = b.fencePrices.filter((t) => !onBoard.has(t.type));
+  const onBoard = new Map(b.materials.map((m) => [m.type, m.id]));
   const perSection = new Map(b.fencePrices.map((t) => [t.type, t.perSection]));
   const activeTotal = b.board.find((r) => r.active)?.total ?? null;
-  // Most-used materials not already on the board → one-tap chips above the dropdown.
-  const matUse = ref?.usage?.materials ?? {};
-  const chipMaterials = available
-    .filter((t) => t.perSection > 0 && (matUse[t.type] ?? 0) > 0)
-    .sort((a, b2) => (matUse[b2.type] ?? 0) - (matUse[a.type] ?? 0))
-    .slice(0, 5);
 
   return (
     <>
@@ -294,7 +287,7 @@ export default function ProjectDetailPage() {
       ))}
       {b.sections.length === 0 && <p className="muted">No measurements yet.</p>}
 
-      <h2>Price board <span className="muted" style={{ fontWeight: 400 }}>(fence + permit + extras, no gates)</span></h2>
+      <h2>Price board <span className="muted" style={{ fontWeight: 400 }}>(fence + permit + extras, no gates — tap a row to set active)</span></h2>
       {b.board.map((row) => {
         const ps = perSection.get(row.type);
         const delta =
@@ -303,7 +296,8 @@ export default function ProjectDetailPage() {
           <div
             key={row.materialId}
             className="card spread"
-            style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : undefined}
+            style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : { cursor: "pointer" }}
+            onClick={row.active ? undefined : () => setActive(row.materialId)}
           >
             <div>
               <strong>{row.type}</strong>
@@ -324,37 +318,23 @@ export default function ProjectDetailPage() {
                   )}
                 </div>
               )}
-              {!row.active && (
-                <button onClick={() => setActive(row.materialId)}>Set active</button>
-              )}
-              <button className="danger" onClick={() => removeMaterial(row.materialId)}>✕</button>
+              <button
+                className="danger"
+                onClick={(e) => {
+                  e.stopPropagation(); // row tap sets active — don't let ✕ do both
+                  removeMaterial(row.materialId);
+                }}
+              >
+                ✕
+              </button>
             </div>
           </div>
         );
       })}
       {b.board.length === 0 && <p className="muted">No materials on the board yet — add one below.</p>}
-      {chipMaterials.length > 0 && (
-        <div className="mat-chips">
-          {chipMaterials.map((t) => (
-            <button key={t.type} onClick={() => addMaterial(t.type)}>+ {t.type}</button>
-          ))}
-        </div>
-      )}
-      <select
-        value={pick}
-        onChange={(e) => addMaterial(e.target.value)}
-        disabled={available.length === 0}
-      >
-        <option value="" disabled>
-          + Add material…
-        </option>
-        {available.map((t) => (
-          <option key={t.type} value={t.type}>
-            {t.type}
-            {t.perSection === 0 ? " (UNPRICED)" : ""}
-          </option>
-        ))}
-      </select>
+      <button className="mp-open" onClick={() => setPickerOpen(true)}>
+        + Add material — see all prices
+      </button>
 
       {b.gates.length === 0 ? (
         <div className="collapsed">
@@ -460,6 +440,17 @@ export default function ProjectDetailPage() {
           reload();
           flash("Saved ✓");
         }}
+      />
+
+      <MaterialPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        catalog={b.catalog ?? []}
+        onBoard={onBoard}
+        activeType={b.activeType}
+        activeTotal={activeTotal}
+        onAdd={addMaterial}
+        onRemove={removeMaterial}
       />
 
       <QuickAddGate
