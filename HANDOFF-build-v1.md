@@ -298,6 +298,25 @@ quick-add measurement, with quantity folded into repeated taps.
   gates correct at every step; minus stepped ×2→×1→row deleted; no console errors; test
   project deleted, no orphan gate rows. `npm test` 23/23, `npm run build` green.
 
+## UI consistency pass — CSS variables + button tiers (2026-06-11)
+
+- `globals.css` now defines the palette as CSS variables in `:root` (`--brand`,
+  `--brand-tint`, `--brand-tint-border`, `--danger`, `--link`, `--text`, `--muted`,
+  `--quiet`, `--bg`, `--border-strong`, `--border`, `--border-light`). All recurring
+  hexes swapped to vars (58 usages), including the handful of inline styles in
+  `page.tsx` / `MaterialPicker` / `QuickAddMeasurement`. One-off colors (toast,
+  warn yellow, photo-viewer darks) stay literal on purpose. **New colors should use
+  the vars** — retheming = edit `:root`.
+- Button tiers: `.primary` (solid green, one per screen), **`.secondary`** (green
+  outline — now on all four "+ Add" buttons incl. `.mp-open`, which is layout-only
+  now), `.danger` (red outline), **`.quiet`** (borderless gray text — quick-add
+  Cancel, was inline-styled).
+- Form rhythm: `form .actions` gets 16px top margin (cards keep 8px); quick-add
+  measurement sheet's Name input got a label to match Linear Ft.
+- Verified live (dev preview, real DB, read-only — no rows touched): home, project
+  dashboard, quick-add sheet, edit form, present view all render identically except
+  the intended green-outline "+ Add" buttons; no console errors; `npm test` green.
+
 ## Appointments grouped by date (2026-06-06)
 
 `app/appointments/page.tsx` now groups the list by Miami-time date: **Today / Tomorrow /

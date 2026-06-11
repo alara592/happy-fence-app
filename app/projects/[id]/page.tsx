@@ -262,7 +262,7 @@ export default function ProjectDetailPage() {
 
       <div className="spread">
         <h2>Measurements ({b.sections.length}) — {b.totalLinearFt} ft</h2>
-        <button onClick={() => setAddOpen(true)}>+ Add</button>
+        <button className="secondary" onClick={() => setAddOpen(true)}>+ Add</button>
       </div>
       {b.sections.map((s) => (
         <div key={s.id} className="card">
@@ -296,12 +296,12 @@ export default function ProjectDetailPage() {
           <div
             key={row.materialId}
             className="card spread"
-            style={row.active ? { borderColor: "#1a7f37", borderWidth: 2 } : { cursor: "pointer" }}
+            style={row.active ? { borderColor: "var(--brand)", borderWidth: 2 } : { cursor: "pointer" }}
             onClick={row.active ? undefined : () => setActive(row.materialId)}
           >
             <div>
               <strong>{row.type}</strong>
-              {row.active && <div className="muted" style={{ color: "#1a7f37" }}>Active fence</div>}
+              {row.active && <div className="muted" style={{ color: "var(--brand)" }}>Active fence</div>}
               {ps !== undefined && ps > 0 && <div className="muted">{fmtUSD(ps)} / section</div>}
               {row.unpriced && (
                 <div className="warn" style={{ margin: "4px 0 0" }}>
@@ -332,7 +332,7 @@ export default function ProjectDetailPage() {
         );
       })}
       {b.board.length === 0 && <p className="muted">No materials on the board yet — add one below.</p>}
-      <button className="mp-open" onClick={() => setPickerOpen(true)}>
+      <button className="secondary mp-open" onClick={() => setPickerOpen(true)}>
         + Add material — see all prices
       </button>
 
@@ -345,7 +345,7 @@ export default function ProjectDetailPage() {
         <>
           <div className="spread">
             <h2>Gates ({b.gates.length})</h2>
-            <button onClick={() => setGateOpen(true)}>+ Add</button>
+            <button className="secondary" onClick={() => setGateOpen(true)}>+ Add</button>
           </div>
           {b.gates.map((g) => (
             <div key={g.id} className="card">
@@ -379,7 +379,7 @@ export default function ProjectDetailPage() {
         <>
           <div className="spread">
             <h2>Extras ({b.extras.length})</h2>
-            <Link href={`/projects/${id}/extras/new`}><button>+ Add</button></Link>
+            <Link href={`/projects/${id}/extras/new`}><button className="secondary">+ Add</button></Link>
           </div>
           {b.extras.map((x) => (
             <div key={x.id} className="card spread">
@@ -472,7 +472,7 @@ export default function ProjectDetailPage() {
             <div className="btns">
               <button onClick={() => setConfirmAsk(null)}>Cancel</button>
               <button
-                style={{ color: "#b02a37", fontWeight: 700 }}
+                style={{ color: "var(--danger)", fontWeight: 700 }}
                 onClick={() => {
                   const r = confirmAsk.run;
                   setConfirmAsk(null);

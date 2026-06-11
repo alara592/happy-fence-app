@@ -101,7 +101,7 @@ export default function MaterialPicker({
                       {delta !== null && delta !== 0 && (
                         <span
                           className="mp-delta"
-                          style={delta < 0 ? { color: "#1a7f37" } : undefined}
+                          style={delta < 0 ? { color: "var(--brand)" } : undefined}
                         >
                           {delta > 0 ? "+" : "−"}{fmtUSD(Math.abs(delta))}
                         </span>

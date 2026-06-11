@@ -68,10 +68,11 @@ export default function QuickAddMeasurement({ projectId, open, onClose, onSaved 
         <div className="qa-grip" />
         <div className="qa-title">Add measurement</div>
 
+        <label>Name</label>
         <input
           autoFocus
           type="text"
-          placeholder="Name (e.g. Side)"
+          placeholder="e.g. Side"
           value={v.name}
           onChange={(e) => setV((p) => ({ ...p, name: e.target.value }))}
         />
@@ -115,7 +116,7 @@ export default function QuickAddMeasurement({ projectId, open, onClose, onSaved 
           </button>
         </div>
         <div style={{ marginTop: 8, textAlign: "center" }}>
-          <button type="button" onClick={close} style={{ border: 0, background: "none", color: "#666" }}>
+          <button type="button" className="quiet" onClick={close}>
             Cancel
           </button>
         </div>
