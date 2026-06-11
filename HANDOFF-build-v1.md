@@ -277,6 +277,35 @@ Still customer-safe — margin/labor/board never render. Now reads the cached bu
   (+$500). Verified live: Manoah Made $14,534 → $15,034. Data-only change (no code); picked up
   within the reference cache TTL (~60s).
 
+## Quick-pick chips — gates + materials (2026-06-10)
+
+App context (Anthony, 2026-06-10): this is NOT a quoting app — it creates and prices jobs
+on the spot. Jobber does quoting/sales; HighLevel (GoHighLevel) is the CRM. Field speed wins;
+avoid duplicating quote/pipeline features that belong to Jobber.
+
+- **Usage counts on `/api/reference`**: the route now also returns
+  `usage: { materials: Record<type, n>, gates: Record<"type|style", n> }` — counts across
+  `project_materials` / `project_gates` (two extra cheap selects per call; `loadReference()`
+  itself untouched so the pricing cache stays pure). Additive + read with optional chaining,
+  so the persisted client cache needed no `PERSIST_KEY` bump.
+- **Quick-add gate** (`components/QuickAddGate.tsx`, NEW): same responsive `.qa-*` sheet as
+  measurements. Top 8 (type, style) combos by usage (stable-sort ties keep catalog order) as
+  one-tap chips showing `Type / Style · $price`; tap = POST qty 1, auto-named `Gate N`
+  (N = existing count + 1), toast, close. "More options →" links to `/gates/new` (full form:
+  name/description/quantity + whole catalog — route unchanged, still used for Edit). Both
+  Gates "+ Add" triggers on the project page open the sheet now.
+- **Material chips** (project page): top 5 most-used *priced* fence types not already on the
+  board render as tap chips (`.mat-chips`) above the `+ Add material…` dropdown; tap =
+  existing `addMaterial()`. Only types with usage > 0 show (so chips are honestly "most-used",
+  never alphabetical filler); dropdown keeps the full catalog. Chips read usage via
+  `useCached("/api/reference")` — prefetched from home, so no extra round trip in practice.
+- CSS: `.qa-chips`/`.qa-chip`, `.mat-chips`, `.qa-more`, `.linkbtn` in globals.css.
+- Verified live (dev preview, real DB): throwaway project → material chip tap put DuraFence
+  on the board (auto-active) and the chip backfilled with the next most-used; gate chip tap
+  added `Gate 1 · Durafence · Single · $534` and the total updated to $534; no console
+  errors; test project deleted (gate cascade confirmed via SQL). `npm test` 17/17,
+  `npm run build` green. NOT yet pushed/deployed.
+
 ## Open data questions (Anthony/Mimi)
 
 - Vinyl/Double gate $1,429 unconfirmed (CHANGELOG said 1,395).

@@ -129,6 +129,27 @@ button:disabled { opacity: 0.5; }
   .qa-grip { display: none; }
 }
 
+/* Quick-add gate: one-tap (type, style) chips */
+.qa-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.qa-chip {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 9px 11px; border: 1px solid #ccc; border-radius: 10px;
+  background: #fff; text-align: left; cursor: pointer;
+}
+.qa-chip .t { font-weight: 700; font-size: .88rem; line-height: 1.2; }
+.qa-chip .s { color: #1a7f37; font-weight: 600; font-size: .8rem; }
+.qa-more { color: #1a7f37; font-weight: 600; text-decoration: none; font-size: .9rem; }
+
+/* Most-used material chips above the + Add material… dropdown */
+.mat-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+.mat-chips button {
+  padding: 8px 12px; border: 1px solid #1a7f37; color: #1a7f37;
+  background: #fff; border-radius: 999px; font-weight: 600; font-size: .9rem;
+}
+
+/* Bare link-styled button (collapsed-row + Add) */
+.linkbtn { border: 0; background: none; padding: 0; color: #1a7f37; font-weight: 600; font-size: .95rem; cursor: pointer; }
+
 /* Input with a unit suffix (e.g. % or $/ft) */
 .field-suffix { display: flex; }
 .field-suffix input { flex: 1; min-width: 0; border-radius: 6px 0 0 6px; border-right: 0; }

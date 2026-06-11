@@ -7,6 +7,7 @@ import { api } from "@/lib/client";
 import { useCached, load, invalidate } from "@/lib/cache";
 import { fmtUSD, fmtDate, mapsUrl, earthUrl } from "@/lib/format";
 import QuickAddMeasurement from "@/components/QuickAddMeasurement";
+import QuickAddGate from "@/components/QuickAddGate";
 
 interface Bundle {
   project: {
@@ -61,11 +62,14 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const bundleKey = `/api/projects/${id}`;
   const { data: b, error: loadError } = useCached<Bundle>(bundleKey);
+  // Usage counts for the quick-pick chips (prefetched from home, so no extra round trip).
+  const { data: ref } = useCached<{ usage?: { materials: Record<string, number> } }>("/api/reference");
   const [pick, setPick] = useState("");
   const [error, setError] = useState(""); // mutation errors (load errors handled below)
   const [discount, setDiscount] = useState("");
   const [toast, setToast] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
   const [showCost, setShowCost] = useState(false);
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
@@ -190,6 +194,12 @@ export default function ProjectDetailPage() {
   const available = b.fencePrices.filter((t) => !onBoard.has(t.type));
   const perSection = new Map(b.fencePrices.map((t) => [t.type, t.perSection]));
   const activeTotal = b.board.find((r) => r.active)?.total ?? null;
+  // Most-used materials not already on the board → one-tap chips above the dropdown.
+  const matUse = ref?.usage?.materials ?? {};
+  const chipMaterials = available
+    .filter((t) => t.perSection > 0 && (matUse[t.type] ?? 0) > 0)
+    .sort((a, b2) => (matUse[b2.type] ?? 0) - (matUse[a.type] ?? 0))
+    .slice(0, 5);
 
   return (
     <>
@@ -323,6 +333,13 @@ export default function ProjectDetailPage() {
         );
       })}
       {b.board.length === 0 && <p className="muted">No materials on the board yet — add one below.</p>}
+      {chipMaterials.length > 0 && (
+        <div className="mat-chips">
+          {chipMaterials.map((t) => (
+            <button key={t.type} onClick={() => addMaterial(t.type)}>+ {t.type}</button>
+          ))}
+        </div>
+      )}
       <select
         value={pick}
         onChange={(e) => addMaterial(e.target.value)}
@@ -342,13 +359,13 @@ export default function ProjectDetailPage() {
       {b.gates.length === 0 ? (
         <div className="collapsed">
           Gates (0) — none yet
-          <Link href={`/projects/${id}/gates/new`}>+ Add</Link>
+          <button className="linkbtn" onClick={() => setGateOpen(true)}>+ Add</button>
         </div>
       ) : (
         <>
           <div className="spread">
             <h2>Gates ({b.gates.length})</h2>
-            <Link href={`/projects/${id}/gates/new`}><button>+ Add</button></Link>
+            <button onClick={() => setGateOpen(true)}>+ Add</button>
           </div>
           {b.gates.map((g) => (
             <div key={g.id} className="card">
@@ -439,6 +456,17 @@ export default function ProjectDetailPage() {
         projectId={id}
         open={addOpen}
         onClose={() => setAddOpen(false)}
+        onSaved={() => {
+          reload();
+          flash("Saved ✓");
+        }}
+      />
+
+      <QuickAddGate
+        projectId={id}
+        gateCount={b.gates.length}
+        open={gateOpen}
+        onClose={() => setGateOpen(false)}
         onSaved={() => {
           reload();
           flash("Saved ✓");
