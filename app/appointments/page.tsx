@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/client";
 import { fmtApptTime, fmtApptClock, etDate, mapsUrl } from "@/lib/format";
+import { useIsDesktop } from "@/lib/useIsDesktop";
+import WeekBoard from "@/components/WeekBoard";
 
 /** City = tail of the address; matches the projects list line. */
 function city(address: string | null): string {
@@ -29,6 +31,7 @@ type Group = (typeof GROUPS)[number];
 /** Appointments — synced from Google Calendar "Site Visit" events. */
 export default function AppointmentsPage() {
   const router = useRouter();
+  const isDesktop = useIsDesktop();
   const [appts, setAppts] = useState<Appointment[] | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -101,6 +104,9 @@ export default function AppointmentsPage() {
       setBusy(null);
     }
   }
+
+  // Desktop (≥1024px) gets the week board; the phone list below is unchanged.
+  if (isDesktop) return <WeekBoard />;
 
   return (
     <>

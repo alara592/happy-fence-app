@@ -4,6 +4,8 @@ import { useEffect, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { useCached, prefetch, peek, subscribe } from "@/lib/cache";
 import { fmtDate, mapsUrl } from "@/lib/format";
+import { useIsDesktop } from "@/lib/useIsDesktop";
+import DesktopHome, { type DashBundle } from "@/components/DesktopHome";
 
 interface ProjectListItem {
   id: string;
@@ -68,6 +70,7 @@ export default function ProjectListPage() {
   const { data: projects, error } = useCached<ProjectListItem[]>("/api/projects");
   const [q, setQ] = useState("");
   const bundles = useBundlePeeks(projects);
+  const isDesktop = useIsDesktop();
 
   // Warm up everything on entry so the rest of the app feels instant (Anthony's pref:
   // a longer first load in exchange for instant navigation afterward).
@@ -95,6 +98,19 @@ export default function ProjectListPage() {
 
   // Stats strip: count of whatever's listed (follows the search). No dollar amounts.
   const stats = grouped ? { count: grouped.filtered.length } : null;
+
+  // Desktop (≥1024px) gets the dashboard home; the phone tree below is unchanged.
+  if (isDesktop) {
+    return (
+      <DesktopHome
+        projects={projects}
+        bundles={bundles as Map<string, DashBundle>}
+        error={error}
+        q={q}
+        setQ={setQ}
+      />
+    );
+  }
 
   return (
     <>

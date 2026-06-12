@@ -42,6 +42,13 @@ export function fmtApptClock(iso: string | null): string {
   });
 }
 
+/** City = text after the address's first comma (same rule as the home list). */
+export function city(address: string | null): string {
+  if (!address) return "";
+  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
+  return parts.length > 1 ? parts[1] : "";
+}
+
 /** Maps directions link for an address (opens Google Maps app/site). */
 export function mapsUrl(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;

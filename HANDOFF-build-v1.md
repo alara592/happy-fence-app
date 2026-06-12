@@ -456,6 +456,31 @@ roles (Anthony's call).
 - Mockups kept as reference: `desktop-mockup.html` (early three-pane concept),
   `quickquote-mockup.html` (approved interactive Screen A).
 
+## Desktop dashboard home + appointments week board (2026-06-12) — DEPLOYED
+
+Designed first (`desktop-views-mockup.html` — Anthony picked Option A over a list-first
+Option B kept in the same file), then built. Desktop-only via `useIsDesktop()`
+(`lib/useIsDesktop.ts`, matchMedia ≥1024px) — pages SWAP whole trees, so phones never
+mount desktop components or pay for their fetches. Phone home + appointments verified
+unchanged at 375px. Suite 34/34, build green, zero console errors, verified live
+against real data.
+
+- **Dashboard home** (`components/DesktopHome.tsx`; `app/page.tsx` returns it when
+  desktop): Today strip (synced appointments filtered to today ET; map link; linked
+  project chip with total, else + Create project via the existing endpoint) →
+  Needs-attention strip (measured-but-no-active-fence, or no measurements; cap 6; hidden
+  when empty) → card grid 3-across WITH totals (desktop-only; phone keeps the no-dollars
+  rule) + search + Created today / Earlier groups. All data from the existing prefetched
+  bundle cache + `/api/appointments?all=1` through the client cache.
+- **Week board** (`components/WeekBoard.tsx`; `app/appointments/page.tsx` returns it
+  when desktop): 5 rolling days starting today (today tinted), per-day visit cards
+  (clock time, client, address, map, Create Project / Project ✓), Sync now, "Show all"
+  toggles a list of everything off the board (same one `?all=1` fetch). Decided:
+  forward-only (yesterday lives under Show all), 5 days not 7.
+- `lib/format.ts` gains shared `city()`. New CSS: `.dk-*` / `.wk-*` blocks.
+- NB totals like $8,034 are correct: gates/discounts add flat amounts after per-section
+  $100 rounding.
+
 **Decided, next up (desktop concept, in order):**
 1. **Price snapshots / effective-date pricing** — projects snapshot the FULL price
    environment (sections, gates, permit, rates — freeze everything, Anthony's call) at

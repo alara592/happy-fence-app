@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Desktop views: dashboard home + appointments week board</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  a { color:#0a58ca; }
+  .muted { color:#666; font-size:.85rem; }
+  .quiet { color:#999; }
+  .wrap { max-width:1340px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .pill { display:inline-block; font-size:.66rem; font-weight:800; background:#d6ecdd; color:#0f5e29; border-radius:10px; padding:1px 7px; margin-left:6px; vertical-align:middle; }
+  .annot { background:#1a7f37; color:#fff; font-size:.78rem; border-radius:8px; padding:9px 12px; margin:10px 0; max-width:1140px; }
+  .annot b { display:block; margin-bottom:2px; }
+  .annot.q { background:#9a6700; }
+  h2.section { font-size:1.05rem; margin:38px 0 10px; }
+
+  /* browser frame */
+  .browser { background:#fafafa; border:1px solid #ccc; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.18); }
+  .chrome { display:flex; align-items:center; gap:8px; background:#e9e9e9; border-bottom:1px solid #d0d0d0; padding:8px 12px; }
+  .dot { width:11px; height:11px; border-radius:50%; }
+  .dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+  .urlbar { flex:1; background:#fff; border:1px solid #ccc; border-radius:6px; font-size:.75rem; color:#666; padding:4px 10px; }
+  .topbar { display:flex; align-items:center; gap:18px; background:#fff; border-bottom:1px solid #ddd; padding:10px 16px; }
+  .topbar .logo { font-weight:800; color:#1a7f37; font-size:.95rem; }
+  .tab { font-size:.85rem; color:#666; padding:4px 2px; border-bottom:2px solid transparent; }
+  .tab.on { color:#111; font-weight:700; border-bottom-color:#1a7f37; }
+  .page { padding:18px 24px 32px; }
+
+  /* shared bits */
+  .sec-h { display:flex; align-items:baseline; gap:10px; margin:0 0 8px; }
+  .sec-h h2 { font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:#999; font-weight:800; margin:0; }
+  .sec-h .more { font-size:.78rem; color:#0a58ca; text-decoration:none; }
+  .chip { display:inline-block; font-size:.68rem; font-weight:800; border-radius:10px; padding:1px 8px; vertical-align:middle; }
+  .chip.warn { background:#fff3cd; color:#7a5b00; }
+  .chip.ok { background:#d6ecdd; color:#0f5e29; }
+  .chip.new { background:#e7f0ff; color:#0a58ca; }
+
+  /* ---- screen 1: dashboard home ---- */
+  .today { display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; }
+  .visit { flex:0 0 250px; background:#fff; border:1px solid #ddd; border-left:4px solid #1a7f37; border-radius:10px; padding:10px 12px; }
+  .visit .t { font-weight:800; font-size:.85rem; color:#1a7f37; }
+  .visit .who { font-weight:700; font-size:.95rem; margin:2px 0; }
+  .visit .addr { color:#666; font-size:.78rem; line-height:1.35; }
+  .visit .act { margin-top:8px; display:flex; gap:10px; align-items:center; font-size:.78rem; }
+  .visit .act a { text-decoration:none; font-weight:600; }
+  .today-empty { color:#999; font-size:.9rem; background:#fff; border:1px dashed #ccc; border-radius:10px; padding:14px 16px; }
+
+  .attn { display:flex; gap:12px; flex-wrap:wrap; }
+  .attn-card { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #eadfb8; background:#fffdf5; border-radius:10px; padding:9px 13px; font-size:.85rem; }
+  .attn-card .why { color:#7a5b00; font-weight:700; font-size:.74rem; display:block; }
+  .attn-card .who { font-weight:600; }
+
+  .gridhead { display:flex; align-items:center; gap:14px; margin:26px 0 10px; }
+  .gridhead h2 { font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:#999; font-weight:800; margin:0; }
+  .gridhead .search { flex:1; max-width:340px; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #bbb; border-radius:8px; padding:6px 10px; font-size:.85rem; color:#999; }
+  .gridhead .newbtn { background:#1a7f37; color:#fff; border:0; border-radius:7px; font-weight:700; font-size:.85rem; padding:8px 14px; }
+  .pgrid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+  .pcard { background:#fff; border:1px solid #ddd; border-radius:10px; padding:12px 14px; position:relative; }
+  .pcard .who { font-weight:700; font-size:.98rem; }
+  .pcard .fence { color:#666; font-size:.82rem; margin-top:1px; }
+  .pcard .meta { color:#999; font-size:.76rem; margin-top:6px; }
+  .pcard .tot { position:absolute; top:12px; right:14px; color:#1a7f37; font-weight:800; font-size:1rem; font-variant-numeric:tabular-nums; }
+  .pcard .tot.none { color:#bbb; font-weight:400; font-size:.8rem; }
+  .pcard .pin { position:absolute; bottom:10px; right:12px; text-decoration:none; }
+  .group-lbl { grid-column:1 / -1; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:#999; font-weight:800; margin:8px 0 -4px; }
+
+  /* ---- screen 1 OPTION B: list-first + today sidebar ---- */
+  .dashB { display:grid; grid-template-columns:minmax(0, 1fr) 320px; gap:22px; align-items:start; }
+  .pgrid2 { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+  .panel { background:#fff; border:1px solid #ddd; border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .panel h3 { font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:#999; font-weight:800; margin:0 0 10px; }
+  .ag { position:relative; }
+  .ag-item { display:flex; gap:12px; padding:7px 0; border-bottom:1px solid #f1f1f1; }
+  .ag-item:last-child { border-bottom:0; }
+  .ag-time { flex:none; width:62px; font-weight:800; color:#1a7f37; font-size:.78rem; padding-top:1px; }
+  .ag-body .who { font-weight:700; font-size:.88rem; }
+  .ag-body .addr { color:#888; font-size:.74rem; line-height:1.3; }
+  .ag-body .act { font-size:.74rem; margin-top:2px; }
+  .ag-body .act a { text-decoration:none; font-weight:600; }
+  .attnB { display:flex; flex-direction:column; gap:8px; }
+  .attnB .attn-card { padding:8px 11px; }
+  .pipeline { display:flex; justify-content:space-between; align-items:baseline; }
+  .pipeline .n { font-size:1.3rem; font-weight:800; color:#1a7f37; }
+  .pipeline .l { color:#999; font-size:.76rem; }
+
+  /* ---- screen 2: appointments week board ---- */
+  .wk-head { display:flex; align-items:center; gap:14px; margin:0 0 12px; }
+  .wk-head h2 { font-size:1.05rem; margin:0; }
+  .wk-head .sync { background:#fff; border:1px solid #1a7f37; color:#1a7f37; font-weight:700; border-radius:7px; font-size:.82rem; padding:7px 13px; }
+  .wk-head .synced { color:#999; font-size:.76rem; }
+  .wk-head .showall { margin-left:auto; font-size:.8rem; color:#0a58ca; }
+  .week { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:10px; align-items:start; }
+  .day { background:#f3f3f3; border:1px solid #e2e2e2; border-radius:10px; padding:8px; min-height:240px; }
+  .day.dtoday { background:#f0f7f2; border-color:#d7e9dd; }
+  .day-h { display:flex; justify-content:space-between; align-items:baseline; padding:2px 4px 8px; }
+  .day-h .dname { font-weight:800; font-size:.8rem; }
+  .day.dtoday .dname { color:#1a7f37; }
+  .day-h .dnum { color:#999; font-size:.74rem; }
+  .appt { background:#fff; border:1px solid #ddd; border-radius:8px; padding:8px 10px; margin-bottom:7px; font-size:.8rem; }
+  .appt .at { font-weight:800; color:#1a7f37; font-size:.74rem; }
+  .appt .who { font-weight:700; font-size:.86rem; }
+  .appt .addr { color:#888; font-size:.72rem; line-height:1.3; margin-top:1px; }
+  .appt .foot { margin-top:6px; display:flex; gap:8px; align-items:center; }
+  .appt .mk { font-size:.72rem; text-decoration:none; font-weight:600; }
+  .day-empty { color:#bbb; font-size:.76rem; text-align:center; padding:18px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Desktop views — dashboard home + appointments week board <span class="pill">design for sign-off · not built yet</span></h1>
+    <p class="muted" style="font-size:.9rem; margin:0">
+      Per your picks: home becomes a <b>dashboard</b> (today's visits → needs attention → full card grid <b>with totals</b>);
+      appointments becomes a <b>week board</b>. Both are pure composition of data the app already loads — no schema, no new
+      API routes, phone untouched. Names/numbers below are real-shaped but illustrative.
+    </p>
+  </div>
+
+  <!-- ============ SCREEN 1: DASHBOARD HOME ============ -->
+  <h2 class="section">Screen 1 — Projects tab = dashboard home (desktop only)</h2>
+
+  <div class="browser">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="urlbar">happy-fence-app.vercel.app/</div>
+    </div>
+    <div class="topbar">
+      <span class="logo">Happy Fence</span>
+      <span class="tab on">Projects</span>
+      <span class="tab">Quick Quote</span>
+      <span class="tab">Appointments</span>
+    </div>
+    <div class="page">
+
+      <div class="sec-h"><h2>Today — Friday, June 12</h2><a class="more" href="#">all appointments →</a></div>
+      <div class="today">
+        <div class="visit">
+          <div class="t">9:30 AM</div>
+          <div class="who">Rafael Cruz</div>
+          <div class="addr">8821 SW 142nd Ave, Kendall</div>
+          <div class="act"><a href="#">📍 Map</a><span class="chip new">+ Create project</span></div>
+        </div>
+        <div class="visit">
+          <div class="t">11:00 AM</div>
+          <div class="who">Juan</div>
+          <div class="addr">17580 SW 285th St, Miami FL 33030</div>
+          <div class="act"><a href="#">📍 Map</a><span class="chip ok">Project ✓ · $17,700</span></div>
+        </div>
+        <div class="visit">
+          <div class="t">4:30 PM</div>
+          <div class="who">D. Okafor</div>
+          <div class="addr">1310 NE 191st St, North Miami Beach</div>
+          <div class="act"><a href="#">📍 Map</a><span class="chip new">+ Create project</span></div>
+        </div>
+      </div>
+
+      <div class="sec-h" style="margin-top:22px"><h2>Needs attention</h2></div>
+      <div class="attn">
+        <div class="attn-card"><div><span class="why">No fence selected</span><span class="who">TEST · 278 ft measured</span></div></div>
+        <div class="attn-card"><div><span class="why">No measurements yet</span><span class="who">Martha · created Jun 5</span></div></div>
+        <div class="attn-card"><div><span class="why">No fence selected</span><span class="who">Antonello Pasci · 120 ft measured</span></div></div>
+      </div>
+
+      <div class="gridhead">
+        <h2>All projects</h2>
+        <div class="search">🔍 Search client or address</div>
+        <span class="muted">10 quotes</span>
+        <button class="newbtn">+ New</button>
+      </div>
+      <div class="pgrid">
+        <div class="group-lbl">Created today</div>
+        <div class="pcard">
+          <div class="who">Juan</div><span class="tot">$17,700</span>
+          <div class="fence">DuraFence - Horizontal · 300 ft</div>
+          <div class="meta">miami fl 33030 · Jun 12 · Permit · 📷 1</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+        <div class="group-lbl">Earlier</div>
+        <div class="pcard">
+          <div class="who">TEST</div><span class="tot none">no fence</span>
+          <div class="fence">278 ft measured</div>
+          <div class="meta">— · Jun 11 · Permit</div>
+        </div>
+        <div class="pcard">
+          <div class="who">Alexander Iparraguirre</div><span class="tot">$3,100</span>
+          <div class="fence">Vinyl - Privacy 4ft - White · 25 ft</div>
+          <div class="meta">Coral Gables · Jun 11</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+        <div class="pcard">
+          <div class="who">Martin A. Diaz-Yabor Faia</div><span class="tot">$28,300</span>
+          <div class="fence">WPC - Composite · 334 ft</div>
+          <div class="meta">Miami · Jun 3</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+        <div class="pcard">
+          <div class="who">Patrick J De Lisi</div><span class="tot">$22,900</span>
+          <div class="fence">WPC - Composite · 262 ft</div>
+          <div class="meta">Miami Springs · Jun 4 · Permit · 📷 1</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+        <div class="pcard">
+          <div class="who">Gabriel Diaz</div><span class="tot">$7,200</span>
+          <div class="fence">DuraFence · 137 ft</div>
+          <div class="meta">Miami · Jun 9 · 📷 1</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+        <div class="pcard">
+          <div class="who">Armando Hernandez</div><span class="tot">$11,800</span>
+          <div class="fence">DuraFence - Horizontal · 228 ft</div>
+          <div class="meta">Miami · Jun 8</div>
+          <a class="pin" href="#">📍</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="annot"><b>All of it comes from data already in the browser.</b> Today's visits = the appointments the calendar sync already stores, filtered to today. Needs-attention + card totals = the project bundles the home screen already prefetches into the cache (the bundle has the total; the phone list just chooses not to render it). Zero new server work, no schema changes.</div>
+  <div class="annot"><b>Totals are desktop-only.</b> The phone list keeps your no-dollars rule. Cards with no active fence show a quiet "no fence" instead of a number — same warning-not-$0 principle as everywhere else.</div>
+  <div class="annot"><b>Needs attention = two rules, both cheap:</b> a project with measurements but no active fence ("priced nothing yet"), and a project with no measurements at all (often a promoted Quick Quote or created-from-appointment shell). Click → straight to the project. When the list is empty the strip disappears entirely.</div>
+  <div class="annot q"><b>One judgment call I made:</b> "Today" shows only today's visits (the dashboard is a morning view, not a planner — the week lives in Appointments). If you'd rather see today + tomorrow here, it's a one-line change. Flag it when you review.</div>
+
+  <!-- ============ SCREEN 1 OPTION B: LIST-FIRST + TODAY SIDEBAR ============ -->
+  <h2 class="section">Screen 1, Option B — list-first, today rides in a sidebar</h2>
+
+  <div class="browser">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="urlbar">happy-fence-app.vercel.app/</div>
+    </div>
+    <div class="topbar">
+      <span class="logo">Happy Fence</span>
+      <span class="tab on">Projects</span>
+      <span class="tab">Quick Quote</span>
+      <span class="tab">Appointments</span>
+    </div>
+    <div class="page">
+      <div class="dashB">
+
+        <!-- LEFT: the project list is the hero -->
+        <div>
+          <div class="gridhead" style="margin-top:0">
+            <h2>All projects</h2>
+            <div class="search">🔍 Search client or address</div>
+            <span class="muted">10 quotes</span>
+            <button class="newbtn">+ New</button>
+          </div>
+          <div class="pgrid2">
+            <div class="group-lbl">Created today</div>
+            <div class="pcard">
+              <div class="who">Juan</div><span class="tot">$17,700</span>
+              <div class="fence">DuraFence - Horizontal · 300 ft</div>
+              <div class="meta">miami fl 33030 · Jun 12 · Permit · 📷 1</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+            <div class="group-lbl">Earlier</div>
+            <div class="pcard">
+              <div class="who">TEST</div><span class="tot none">no fence</span>
+              <div class="fence">278 ft measured</div>
+              <div class="meta">— · Jun 11 · Permit</div>
+            </div>
+            <div class="pcard">
+              <div class="who">Alexander Iparraguirre</div><span class="tot">$3,100</span>
+              <div class="fence">Vinyl - Privacy 4ft - White · 25 ft</div>
+              <div class="meta">Coral Gables · Jun 11</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+            <div class="pcard">
+              <div class="who">Martin A. Diaz-Yabor Faia</div><span class="tot">$28,300</span>
+              <div class="fence">WPC - Composite · 334 ft</div>
+              <div class="meta">Miami · Jun 3</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+            <div class="pcard">
+              <div class="who">Patrick J De Lisi</div><span class="tot">$22,900</span>
+              <div class="fence">WPC - Composite · 262 ft</div>
+              <div class="meta">Miami Springs · Jun 4 · Permit · 📷 1</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+            <div class="pcard">
+              <div class="who">Gabriel Diaz</div><span class="tot">$7,200</span>
+              <div class="fence">DuraFence · 137 ft</div>
+              <div class="meta">Miami · Jun 9 · 📷 1</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+            <div class="pcard">
+              <div class="who">Armando Hernandez</div><span class="tot">$11,800</span>
+              <div class="fence">DuraFence - Horizontal · 228 ft</div>
+              <div class="meta">Miami · Jun 8</div>
+              <a class="pin" href="#">📍</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: today + needs attention + pipeline, always in view -->
+        <div>
+          <div class="panel">
+            <h3>Today — Fri, June 12</h3>
+            <div class="ag">
+              <div class="ag-item">
+                <span class="ag-time">9:30 AM</span>
+                <span class="ag-body">
+                  <span class="who">Rafael Cruz</span>
+                  <span class="addr">8821 SW 142nd Ave, Kendall</span>
+                  <span class="act"><a href="#">📍 Map</a> · <a href="#">+ Create project</a></span>
+                </span>
+              </div>
+              <div class="ag-item">
+                <span class="ag-time">11:00 AM</span>
+                <span class="ag-body">
+                  <span class="who">Juan</span>
+                  <span class="addr">17580 SW 285th St, Miami</span>
+                  <span class="act"><span class="chip ok">Project ✓ · $17,700</span></span>
+                </span>
+              </div>
+              <div class="ag-item">
+                <span class="ag-time">4:30 PM</span>
+                <span class="ag-body">
+                  <span class="who">D. Okafor</span>
+                  <span class="addr">1310 NE 191st St, North Miami Beach</span>
+                  <span class="act"><a href="#">📍 Map</a> · <a href="#">+ Create project</a></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Needs attention</h3>
+            <div class="attnB">
+              <div class="attn-card"><div><span class="why">No fence selected</span><span class="who">TEST · 278 ft measured</span></div></div>
+              <div class="attn-card"><div><span class="why">No measurements yet</span><span class="who">Martha · created Jun 5</span></div></div>
+              <div class="attn-card"><div><span class="why">No fence selected</span><span class="who">Antonello Pasci · 120 ft</span></div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>On the board</h3>
+            <div class="pipeline"><span class="n">$112,800</span><span class="l">8 quoted of 10 open</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="annot"><b>How B differs from A — same ingredients, different hero.</b> A reads top-to-bottom like a morning briefing: today first, then what's stuck, then the list. B keeps the LIST as the main surface (closer to today's app) and parks today + needs-attention + a pipeline number in a sidebar that stays put while you scroll projects. B is better if you're in the list constantly and glance at today; A is better if the first question every morning is "where am I going."</div>
+  <div class="annot"><b>B adds one thing A doesn't have:</b> the "On the board" pipeline number — total of all open quotes with an active fence. It's a one-liner from the same cached bundles, and it can be added to A (or dropped from B) freely. Cards drop to 2-across in B since the sidebar takes ~320px.</div>
+
+  <!-- ============ SCREEN 2: APPOINTMENTS WEEK BOARD ============ -->
+  <h2 class="section">Screen 2 — Appointments tab = week board (desktop only)</h2>
+
+  <div class="browser">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="urlbar">happy-fence-app.vercel.app/appointments</div>
+    </div>
+    <div class="topbar">
+      <span class="logo">Happy Fence</span>
+      <span class="tab">Projects</span>
+      <span class="tab">Quick Quote</span>
+      <span class="tab on">Appointments</span>
+    </div>
+    <div class="page">
+
+      <div class="wk-head">
+        <h2>Site visits</h2>
+        <button class="sync">⟳ Sync now</button>
+        <span class="synced">synced 6 min ago · auto every 15 min</span>
+        <a class="showall" href="#">Show all →</a>
+      </div>
+
+      <div class="week">
+        <div class="day dtoday">
+          <div class="day-h"><span class="dname">Today</span><span class="dnum">Fri 6/12</span></div>
+          <div class="appt">
+            <div class="at">9:30 AM</div>
+            <div class="who">Rafael Cruz</div>
+            <div class="addr">8821 SW 142nd Ave, Kendall</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><a class="mk" href="#">+ Create project</a></div>
+          </div>
+          <div class="appt">
+            <div class="at">11:00 AM</div>
+            <div class="who">Juan</div>
+            <div class="addr">17580 SW 285th St, Miami</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><span class="chip ok">Project ✓</span></div>
+          </div>
+          <div class="appt">
+            <div class="at">4:30 PM</div>
+            <div class="who">D. Okafor</div>
+            <div class="addr">1310 NE 191st St, North Miami Beach</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><a class="mk" href="#">+ Create project</a></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h"><span class="dname">Sat</span><span class="dnum">6/13</span></div>
+          <div class="appt">
+            <div class="at">10:00 AM</div>
+            <div class="who">Frank Theye</div>
+            <div class="addr">4181 W 10th Ave, Hialeah</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><a class="mk" href="#">+ Create project</a></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h"><span class="dname">Sun</span><span class="dnum">6/14</span></div>
+          <div class="day-empty">No visits</div>
+        </div>
+        <div class="day">
+          <div class="day-h"><span class="dname">Mon</span><span class="dnum">6/15</span></div>
+          <div class="appt">
+            <div class="at">8:30 AM</div>
+            <div class="who">Pedro Bravo</div>
+            <div class="addr">14905 NW 87th Ct, Miami Lakes</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><a class="mk" href="#">+ Create project</a></div>
+          </div>
+          <div class="appt">
+            <div class="at">2:00 PM</div>
+            <div class="who">L. Fontaine</div>
+            <div class="addr">733 NE 92nd St, Miami Shores</div>
+            <div class="foot"><a class="mk" href="#">📍 Map</a><a class="mk" href="#">+ Create project</a></div>
+          </div>
+        </div>
+        <div class="day">
+          <div class="day-h"><span class="dname">Tue</span><span class="dnum">6/16</span></div>
+          <div class="day-empty">No visits</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="annot"><b>Same data, new arrangement.</b> The week board reads the same synced appointments the list shows today — 5 rolling days starting today (today tinted green). Sync now, the 15-minute auto-sync, Create Project, and the project-linked ✓ all keep working exactly as they do now. "Show all" keeps revealing everything beyond the window, as a list below the board.</div>
+  <div class="annot"><b>Phone keeps the list.</b> The board is ≥1024px only; the phone appointments screen doesn't change.</div>
+  <div class="annot q"><b>Two judgment calls to confirm:</b> (1) 5 days starting today — wide enough? 7 fits but cards get narrow. (2) Yesterday's visits drop off the board (the current list shows back to 3 days ago) — is looking back useful to you, or is forward-only right for a desk view?</div>
+
+</div>
+</body>
+</html>

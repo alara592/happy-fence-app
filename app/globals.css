@@ -470,7 +470,68 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
   main:has(.qq) { max-width: 1180px; }
   .qq { flex-direction: row; align-items: flex-start; gap: 24px; }
   .qq-pad { width: 400px; flex: none; position: sticky; top: 12px; }
+
+  /* Dashboard home + appointments week board live wide */
+  main:has(.dk-home), main:has(.wk-board) { max-width: 1180px; }
 }
+
+/* ---- Desktop dashboard home (Option A, 2026-06-12) — component renders ≥1024px only ---- */
+.dk-sec { display: flex; align-items: baseline; gap: 10px; margin: 14px 0 8px; }
+.dk-sec h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--quiet); font-weight: 800; margin: 0; }
+.dk-more { font-size: .78rem; }
+.chip { display: inline-block; font-size: .72rem; font-weight: 800; border-radius: 10px; padding: 2px 9px; vertical-align: middle; border: 0; cursor: pointer; text-decoration: none; }
+.chip.ok { background: var(--brand-tint); color: var(--brand); border: 1px solid var(--brand-tint-border); }
+.chip.new { background: #e7f0ff; color: var(--link); }
+.dk-today { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+.dk-visit { flex: 0 0 250px; background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--brand); border-radius: 10px; padding: 10px 12px; }
+.dk-visit .t { font-weight: 800; font-size: .85rem; color: var(--brand); }
+.dk-visit .who { font-weight: 700; font-size: .95rem; margin: 2px 0; }
+.dk-visit .addr { color: var(--muted); font-size: .78rem; line-height: 1.35; }
+.dk-visit .act { margin-top: 8px; display: flex; gap: 10px; align-items: center; font-size: .78rem; }
+.dk-visit .act a { text-decoration: none; font-weight: 600; }
+.dk-today-empty { color: var(--quiet); font-size: .9rem; background: #fff; border: 1px dashed var(--border-strong); border-radius: 10px; padding: 14px 16px; }
+.dk-attn { display: flex; gap: 12px; flex-wrap: wrap; }
+.dk-attn-card { background: #fffdf5; border: 1px solid #eadfb8; border-radius: 10px; padding: 9px 13px; font-size: .85rem; text-decoration: none; color: inherit; }
+.dk-attn-card .why { color: var(--warn-text); font-weight: 700; font-size: .74rem; display: block; }
+.dk-attn-card .who { font-weight: 600; }
+.dk-gridhead { display: flex; align-items: center; gap: 14px; margin: 26px 0 10px; }
+.dk-gridhead h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--quiet); font-weight: 800; margin: 0; }
+.dk-pgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.dk-group-lbl { grid-column: 1 / -1; font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--quiet); font-weight: 800; margin: 8px 0 -4px; }
+.dk-pcard { background: #fff; border: 1px solid var(--border); border-radius: 10px; position: relative; }
+.dk-pcard-link { display: block; padding: 12px 14px; padding-right: 96px; text-decoration: none; color: inherit; }
+.dk-pcard .who { font-weight: 700; font-size: .98rem; display: block; }
+.dk-pcard .fence { color: var(--muted); font-size: .82rem; margin-top: 1px; display: block; }
+.dk-pcard .meta { color: var(--quiet); font-size: .76rem; margin-top: 6px; display: block; }
+.dk-pcard .tot { position: absolute; top: 12px; right: 14px; color: var(--brand); font-weight: 800; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.dk-pcard .tot.none { color: var(--warn-text); font-weight: 600; font-size: .78rem; }
+.dk-pin { position: absolute; bottom: 8px; right: 10px; padding: 6px; text-decoration: none; font-size: 1.05rem; }
+
+/* ---- Desktop appointments week board (2026-06-12) — component renders ≥1024px only ---- */
+.wk-head { display: flex; align-items: center; gap: 14px; margin: 0 0 12px; }
+.wk-head h1 { margin: 0; }
+.wk-showall { margin-left: auto; color: var(--link); font-size: .85rem; }
+.wk-week { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.wk-day { background: #f3f3f3; border: 1px solid #e2e2e2; border-radius: 10px; padding: 8px; min-height: 240px; }
+.wk-dtoday { background: var(--brand-tint); border-color: var(--brand-tint-border); }
+.wk-day-h { display: flex; justify-content: space-between; align-items: baseline; padding: 2px 4px 8px; }
+.wk-day-h .dname { font-weight: 800; font-size: .8rem; }
+.wk-dtoday .dname { color: var(--brand); }
+.wk-day-h .dnum { color: var(--quiet); font-size: .74rem; }
+.wk-appt { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 7px; font-size: .8rem; }
+.wk-appt .at { font-weight: 800; color: var(--brand); font-size: .74rem; }
+.wk-appt .who { font-weight: 700; font-size: .86rem; }
+.wk-appt .addr { color: #888; font-size: .72rem; line-height: 1.3; margin-top: 1px; }
+.wk-appt .foot { margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.wk-appt .mk { font-size: .72rem; text-decoration: none; font-weight: 600; }
+.mk-btn { border: 0; background: none; padding: 0; color: var(--brand); font-weight: 700; font-size: .72rem; cursor: pointer; }
+.wk-day-empty { color: var(--border-strong); font-size: .76rem; text-align: center; padding: 18px 0; }
+.wk-rest { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.wk-rest-row { display: flex; align-items: center; gap: 14px; padding: 9px 14px; border-bottom: 1px solid var(--border-light); font-size: .88rem; }
+.wk-rest-row:last-child { border-bottom: 0; }
+.wk-rest-row .when { flex: none; width: 150px; color: var(--muted); font-size: .8rem; }
+.wk-rest-row .who { font-weight: 600; }
+.wk-rest-row .end { margin-left: auto; }
 
 /* ---- Cost breakdown modal (internal) ---- */
 .est-cost { font-family: inherit; cursor: pointer; }
