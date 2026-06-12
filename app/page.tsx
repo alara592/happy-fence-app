@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { useCached, prefetch, peek, subscribe } from "@/lib/cache";
-import { fmtUSD, fmtDate, mapsUrl } from "@/lib/format";
+import { fmtDate, mapsUrl } from "@/lib/format";
 
 interface ProjectListItem {
   id: string;
@@ -15,9 +15,9 @@ interface ProjectListItem {
   updated_at: string;
 }
 
-/** The slice of a project bundle the list cards read (full shape in projects/[id]). */
+/** The slice of a project bundle the list cards read (full shape in projects/[id]).
+ * No prices here — Anthony's rule (2026-06-11): the home list shows no dollar amounts. */
 interface BundlePeek {
-  total: number | null;
   activeType: string | null;
   totalLinearFt: number;
   photos: unknown[];
@@ -93,16 +93,8 @@ export default function ProjectListPage() {
     return { by, filtered };
   }, [projects, q]);
 
-  // Stats strip: count + summed quote totals for whatever's listed (follows the search).
-  const stats = useMemo(() => {
-    if (!grouped) return null;
-    let sum = 0;
-    for (const p of grouped.filtered) {
-      const t = bundles.get(p.id)?.total;
-      if (t !== null && t !== undefined) sum += t;
-    }
-    return { count: grouped.filtered.length, sum };
-  }, [grouped, bundles]);
+  // Stats strip: count of whatever's listed (follows the search). No dollar amounts.
+  const stats = grouped ? { count: grouped.filtered.length } : null;
 
   return (
     <>
@@ -131,11 +123,6 @@ export default function ProjectListPage() {
       {stats && stats.count > 0 && (
         <div className="hm-stats">
           <strong>{stats.count}</strong>&nbsp;{stats.count === 1 ? "quote" : "quotes"}
-          {stats.sum > 0 && (
-            <>
-              &nbsp;·&nbsp;<strong className="hm-stats-sum">{fmtUSD(stats.sum)}</strong>&nbsp;quoted
-            </>
-          )}
         </div>
       )}
 
@@ -170,12 +157,7 @@ export default function ProjectListPage() {
                 return (
                   <div key={p.id} className="card hm-card">
                     <Link href={`/projects/${p.id}`} className="hm-link">
-                      <div className="spread">
-                        <strong>{p.client}</strong>
-                        {b && b.total !== null && (
-                          <span className="hm-total">{fmtUSD(b.total)}</span>
-                        )}
-                      </div>
+                      <strong>{p.client}</strong>
                       {b &&
                         (b.activeType ? (
                           <div className="muted">

@@ -301,14 +301,16 @@ quick-add measurement, with quantity folded into repeated taps.
 ## Home redesign — brand header, stats strip, bundle-backed cards (2026-06-11)
 
 - `app/page.tsx` rewritten. The list now USES the bundles it was already prefetching:
-  each card shows the quote total (green, right), active fence + total ft (or amber
-  "No fence selected"), city · job date · Permit · 📷 photo count. Whole card is the
-  tap target (chevron dropped); 📍 pin kept as an absolute-positioned corner target.
+  each card shows active fence + total ft (or amber "No fence selected"),
+  city · job date · Permit · 📷 photo count. Whole card is the tap target (chevron
+  dropped); 📍 pin kept as an absolute-positioned corner target.
+- **Product rule (Anthony, 2026-06-11): NO dollar amounts on the home list** — no
+  per-card totals, no summed "$ quoted" in the stats strip. Prices live on the
+  project page and Present view only. (First build had them; removed same day.)
 - Sticky green brand header (`.hm-head`, same full-bleed pattern as `.sticky-total`):
   Projects title + Appointments (translucent chip) + "+ New" (white chip). "+ New" is
   always reachable mid-scroll.
-- Stats strip under the search: "N quotes · $X quoted" — sums cached bundle totals
-  and follows the search filter live. Null totals counted in N, excluded from $X.
+- Stats strip under the search: "N quotes" — follows the search filter live.
 - Loading…" replaced with shimmer skeleton cards (`.skel`); empty state got a
   "+ New Project" button.
 - `lib/cache.ts` gained `subscribe(key, fn)` so the page can `peek` every bundle and

@@ -229,14 +229,12 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 }
 .hm-new { background: #fff; border-color: #fff; color: var(--brand); font-weight: 700; white-space: nowrap; }
 .hm-stats { display: flex; align-items: baseline; color: var(--muted); font-size: .85rem; margin: 2px 2px 0; }
-.hm-stats-sum { color: var(--brand); }
 .hm-card { position: relative; padding: 0; }
 .hm-link {
   display: block; padding: 12px;
   padding-right: 52px;               /* room for the pin */
   text-decoration: none; color: inherit;
 }
-.hm-total { color: var(--brand); font-weight: 700; white-space: nowrap; }
 .hm-nofence { color: var(--warn-text); font-size: .85rem; font-weight: 600; }
 .hm-meta { margin-top: 2px; }
 .hm-pin {
