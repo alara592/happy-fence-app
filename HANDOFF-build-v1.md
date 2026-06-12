@@ -298,6 +298,28 @@ quick-add measurement, with quantity folded into repeated taps.
   gates correct at every step; minus stepped ×2→×1→row deleted; no console errors; test
   project deleted, no orphan gate rows. `npm test` 23/23, `npm run build` green.
 
+## Home redesign — brand header, stats strip, bundle-backed cards (2026-06-11)
+
+- `app/page.tsx` rewritten. The list now USES the bundles it was already prefetching:
+  each card shows the quote total (green, right), active fence + total ft (or amber
+  "No fence selected"), city · job date · Permit · 📷 photo count. Whole card is the
+  tap target (chevron dropped); 📍 pin kept as an absolute-positioned corner target.
+- Sticky green brand header (`.hm-head`, same full-bleed pattern as `.sticky-total`):
+  Projects title + Appointments (translucent chip) + "+ New" (white chip). "+ New" is
+  always reachable mid-scroll.
+- Stats strip under the search: "N quotes · $X quoted" — sums cached bundle totals
+  and follows the search filter live. Null totals counted in N, excluded from $X.
+- Loading…" replaced with shimmer skeleton cards (`.skel`); empty state got a
+  "+ New Project" button.
+- `lib/cache.ts` gained `subscribe(key, fn)` so the page can `peek` every bundle and
+  re-render as prefetches land (no per-card hooks). `useCached` untouched.
+- New `--warn-text` var (#9a6700) shared by `.mp-unpriced` and `.hm-nofence`.
+- Wish-list items still deferred (need schema/data): status + filter chips, call
+  button (phone field), per-card thumbnails.
+- Verified live (dev preview, real DB, read-only): totals/fence lines/photo counts
+  correct on 9 real projects, search updates strip + cards, sticky header pins,
+  card tap navigates, no console errors. `npm test` 23/23.
+
 ## UI consistency pass — CSS variables + button tiers (2026-06-11)
 
 - `globals.css` now defines the palette as CSS variables in `:root` (`--brand`,

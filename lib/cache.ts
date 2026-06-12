@@ -64,6 +64,18 @@ export function peek<T>(key: string): T | undefined {
   return store.get(key)?.data as T | undefined;
 }
 
+/** Subscribe to changes for one key. Lets a screen `peek` many keys and still re-render
+ * as they land (home reads every project bundle for card totals + the stats strip). */
+export function subscribe(key: string, fn: () => void): () => void {
+  let set = listeners.get(key);
+  if (!set) listeners.set(key, (set = new Set()));
+  set.add(fn);
+  return () => {
+    set!.delete(fn);
+    if (set!.size === 0) listeners.delete(key);
+  };
+}
+
 /** Overwrite an entry directly (e.g. data returned from a mutation). */
 export function setCache<T>(key: string, data: T): void {
   store.set(key, { data, at: Date.now() });

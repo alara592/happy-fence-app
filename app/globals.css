@@ -12,6 +12,7 @@
   --border-strong: #bbb;
   --border: #ddd;
   --border-light: #eee;
+  --warn-text: #9a6700;
 }
 * { box-sizing: border-box; }
 body {
@@ -190,7 +191,7 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 .mp-price { flex: none; text-align: right; white-space: nowrap; }
 .mp-price strong { font-size: .95rem; }
 .mp-delta { color: var(--muted); font-size: .78rem; font-weight: 600; margin-left: 6px; }
-.mp-unpriced { color: #9a6700; font-size: .8rem; font-weight: 600; }
+.mp-unpriced { color: var(--warn-text); font-size: .8rem; font-weight: 600; }
 
 /* Bare link-styled button (collapsed-row + Add) */
 .linkbtn { border: 0; background: none; padding: 0; color: var(--brand); font-weight: 600; font-size: .95rem; cursor: pointer; }
@@ -211,6 +212,51 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
   border-radius: 8px; margin: 8px 0; color: #888; font-size: .95rem;
 }
 .collapsed a { color: var(--brand); font-weight: 600; text-decoration: none; }
+
+/* ---- Home redesign (2026-06-11): brand header, stats strip, bundle-backed cards ---- */
+.hm-head {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--brand); color: #fff;
+  margin: -12px -16px 0;             /* full-bleed inside main's padding */
+  padding: 10px 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.hm-head h1 { margin: 0; font-size: 1.25rem; }
+.hm-appts {
+  background: rgba(255,255,255,.16); border: 0; color: #fff;
+  font-weight: 600; white-space: nowrap;
+}
+.hm-new { background: #fff; border-color: #fff; color: var(--brand); font-weight: 700; white-space: nowrap; }
+.hm-stats { display: flex; align-items: baseline; color: var(--muted); font-size: .85rem; margin: 2px 2px 0; }
+.hm-stats-sum { color: var(--brand); }
+.hm-card { position: relative; padding: 0; }
+.hm-link {
+  display: block; padding: 12px;
+  padding-right: 52px;               /* room for the pin */
+  text-decoration: none; color: inherit;
+}
+.hm-total { color: var(--brand); font-weight: 700; white-space: nowrap; }
+.hm-nofence { color: var(--warn-text); font-size: .85rem; font-weight: 600; }
+.hm-meta { margin-top: 2px; }
+.hm-pin {
+  position: absolute; right: 6px; bottom: 4px;
+  padding: 10px;                      /* thumb-sized tap target */
+}
+.hm-empty { text-align: center; margin: 32px 0; }
+.hm-empty button { margin-top: 8px; }
+
+/* Loading skeleton cards */
+.skel {
+  height: 84px; border-radius: 8px; margin: 8px 0;
+  background: linear-gradient(90deg, var(--border-light) 25%, #f7f7f7 37%, var(--border-light) 63%);
+  background-size: 400% 100%;
+  animation: skel 1.4s ease infinite;
+}
+@keyframes skel {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
 
 /* Home: search + date grouping + card pin */
 .search { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-strong); border-radius: 8px; padding: 0 10px; margin: 10px 0 4px; }
