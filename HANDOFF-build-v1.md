@@ -3,7 +3,7 @@
 Single source of truth for app state. Read this first in any new session, then
 `README.md` (run/deploy) and `lib/pricing.ts` (the engine). History: spec in
 `../Big Ant Fencing/V1-SPEC-quote-a-job.md`, strategy in
-`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-06**.
+`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-12**.
 
 ## What this is
 
@@ -416,6 +416,56 @@ avoid duplicating quote/pipeline features that belong to Jobber.
   added `Gate 1 · Durafence · Single · $534` and the total updated to $534; no console
   errors; test project deleted (gate cascade confirmed via SQL). `npm test` 17/17,
   `npm run build` green. NOT yet pushed/deployed.
+
+## Desktop shell + Quick Quote (2026-06-12) — DEPLOYED
+
+Desktop concept steps 1+2 (of the plan Anthony approved 2026-06-12: shell → Quick Quote →
+price snapshots → Prices screen → morning view). Commit `d9945b8`, pushed by Anthony,
+verified READY on Vercel. Phones render exactly as before — everything desktop sits
+behind `min-width: 1024px`.
+
+**Who it's for (changes the product framing):** the desktop's PRIMARY user is Anthony's
+assistant/appointment setter qualifying leads live on the phone; Anthony uses it to verify
+costs after the fact + morning planning. Full trust model kept deliberately — one PIN, no
+roles (Anthony's call).
+
+- **Shell** (`components/AppFrame.tsx`, NEW; root layout now wraps children in it):
+  desktop top nav (Projects / Quick Quote / Appointments) + persistent left project rail
+  on `/projects/*` (not on home — the home list IS the list). `/unlock` and `*/present`
+  stay bare (pre-auth / customer-facing). Project page is a workbench via CSS grid:
+  `.pd-top`/`.pd-side`/`.pd-bottom` wrappers put the price board in a sticky right column;
+  source order unchanged so phone layout is byte-identical.
+- **Quick Quote** (`app/quick-quote/page.tsx`, NEW): scratch-pad calculator — footage,
+  walk/double gate steppers, tear-down toggle (assumes the FULL run, decided), permit
+  toggle (default on). Headline = the **−5%/+10% qualifying range** (what the assistant
+  reads to callers; rounded out to $100s), exact price in small print. Right column prices
+  the WHOLE catalog live, cheapest first, unpriced types ⚠ last. Click a row to quote it
+  (auto-follows cheapest until a manual pick). **Save as project** promotes: real project
+  (date = today ET) + "Phone estimate" section + material (auto-actives) + gates; scratch
+  clears. Otherwise NOTHING is written; state survives refresh via localStorage
+  (`hfc-qq-v1`). Esc clears.
+- **`lib/quickquote.ts`** (NEW, pure, tested): `matchGateType` (gates auto-match the fence
+  family, decided — mixed combos go through the project screen), `quoteRange`, `quickTotal`
+  (wraps the engine — NO math reimplementation). `QQ_LABOR_COST_FT = 12` /
+  `QQ_PROFIT_MARGIN = 0.3` MIRROR the `POST /api/projects` fallbacks — verified against
+  live data (all 9 projects use exactly 12 / 0.30). These become editable settings rows
+  (`default_labor_cost_ft`, `default_margin`) when the Prices screen ships.
+- Tests: `tests/quickquote.test.ts` (11) — suite now 34/34. E2E verified: Quick Quote
+  exact $7,395 (120 ft Vinyl White + walk gate + tear + permit) promoted to a project the
+  server also priced at exactly $7,395; test project deleted after.
+- Mockups kept as reference: `desktop-mockup.html` (early three-pane concept),
+  `quickquote-mockup.html` (approved interactive Screen A).
+
+**Decided, next up (desktop concept, in order):**
+1. **Price snapshots / effective-date pricing** — projects snapshot the FULL price
+   environment (sections, gates, permit, rates — freeze everything, Anthony's call) at
+   creation; opening a project whose snapshot differs from current prices prompts
+   "update to current or keep as quoted", never silent repricing. The one real
+   schema/engine-read change; deploy alone. Supersedes the "quote freezing" wish-list item.
+2. **Prices screen** — inline editing of all price tables + the new default labor/margin
+   settings. MUST ship after snapshots (easy edits before the freeze would silently
+   reprice every open quote).
+3. **Morning view** — Anthony's desktop home: today's site visits + needs-attention list.
 
 ## Open data questions (Anthony/Mimi)
 
