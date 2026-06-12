@@ -213,6 +213,10 @@ export default function ProjectDetailPage() {
         </Link>
       </div>
 
+      {/* Desktop (≥1024px): .pd lays top/bottom in the left column, the board (.pd-side)
+          in the right. On phones all three are plain blocks in source order — unchanged. */}
+      <div className="pd">
+      <div className="pd-top">
       <div className="spread">
         <h1 style={{ margin: 0 }}>{p.client}</h1>
         <Link href={`/projects/${id}/edit`}><button>Edit</button></Link>
@@ -286,7 +290,9 @@ export default function ProjectDetailPage() {
         </div>
       ))}
       {b.sections.length === 0 && <p className="muted">No measurements yet.</p>}
+      </div>
 
+      <div className="pd-side">
       <h2>Price board <span className="muted" style={{ fontWeight: 400 }}>(fence + permit + extras, no gates — tap a row to set active)</span></h2>
       {b.board.map((row) => {
         const ps = perSection.get(row.type);
@@ -335,7 +341,9 @@ export default function ProjectDetailPage() {
       <button className="secondary mp-open" onClick={() => setPickerOpen(true)}>
         + Add material — see all prices
       </button>
+      </div>
 
+      <div className="pd-bottom">
       {b.gates.length === 0 ? (
         <div className="collapsed">
           Gates (0) — none yet
@@ -431,6 +439,8 @@ export default function ProjectDetailPage() {
 
       <h2>Danger zone</h2>
       <button className="danger" onClick={delProject}>Delete Project</button>
+      </div>
+      </div>
 
       <QuickAddMeasurement
         projectId={id}

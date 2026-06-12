@@ -388,6 +388,90 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 .viewer .v-actions .del { background: #2a1416; color: #ff8c92; border-color: #5a2a2e; font-weight: 700; }
 .viewer .v-actions .save { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700; }
 
+/* ---- Desktop shell (2026-06-12): top nav + project rail + workbench split ----
+   Everything desktop lives behind ≥1024px; phones render exactly as before. */
+.dnav, .drail { display: none; }
+
+/* Quick Quote (desktop-first; stacks on phone) */
+.qq { display: flex; flex-direction: column; gap: 18px; }
+.qq-pad { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.qq-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--quiet); font-weight: 800; margin: 0 0 4px; }
+.qq-ftrow { display: flex; align-items: baseline; gap: 10px; }
+.qq-ftrow input { width: 180px; font-size: 2.4rem; font-weight: 800; padding: 4px 12px; border: 2px solid var(--border-strong); border-radius: 10px; font-variant-numeric: tabular-nums; }
+.qq-ftrow input:focus { border-color: var(--brand); outline: none; }
+.qq-ftrow .unit { font-size: 1.05rem; color: var(--quiet); font-weight: 600; }
+.qq-gline { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.qq-gline .nm { font-size: .95rem; }
+.qq-gline .nm small { display: block; color: var(--quiet); font-size: .72rem; }
+.qq-step { display: flex; align-items: stretch; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+.qq-step button { width: 38px; padding: 4px 0; border: 0; border-radius: 0; background: #fff; font-size: 1.15rem; color: var(--brand); font-weight: 700; }
+.qq-step .qty { width: 34px; text-align: center; font-weight: 800; line-height: 32px; border-left: 1px solid var(--border-light); border-right: 1px solid var(--border-light); }
+.qq-tog { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-light); cursor: pointer; }
+.qq-tog .nm { font-size: .95rem; }
+.qq-tog .nm small { display: block; color: var(--quiet); font-size: .72rem; }
+.qq-sw { width: 44px; height: 26px; border-radius: 13px; background: #ccc; position: relative; transition: background .15s; flex: none; }
+.qq-sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.qq-sw.on { background: var(--brand); }
+.qq-sw.on::after { left: 21px; }
+.qq-total { margin-top: 16px; background: var(--brand); color: #fff; border-radius: 12px; padding: 14px 16px; }
+.qq-total .mat { font-size: .82rem; opacity: .9; }
+.qq-total .amt { font-size: 1.8rem; font-weight: 800; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.qq-total .sub { font-size: .74rem; opacity: .85; margin-top: 4px; min-height: 1em; }
+.qq-exits { display: flex; gap: 10px; margin-top: 12px; }
+.qq-exits .qq-save { flex: 1; }
+.qq-list { flex: 1; min-width: 0; }
+.qq-list-head { display: flex; justify-content: space-between; align-items: baseline; margin: 2px 2px 8px; }
+.qq-list-head h2 { margin: 0; }
+.qq-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; margin: 5px 0; cursor: pointer; font-size: .92rem; }
+.qq-row:hover { border-color: var(--brand); }
+.qq-row.sel { background: var(--brand-tint); border: 2px solid var(--brand); padding: 8px 13px; }
+.qq-row .nm { font-weight: 600; min-width: 0; }
+.qq-row .nm small { display: block; font-weight: 400; color: var(--quiet); font-size: .74rem; }
+.qq-row .tt { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qq-row.unp { cursor: default; opacity: .75; }
+.qq-row.unp .tt { color: var(--warn-text); font-weight: 600; font-size: .78rem; }
+.qq-empty { color: var(--border-strong); text-align: center; padding: 48px 0; font-size: 1rem; }
+
+@media (min-width: 1024px) {
+  .dnav {
+    display: flex; align-items: center; gap: 22px;
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 11px 22px;
+  }
+  .dnav-logo { font-weight: 800; color: var(--brand); font-size: .95rem; }
+  .dnav-tab { color: var(--muted); text-decoration: none; font-size: .92rem; padding: 2px 1px; border-bottom: 2px solid transparent; }
+  .dnav-tab.on { color: var(--text); font-weight: 700; border-bottom-color: var(--brand); }
+
+  .dframe.with-rail { display: flex; align-items: flex-start; }
+  .dframe.with-rail main { flex: 1; min-width: 0; }
+  .drail {
+    display: block; width: 270px; flex: none;
+    background: #fff; border-right: 1px solid var(--border);
+    height: calc(100vh - 47px); overflow-y: auto;
+    position: sticky; top: 0; padding: 10px 10px 24px;
+  }
+  .drail-head { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 8px 8px; font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--quiet); font-weight: 800; }
+  .drail-head a { color: var(--brand); font-weight: 700; text-decoration: none; text-transform: none; letter-spacing: normal; font-size: .85rem; }
+  .drail-item { display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: inherit; }
+  .drail-item:hover { background: #f5f5f5; }
+  .drail-item.sel { background: var(--brand-tint); outline: 1px solid var(--brand-tint-border); }
+  .drail-item .c { display: block; font-weight: 600; font-size: .9rem; }
+  .drail-item .m { display: block; color: var(--quiet); font-size: .74rem; }
+
+  /* Project workbench: board in a sticky right column, everything else left */
+  main:has(.pd) { max-width: 1140px; }
+  .pd { display: grid; grid-template-columns: minmax(0, 1fr) 380px; grid-template-areas: "top side" "bottom side"; column-gap: 28px; align-items: start; }
+  .pd-top { grid-area: top; }
+  .pd-bottom { grid-area: bottom; }
+  .pd-side { grid-area: side; position: sticky; top: 12px; }
+  .pd-side h2 { margin-top: 0; }
+
+  /* Quick Quote: pad left, catalog right */
+  main:has(.qq) { max-width: 1180px; }
+  .qq { flex-direction: row; align-items: flex-start; gap: 24px; }
+  .qq-pad { width: 400px; flex: none; position: sticky; top: 12px; }
+}
+
 /* ---- Cost breakdown modal (internal) ---- */
 .est-cost { font-family: inherit; cursor: pointer; }
 .cost-modal { padding: 18px 18px 6px; }

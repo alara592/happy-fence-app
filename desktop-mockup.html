@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Desktop concept: the Command Center</title>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#eee; color:#111; }
+  a { color:#0a58ca; }
+  .muted { color:#666; font-size:.85rem; }
+  .quiet { color:#999; }
+  .wrap { max-width:1340px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:28px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .annot { background:#1a7f37; color:#fff; font-size:.78rem; border-radius:8px; padding:9px 12px; margin:10px 0; max-width:1100px; }
+  .annot b { display:block; margin-bottom:2px; }
+  .annot.q { background:#9a6700; }
+  .pill { display:inline-block; font-size:.66rem; font-weight:800; background:#d6ecdd; color:#0f5e29; border-radius:10px; padding:1px 7px; margin-left:6px; vertical-align:middle; }
+  h2.section { font-size:1.05rem; margin:40px 0 10px; }
+
+  /* ---- desktop browser frame ---- */
+  .browser { background:#fff; border:1px solid #ccc; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.18); }
+  .chrome { display:flex; align-items:center; gap:8px; background:#e9e9e9; border-bottom:1px solid #d0d0d0; padding:8px 12px; }
+  .dot { width:11px; height:11px; border-radius:50%; }
+  .dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+  .urlbar { flex:1; background:#fff; border:1px solid #ccc; border-radius:6px; font-size:.75rem; color:#666; padding:4px 10px; }
+
+  /* ---- top app bar ---- */
+  .topbar { display:flex; align-items:center; gap:18px; background:#fff; border-bottom:1px solid #ddd; padding:10px 16px; }
+  .topbar .logo { font-weight:800; color:#1a7f37; font-size:.95rem; }
+  .tab { font-size:.85rem; color:#666; padding:4px 2px; }
+  .tab.on { color:#111; font-weight:700; border-bottom:2px solid #1a7f37; }
+  .cmdk { margin-left:auto; display:flex; align-items:center; gap:8px; border:1px solid #ccc; border-radius:6px; padding:5px 10px; font-size:.78rem; color:#999; min-width:260px; }
+  .kbd { font-family:ui-monospace,monospace; font-size:.68rem; background:#f1f1f1; border:1px solid #ccc; border-bottom-width:2px; border-radius:4px; padding:0 5px; color:#555; }
+
+  /* ---- three panes ---- */
+  .panes { display:flex; min-height:640px; background:#fafafa; }
+  .pane-l { width:290px; border-right:1px solid #ddd; background:#fff; padding:10px; overflow:hidden; }
+  .pane-c { flex:1; padding:14px 18px; min-width:0; }
+  .pane-r { width:330px; border-left:1px solid #ddd; background:#fff; padding:12px; }
+
+  .search { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #bbb; border-radius:8px; padding:6px 10px; font-size:.85rem; color:#999; margin-bottom:8px; }
+  .group-h { font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:#999; font-weight:800; margin:14px 4px 4px; }
+  .proj { padding:8px 10px; border-radius:8px; font-size:.85rem; display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .proj:hover { background:#f5f5f5; }
+  .proj.sel { background:#f0f7f2; border:1px solid #d7e9dd; }
+  .proj .who { font-weight:600; }
+  .proj .sub { color:#999; font-size:.74rem; display:block; }
+  .proj .tot { color:#1a7f37; font-weight:700; font-size:.8rem; white-space:nowrap; }
+  .proj .tot.none { color:#bbb; font-weight:400; }
+
+  /* center: project */
+  .ptitle { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .ptitle h1 { font-size:1.25rem; margin:0; }
+  .ptitle .meta { color:#666; font-size:.82rem; }
+  .totalbar { display:flex; align-items:center; gap:14px; background:#1a7f37; color:#fff; border-radius:10px; padding:10px 16px; margin:12px 0; }
+  .totalbar .amt { font-size:1.35rem; font-weight:800; }
+  .totalbar .lbl { font-size:.78rem; opacity:.85; }
+  .totalbar .present { margin-left:auto; background:#fff; color:#1a7f37; border:0; border-radius:7px; font-weight:700; font-size:.85rem; padding:7px 14px; }
+
+  table.grid { width:100%; border-collapse:collapse; background:#fff; border:1px solid #ddd; border-radius:8px; overflow:hidden; font-size:.85rem; }
+  .grid th { text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#999; font-weight:800; padding:8px 10px; border-bottom:1px solid #ddd; background:#fcfcfc; }
+  .grid td { padding:8px 10px; border-bottom:1px solid #eee; }
+  .grid tr:last-child td { border-bottom:0; }
+  .grid td.num, .grid th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .grid .price { color:#1a7f37; font-weight:600; }
+  .grid td.editing { outline:2px solid #1a7f37; outline-offset:-2px; border-radius:3px; background:#f0f7f2; }
+  .grid .newrow td { color:#999; font-style:italic; background:#fcfcfc; }
+  .chk { color:#1a7f37; }
+  .h3line { display:flex; align-items:baseline; gap:10px; margin:18px 0 6px; }
+  .h3line h3 { font-size:.95rem; margin:0; }
+  .h3line .hint { color:#999; font-size:.74rem; }
+
+  .twocol { display:flex; gap:14px; }
+  .twocol > div { flex:1; }
+  .mini { background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px 12px; font-size:.85rem; }
+  .mini .row { display:flex; justify-content:space-between; padding:3px 0; }
+
+  /* right: board */
+  .pane-r h3 { font-size:.95rem; margin:4px 0 8px; }
+  .board { border:1px solid #ddd; border-radius:8px; overflow:hidden; }
+  .brow { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid #eee; font-size:.85rem; background:#fff; }
+  .brow:last-child { border-bottom:0; }
+  .brow.active { background:#f0f7f2; }
+  .brow .name { font-weight:600; }
+  .brow .per { display:block; color:#999; font-size:.72rem; font-weight:400; }
+  .brow .t { font-weight:700; white-space:nowrap; }
+  .brow .delta { font-size:.72rem; color:#999; display:block; text-align:right; }
+  .brow .delta.cheap { color:#1a7f37; }
+  .star { color:#1a7f37; font-size:.8rem; }
+  .catalog-h { display:flex; justify-content:space-between; align-items:baseline; margin:16px 0 6px; }
+  .catalog-h h3 { margin:0; }
+  .cat { font-size:.8rem; border:1px dashed #ccc; border-radius:8px; padding:8px 10px; color:#666; }
+  .cat .crow { display:flex; justify-content:space-between; padding:3px 0; }
+  .whatif { margin-top:16px; background:#fff8e6; border:1px solid #eadfb8; border-radius:8px; padding:10px 12px; font-size:.8rem; }
+  .whatif b { font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; color:#9a6700; }
+  .slider { height:4px; background:#e3d9b0; border-radius:2px; position:relative; margin:12px 4px 6px; }
+  .slider .knob { position:absolute; left:55%; top:-5px; width:14px; height:14px; border-radius:50%; background:#9a6700; }
+
+  /* prices screen */
+  .blast { background:#fff8e6; border:1px solid #eadfb8; border-radius:8px; padding:10px 12px; font-size:.8rem; margin-top:10px; }
+  .blast b { color:#9a6700; }
+  .blast .row { display:flex; justify-content:space-between; padding:2px 0; font-variant-numeric:tabular-nums; }
+
+  .pillars { display:flex; gap:14px; flex-wrap:wrap; margin:18px 0 6px; }
+  .pillar { flex:1; min-width:230px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:14px 16px; }
+  .pillar h3 { margin:0 0 6px; font-size:.92rem; color:#1a7f37; }
+  .pillar p { margin:0; font-size:.82rem; color:#444; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Desktop concept — the Command Center <span class="pill">same app, same engine, no schema change</span></h1>
+    <p class="muted" style="font-size:.9rem">
+      The phone stays exactly as it is: a field tool, one thing at a time. Desktop stops being a stretched phone
+      and becomes the <b>office tool</b>: everything on one screen, keyboard-first, plus the two things the phone
+      can't do at all today — <b>editing the price tables</b> and seeing a price change's blast radius before saving.
+      Built as a responsive layout (and a <code>Prices</code> route) in the same Next.js app — same API routes,
+      same <code>lib/pricing.ts</code>, same cache.
+    </p>
+    <div class="pillars">
+      <div class="pillar"><h3>1 · One screen, three panes</h3><p>Projects list + project detail + price board side by side. No back-and-forth navigation — click a project on the left, it loads in the middle, the board updates on the right.</p></div>
+      <div class="pillar"><h3>2 · Keyboard-first</h3><p><span class="kbd">⌘K</span> jumps to any client. Measurements edit like a spreadsheet: click a cell, type, <span class="kbd">Tab</span>, <span class="kbd">Enter</span> for a new row. No forms, no bottom sheets.</p></div>
+      <div class="pillar"><h3>3 · Price tables, finally editable</h3><p>Today price changes go through SQL. A Prices screen edits fence / gate / extras / settings inline — with a live preview of which projects move and by how much.</p></div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 1: COMMAND CENTER ================= -->
+  <h2 class="section">Screen 1 — Command Center (default desktop view)</h2>
+
+  <div class="browser">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="urlbar">happy-fence-app.vercel.app/projects/…</div>
+    </div>
+
+    <div class="topbar">
+      <span class="logo">Happy Fence</span>
+      <span class="tab on">Projects</span>
+      <span class="tab">Appointments</span>
+      <span class="tab">Prices</span>
+      <div class="cmdk">🔍 Jump to client, address, screen… <span style="margin-left:auto"><span class="kbd">⌘K</span></span></div>
+    </div>
+
+    <div class="panes">
+
+      <!-- LEFT: project list -->
+      <div class="pane-l">
+        <div class="search">🔍 Search…</div>
+        <div class="group-h">This week</div>
+        <div class="proj sel"><span><span class="who">Frank Theye</span><span class="sub">Hialeah · Fri 6/13</span></span><span class="tot">$3,600</span></div>
+        <div class="proj"><span><span class="who">Pedro Bravo</span><span class="sub">Miami Lakes · Sat 6/14</span></span><span class="tot">$3,300</span></div>
+        <div class="group-h">Upcoming</div>
+        <div class="proj"><span><span class="who">Maria Delgado</span><span class="sub">Kendall · 6/18 · permit</span></span><span class="tot none">—</span></div>
+        <div class="proj"><span><span class="who">R. Whitfield</span><span class="sub">Doral · 6/20</span></span><span class="tot">$9,400</span></div>
+        <div class="group-h">Earlier</div>
+        <div class="proj"><span><span class="who">J. Osterman</span><span class="sub">Hialeah · 5/30</span></span><span class="tot">$6,100</span></div>
+        <div class="proj"><span><span class="who">C. Reyes</span><span class="sub">Miramar · 5/22</span></span><span class="tot none">—</span></div>
+      </div>
+
+      <!-- CENTER: selected project -->
+      <div class="pane-c">
+        <div class="ptitle">
+          <h1>Frank Theye</h1>
+          <span class="meta">4181 W 10th Ave, Hialeah 📍 🌐 &nbsp;·&nbsp; 35% | $6/ft</span>
+        </div>
+
+        <div class="totalbar">
+          <span class="amt">$3,600</span>
+          <span class="lbl">Wood - Dog Ear &nbsp;·&nbsp; permit $800 &nbsp;·&nbsp; 1 gate</span>
+          <button class="present">Present →</button>
+        </div>
+
+        <div class="h3line"><h3>Measurements</h3><span class="hint">click a cell to edit · Tab moves · Enter adds a row</span></div>
+        <table class="grid">
+          <tr><th>Name</th><th class="num">Linear ft</th><th>Tear</th><th>Dump</th><th class="num">Take-down ft</th><th class="num">Price (active)</th></tr>
+          <tr><td>Back run</td><td class="num">120</td><td class="chk">✓</td><td class="chk">✓</td><td class="num">120</td><td class="num price">$2,000</td></tr>
+          <tr><td>Left side</td><td class="num editing">64</td><td class="chk">✓</td><td>—</td><td class="num">64</td><td class="num price">$800</td></tr>
+          <tr class="newrow"><td>+ new measurement…</td><td class="num"></td><td></td><td></td><td class="num"></td><td class="num"></td></tr>
+        </table>
+
+        <div class="h3line"><h3>Gates &amp; Extras</h3></div>
+        <div class="twocol">
+          <div class="mini">
+            <div class="row"><span>Single walk gate — Wood</span><span>2 × $250</span></div>
+            <div class="row quiet"><span>+ add gate</span><span></span></div>
+          </div>
+          <div class="mini">
+            <div class="row quiet"><span>No extras · + add</span><span></span></div>
+            <div class="row"><span>Discount</span><span>$0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: price board -->
+      <div class="pane-r">
+        <h3>Price board <span class="quiet" style="font-weight:400;font-size:.74rem">click a row to set active</span></h3>
+        <div class="board">
+          <div class="brow active">
+            <span><span class="star">★</span> <span class="name">Wood - Dog Ear</span><span class="per">$94 / section</span></span>
+            <span class="t">$3,600</span>
+          </div>
+          <div class="brow">
+            <span><span class="name">Vinyl - Privacy - White</span><span class="per">$112 / section</span></span>
+            <span><span class="t">$4,100</span><span class="delta">+$500</span></span>
+          </div>
+          <div class="brow">
+            <span><span class="name">Chain Link - Galvanized</span><span class="per">$58 / section</span></span>
+            <span><span class="t">$2,900</span><span class="delta cheap">−$700</span></span>
+          </div>
+        </div>
+
+        <div class="catalog-h"><h3>Catalog</h3><span class="quiet" style="font-size:.74rem">cheapest first</span></div>
+        <div class="cat">
+          <div class="crow"><span>Vinyl - Privacy - Sand</span><span>$4,200 · + add</span></div>
+          <div class="crow"><span>Aluminum - 3 Rail - Black</span><span>$5,000 · + add</span></div>
+          <div class="crow"><span>Cypress - Board on Board</span><span>$4,400 · + add</span></div>
+        </div>
+
+        <div class="whatif">
+          <b>What-if (never saves)</b>
+          <div class="slider"><span class="knob"></span></div>
+          <div style="display:flex;justify-content:space-between"><span>margin 35% → <b>38%</b></span><span>total $3,600 → <b>$3,800</b></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="annot"><b>Three panes, zero navigation.</b> The phone's home → project → board flow becomes one screen. Clicking a project in the left rail swaps the center + right panes — and since the client cache already prefetches every bundle on entry, the swap is instant with no new server work.</div>
+  <div class="annot"><b>Spreadsheet measurements.</b> The grid is the desktop replacement for the section form: click a cell, type, Tab to the next, Enter to append a row (take-down still auto-mirrors linear ft). Each row keeps the computed price-under-active-fence column. Same PATCH endpoints as the phone forms.</div>
+  <div class="annot"><b>What-if is read-only by design.</b> Margin stays set-and-forget (your product rule) — the slider only recomputes the displayed total locally and resets when you leave. It never writes. If even that feels like clutter, it's the first thing to cut.</div>
+  <div class="annot q"><b>Open question — totals in the left rail.</b> You deliberately keep totals off the phone home list. The office is a different context (no customer looking over your shoulder), so this concept shows them. Easy to drop if you want one rule everywhere.</div>
+
+  <!-- ================= SCREEN 2: PRICES ================= -->
+  <h2 class="section">Screen 2 — Prices (doesn't exist on the phone at all)</h2>
+
+  <div class="browser" style="max-width:980px">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="urlbar">happy-fence-app.vercel.app/prices</div>
+    </div>
+    <div class="topbar">
+      <span class="logo">Happy Fence</span>
+      <span class="tab">Projects</span>
+      <span class="tab">Appointments</span>
+      <span class="tab on">Prices</span>
+      <div class="cmdk">🔍 <span style="margin-left:auto"><span class="kbd">⌘K</span></span></div>
+    </div>
+    <div style="background:#fafafa; padding:16px 20px 24px;">
+      <div class="h3line"><h3>Fence prices</h3><span class="hint">edit in place · gates / extras / settings tabs work the same</span></div>
+      <table class="grid">
+        <tr><th>Type</th><th class="num">$ / section</th><th class="num">ft / section</th><th class="num">Sort</th></tr>
+        <tr><td>Wood - Dog Ear</td><td class="num">$94</td><td class="num">8</td><td class="num">1</td></tr>
+        <tr><td>Vinyl - Privacy - White</td><td class="num editing">$118</td><td class="num">8</td><td class="num">2</td></tr>
+        <tr><td>Vinyl - Privacy - Sand</td><td class="num">$112</td><td class="num">6</td><td class="num">3</td></tr>
+        <tr><td style="color:#9a6700">Composite - Horizontal ⚠ unpriced</td><td class="num">$0</td><td class="num">8</td><td class="num">9</td></tr>
+      </table>
+
+      <div class="blast" style="max-width:560px">
+        <b>Before you save: $112 → $118 moves 3 quotes</b>
+        <div class="row"><span>Pedro Bravo</span><span>$3,300 → $3,400</span></div>
+        <div class="row"><span>R. Whitfield</span><span>$9,400 → $9,600</span></div>
+        <div class="row"><span>Maria Delgado</span><span>board row only (not active)</span></div>
+        <div class="row quiet" style="margin-top:6px"><span></span><span><button style="font-size:.78rem;padding:5px 12px;border:1px solid #999;border-radius:6px;background:#fff">Cancel</button> &nbsp;<button style="font-size:.78rem;padding:5px 12px;border:0;border-radius:6px;background:#1a7f37;color:#fff;font-weight:700">Save price</button></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annot"><b>The biggest single win.</b> Price-table changes today go through Claude + SQL. Because every quote is computed on read, a price edit silently re-prices <i>every</i> open project — which is exactly why the phone shouldn't have this screen, and why desktop shows the blast radius first: the preview just runs the same engine against affected projects before you commit. Needs only small CRUD routes on the existing tables; zero engine changes.</div>
+  <div class="annot"><b>Unpriced types stay loud.</b> $0 rows carry the same ⚠ treatment as the board — and this screen is finally the place to fix them.</div>
+
+  <!-- ================= BUILD NOTES ================= -->
+  <h2 class="section">How it's built (and what it isn't)</h2>
+  <div class="intro" style="margin-bottom:8px">
+    <p class="muted" style="font-size:.9rem; margin:0 0 8px">
+      <b>Not a second app.</b> One Next.js codebase, one deploy, one PIN. The three-pane layout is a
+      <code>min-width: 1024px</code> media-query shell around the existing pages; below it, today's phone UI renders
+      untouched. The pieces land independently, roughly in value order:
+    </p>
+    <ol class="muted" style="font-size:.88rem; margin:0 0 8px 18px; padding:0; line-height:1.7">
+      <li><b>Prices screen + blast radius</b> — new route + small CRUD API routes; engine reused as-is.</li>
+      <li><b>Three-pane shell</b> — layout/CSS only; panes are the existing components rearranged, fed by the existing cache.</li>
+      <li><b>Spreadsheet measurement grid</b> — desktop-only component over the existing section PATCH routes.</li>
+      <li><b>⌘K palette + keyboard nav</b> — client-only; the project list is already cached, so search is local.</li>
+      <li><b>What-if panel</b> — pure client math via the engine; optional, last.</li>
+    </ol>
+    <p class="muted" style="font-size:.9rem; margin:0">
+      Out of scope on purpose: no schema changes, no second auth story, no Electron wrapper, no phone-UI changes,
+      and nothing the engine doesn't already compute.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

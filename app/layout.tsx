@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import AppFrame from "@/components/AppFrame";
 
 export const metadata: Metadata = {
   title: "Happy Fence — Quotes",
@@ -18,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <AppFrame>{children}</AppFrame>
       </body>
     </html>
   );
