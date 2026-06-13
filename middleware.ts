@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   // Everything except Next internals and static assets.
-  matcher: ["/((?!_next/|favicon.ico|manifest.json|icons/).*)"],
+  matcher: ["/((?!_next/|favicon.ico|manifest.json|icons/|brand/).*)"],
 };
