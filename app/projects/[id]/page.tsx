@@ -52,6 +52,8 @@ interface Bundle {
   gatesTotal: number;
   activeType: string | null;
   total: number | null;
+  /** Quoted number drifted from current prices (effective-date pricing). Absent in stale caches. */
+  pricesChanged?: boolean;
   estCost: number | null;
   totalLinearFt: number;
   fencePrices: { type: string; perSection: number }[];
@@ -72,6 +74,7 @@ export default function ProjectDetailPage() {
   const [gateOpen, setGateOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showCost, setShowCost] = useState(false);
+  const [pricesDismissed, setPricesDismissed] = useState(false);
   const [confirmAsk, setConfirmAsk] = useState<{ message: string; run: () => void } | null>(null);
 
   const reload = () => load<Bundle>(bundleKey).catch(() => {});
@@ -80,6 +83,9 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (b) setDiscount(String(b.project.discount));
   }, [b?.project.discount]);
+
+  // Re-arm the prices-changed banner when navigating to a different project.
+  useEffect(() => setPricesDismissed(false), [id]);
 
   function flash(msg: string) {
     setToast(msg);
@@ -165,6 +171,17 @@ export default function ProjectDetailPage() {
     }
   }
 
+  // "Update to current" on the prices-changed banner — re-freeze the project at today's prices.
+  async function updateToCurrent() {
+    try {
+      await api(`/api/projects/${id}/reprice`, { method: "POST" });
+      flash("Updated to current prices ✓");
+      reload();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   function delProject() {
     setConfirmAsk({
       message: "Delete this project AND all its sections, gates, extras, and materials?",
@@ -212,6 +229,16 @@ export default function ProjectDetailPage() {
           <button className="present-btn">Present →</button>
         </Link>
       </div>
+
+      {b.pricesChanged && !pricesDismissed && (
+        <div className="price-drift">
+          <span>Prices changed since this quote was made.</span>
+          <span className="acts">
+            <button className="secondary" onClick={updateToCurrent}>Update to current</button>
+            <button className="quiet" onClick={() => setPricesDismissed(true)}>Keep as quoted</button>
+          </span>
+        </div>
+      )}
 
       {/* Desktop (≥1024px): .pd lays top/bottom in the left column, the board (.pd-side)
           in the right. On phones all three are plain blocks in source order — unchanged. */}

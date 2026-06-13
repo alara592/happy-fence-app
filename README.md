@@ -15,7 +15,7 @@ never re-implement it elsewhere.
 ## Tests
 
 `npm test` — pricing fixture suite (Frank $3,600 / Pedro $3,300 + unit tests). Must be
-34/34 green before any deploy.
+43/43 green before any deploy.
 
 ## Deploy
 

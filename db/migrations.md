@@ -144,3 +144,27 @@ insert into fence_prices (type, per_section, ft_per_section) values ('Vinyl(Sand
 insert into fence_prices (type, per_section, ft_per_section, sort_order)
   values ('WPC - Composite', 297, 6, 22); -- new (Material - Style scheme)
 ```
+
+## 9. price_snapshot_effective_date_pricing (2026-06-13)
+
+Effective-date pricing / quote freeze. Each project freezes the reference tables it was quoted
+under (`price_snapshot` jsonb; shape per `lib/snapshot.ts`). `getProjectBundle` prices from that
+copy and returns `pricesChanged` when the active fence's live total drifts. Gates/extras are
+already frozen at add-time, so only fence prices + the global rates are captured. New projects
+snapshot at create (`POST /api/projects`, appointment create-project); the "Update to current"
+banner (`POST /api/projects/[id]/reprice`) re-freezes at live. Backfill froze all existing
+projects at today's prices (Anthony's call, 2026-06-13).
+
+```sql
+alter table projects add column price_snapshot jsonb;
+
+update projects set price_snapshot = jsonb_build_object(
+  'fencePrices', (select coalesce(jsonb_agg(jsonb_build_object(
+     'type', type, 'perSection', per_section, 'ftPerSection', ft_per_section) order by sort_order), '[]'::jsonb) from fence_prices),
+  'gatePrices', (select coalesce(jsonb_agg(jsonb_build_object(
+     'type', type, 'style', style, 'price', price) order by type, style), '[]'::jsonb) from gate_prices),
+  'settings', (select jsonb_build_object(
+     'defaultTearDownRate', default_tear_down_rate, 'defaultDumpRate', default_dump_rate,
+     'permitFee', permit_fee) from settings where id = 'GLOBAL')
+) where price_snapshot is null;
+```

@@ -7,6 +7,7 @@ import {
   type ProjectPricingInput,
   type SectionInput,
 } from "@/lib/pricing";
+import { coerceSnapshot, pricesChangedForProject } from "@/lib/snapshot";
 
 /* ── Row shapes (DB, snake_case) ─────────────────────────────────────────── */
 
@@ -24,6 +25,8 @@ export interface ProjectRow {
   price_mod_notes: string | null;
   created_at: string;
   updated_at: string;
+  /** Frozen reference tables for effective-date pricing (jsonb). null = price from live tables. */
+  price_snapshot: unknown;
 }
 
 /** Internal cost line items that sum to estCost — fed to the breakdown modal. */
@@ -205,7 +208,7 @@ export function computeBoard(
 
 export async function getProjectBundle(id: string) {
   const client = db();
-  const [proj, sections, gates, extras, materials, photos, ref] = await Promise.all([
+  const [proj, sections, gates, extras, materials, photos, liveRef] = await Promise.all([
     client.from("projects").select("*").eq("id", id).maybeSingle(),
     client.from("project_sections").select("*").eq("project_id", id).order("created_at"),
     client.from("project_gates").select("*").eq("project_id", id).order("created_at"),
@@ -220,6 +223,14 @@ export async function getProjectBundle(id: string) {
   if (!proj.data) return null;
 
   const project = normalizeProject(proj.data);
+
+  // Effective-date pricing: price this project from its frozen snapshot, falling back to live
+  // tables when it has none. Extras catalog stays live (extras are copied per-project at add).
+  const snapshot = coerceSnapshot(project.price_snapshot);
+  const ref = snapshot
+    ? { ...liveRef, fencePrices: snapshot.fencePrices, gatePrices: snapshot.gatePrices, settings: snapshot.settings }
+    : liveRef;
+
   const sectionRows = (sections.data ?? []).map(normalizeSection);
   const gateRows = (gates.data ?? []).map((g) => ({
     ...g,
@@ -284,6 +295,27 @@ export async function getProjectBundle(id: string) {
     }));
   }
 
+  // Effective-date pricing: has the quoted number drifted from current prices? Only when the
+  // project is frozen (has a snapshot) and an active, priced fence is what's being quoted.
+  const pricesChanged =
+    snapshot && activeRow && !activeRow.unpriced
+      ? pricesChangedForProject(
+          snapshot,
+          liveRef,
+          {
+            laborCostFt: project.labor_cost_ft,
+            profitMargin: project.profit_margin,
+            permit: project.permit,
+            discount: project.discount,
+            dumpIncluded: project.dump_included,
+            sections: sectionInputs(sectionRows, activeRow.type),
+            gates: [],
+            extras: extraRows.map((e) => ({ price: num(e.price) })),
+          },
+          activeRow.type,
+        )
+      : false;
+
   return {
     project,
     sections: sectionsOut,
@@ -294,6 +326,7 @@ export async function getProjectBundle(id: string) {
     board,
     gatesTotal,
     activeType: activeRow?.type ?? null,
+    pricesChanged,
     total,
     // Internal-only estimated job cost (COGS) under the active fence — what the job costs
     // Anthony before markup. Gates excluded (cost not derivable). null when no active fence.

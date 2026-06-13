@@ -1,5 +1,6 @@
 import { db } from "./db";
 import type { FencePriceRow, GatePriceRow, GlobalSettings } from "@/lib/pricing";
+import { snapshotFromReference, type PriceSnapshot } from "@/lib/snapshot";
 
 export interface ExtraCatalogRow {
   id: string;
@@ -67,4 +68,10 @@ export async function loadReference(): Promise<ReferenceData> {
 
   cache = { data, at: Date.now() };
   return data;
+}
+
+/** Snapshot the CURRENT reference tables for freezing onto a new (or repriced) project —
+ *  effective-date pricing. See lib/snapshot.ts. */
+export async function currentPriceSnapshot(): Promise<PriceSnapshot> {
+  return snapshotFromReference(await loadReference());
 }

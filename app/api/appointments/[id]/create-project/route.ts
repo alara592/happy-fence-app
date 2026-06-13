@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { etDate } from "@/lib/format";
+import { currentPriceSnapshot } from "@/lib/server/reference";
 
 /**
  * POST — create a Project from an appointment, then link them.
@@ -25,6 +26,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
       return NextResponse.json({ project_id: appt.project_id, created: false });
     }
 
+    const price_snapshot = await currentPriceSnapshot();
     const { data: project, error: pErr } = await db()
       .from("projects")
       .insert({
@@ -34,6 +36,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
         permit: false,
         labor_cost_ft: 12,
         profit_margin: 0.3,
+        price_snapshot,
       })
       .select("id")
       .single();

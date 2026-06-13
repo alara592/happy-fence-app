@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
+import { currentPriceSnapshot } from "@/lib/server/reference";
 
 /** GET — project list, last-edited first. No totals (price-board model). */
 export async function GET() {
@@ -22,6 +23,9 @@ export async function POST(req: NextRequest) {
     if (!b.client?.trim()) {
       return NextResponse.json({ error: "Client is required" }, { status: 400 });
     }
+    // Freeze current prices onto the project (effective-date pricing). New quotes always
+    // start at today's prices; later price edits won't move them without an explicit update.
+    const price_snapshot = await currentPriceSnapshot();
     const { data, error } = await db()
       .from("projects")
       .insert({
@@ -34,6 +38,7 @@ export async function POST(req: NextRequest) {
         discount: Number(b.discount ?? 0),
         notes: b.notes || null,
         price_mod_notes: b.price_mod_notes || null,
+        price_snapshot,
       })
       .select()
       .single();

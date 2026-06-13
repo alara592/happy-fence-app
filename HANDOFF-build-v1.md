@@ -511,15 +511,36 @@ Present**, with the badge + more brand worked into E2.
   verified live at 1400 + 375.
 
 **Decided, next up (desktop concept, in order):**
-1. **Price snapshots / effective-date pricing** — projects snapshot the FULL price
-   environment (sections, gates, permit, rates — freeze everything, Anthony's call) at
-   creation; opening a project whose snapshot differs from current prices prompts
-   "update to current or keep as quoted", never silent repricing. The one real
-   schema/engine-read change; deploy alone. Supersedes the "quote freezing" wish-list item.
-2. **Prices screen** — inline editing of all price tables + the new default labor/margin
-   settings. MUST ship after snapshots (easy edits before the freeze would silently
-   reprice every open quote).
+1. ~~Price snapshots / effective-date pricing~~ — **DONE 2026-06-13, see "Price snapshots" below.**
+2. **Prices screen** — inline editing of all price tables + new default labor/margin
+   settings. Now unblocked (snapshots shipped). Keep this order — editable prices before the
+   freeze would have silently repriced every open quote.
 3. **Morning view** — Anthony's desktop home: today's site visits + needs-attention list.
+
+## Price snapshots — effective-date pricing (2026-06-13)
+
+Quotes no longer silently reprice when the price tables change. Each project freezes the
+reference tables it was quoted under (`projects.price_snapshot` jsonb; migration #9 in
+`db/migrations.md`) and `getProjectBundle` prices from that copy. Only **fence prices + the
+global rates** are captured — gates/extras are already frozen at add-time (their price is
+copied onto the project row), so they can't drift. New projects snapshot current prices at
+creation (both create paths). When the active fence's live total differs from the frozen one,
+the project page shows a butter banner — **"Prices changed since this quote was made → Update
+to current / Keep as quoted"** — Update re-freezes at live (`POST /api/projects/[id]/reprice`).
+
+- **Pure core** in `lib/snapshot.ts` (`snapshotFromReference`, `coerceSnapshot`,
+  `pricesChangedForProject`), unit-tested (suite now **43/43**). The engine (`lib/pricing.ts`)
+  is UNCHANGED — it already takes the tables as input, so "snapshot" just feeds a project its
+  frozen copy. In `getProjectBundle` the live load is `liveRef` (used for the drift check), and
+  `ref` is the snapshot (or live fallback when a project has none); `pricesChanged` is true only
+  when the active fence's board total moved.
+- **Backfill froze all existing projects at today's prices** (Anthony's call) — so the deploy
+  changes no one's number (snapshot == live at freeze time; verified 0 drift across 13 projects).
+- Cache `PERSIST_KEY` bumped v4 → v5 (bundle gained `pricesChanged`). The `.price-drift` banner
+  style is in globals.css (butter + ink border + offset shadow).
+- Verified live (dev preview, real DB): Juan $17,700 unchanged + no banner; a drifted test
+  project showed the banner + frozen total, "Update to current" restored it; the create route
+  writes a snapshot; no console errors. `npm test` 43/43, `npm run build` green.
 
 ## Open data questions (Anthony/Mimi)
 

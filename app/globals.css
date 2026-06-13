@@ -570,3 +570,14 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 .cm-profit { color: var(--brand); font-weight: 700; border-bottom: none; }
 .cm-profit span:last-child { color: var(--brand); }
 .cm-note { color: var(--quiet); font-size: .76rem; margin: 8px 0 4px; line-height: 1.4; }
+
+/* Prices-changed banner (effective-date pricing) — butter attention card, ink offset shadow. */
+.price-drift {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin: 0 0 16px; padding: 10px 14px;
+  background: var(--butter); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 10px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-weight: 600; font-size: 0.9rem;
+}
+.price-drift .acts { display: flex; gap: 8px; flex: none; }
