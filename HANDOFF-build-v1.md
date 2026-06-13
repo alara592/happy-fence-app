@@ -2,8 +2,8 @@
 
 Single source of truth for app state. Read this first in any new session, then
 `README.md` (run/deploy) and `lib/pricing.ts` (the engine). History: spec in
-`../Big Ant Fencing/V1-SPEC-quote-a-job.md`, strategy in
-`../Big Ant Fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-12**.
+`../_archive/from-big-ant-fencing/V1-SPEC-quote-a-job.md`, strategy in
+`../_archive/from-big-ant-fencing/MIGRATION-PLAN-custom-rebuild.md`. Last updated **2026-06-13**.
 
 ## What this is
 
@@ -148,7 +148,7 @@ stay flat lookups.
 ## UX v2 — home, project, present (built 2026-06-06)
 
 Client-only UI pass (no schema, no engine, no server-route changes). Designed from
-mockups in repo root (`*-mockup.html`, kept as reference). Verified live against the
+mockups in `mockups/` (`*-mockup.html`, kept as reference). Verified live against the
 real DB via dev preview; `npm test` 17/17 and `npm run build` green.
 
 - **Home** (`app/page.tsx`): search box (filters client + address), date grouping into
@@ -453,12 +453,12 @@ roles (Anthony's call).
 - Tests: `tests/quickquote.test.ts` (11) — suite now 34/34. E2E verified: Quick Quote
   exact $7,395 (120 ft Vinyl White + walk gate + tear + permit) promoted to a project the
   server also priced at exactly $7,395; test project deleted after.
-- Mockups kept as reference: `desktop-mockup.html` (early three-pane concept),
-  `quickquote-mockup.html` (approved interactive Screen A).
+- Mockups kept as reference: `mockups/desktop-mockup.html` (early three-pane concept),
+  `mockups/quickquote-mockup.html` (approved interactive Screen A).
 
 ## Desktop dashboard home + appointments week board (2026-06-12) — DEPLOYED
 
-Designed first (`desktop-views-mockup.html` — Anthony picked Option A over a list-first
+Designed first (`mockups/desktop-views-mockup.html` — Anthony picked Option A over a list-first
 Option B kept in the same file), then built. Desktop-only via `useIsDesktop()`
 (`lib/useIsDesktop.ts`, matchMedia ≥1024px) — pages SWAP whole trees, so phones never
 mount desktop components or pay for their fetches. Phone home + appointments verified
@@ -487,7 +487,7 @@ The app now wears the actual Happy Fence brand (Brand Brief v2:
 `../design_handoff_present_to_customer/Happy Fence Brand Brief v2.html`; tokens
 summarized in Claude's memory `happy-fence-brand.md`). Design process: A–D invented
 directions, then Anthony supplied the brand files → E1 (full brand) / E2 (dialed for
-work) added to `design-directions-mockup.html`. Anthony's call: **E2 everywhere, E1 on
+work) added to `mockups/design-directions-mockup.html`. Anthony's call: **E2 everywhere, E1 on
 Present**, with the badge + more brand worked into E2.
 
 - **Tokens** (`globals.css` :root): cream canvas `#FBF7E8`, surfaces `#FFFCF1`, navy
