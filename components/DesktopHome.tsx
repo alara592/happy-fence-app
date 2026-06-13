@@ -184,6 +184,7 @@ export default function DesktopHome({ projects, bundles, error, q, setQ }: Props
         </>
       )}
 
+      <div className="pickets" />
       <div className="dk-gridhead">
         <h2>All projects</h2>
         <div className="search" style={{ margin: 0, flex: 1, maxWidth: 340 }}>

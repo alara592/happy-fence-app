@@ -115,7 +115,10 @@ export default function ProjectListPage() {
   return (
     <>
       <div className="hm-head">
-        <h1>Projects</h1>
+        <h1>
+          <img className="hm-badge" src="/brand/logo-96.png" alt="" />
+          Projects
+        </h1>
         <div className="actions" style={{ margin: 0 }}>
           <Link href="/appointments">
             <button className="hm-appts">Appointments</button>

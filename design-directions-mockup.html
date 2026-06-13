@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Fence — Design directions A/B/C/D + brand E1/E2 (general app language)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Quicksand:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,-apple-system,sans-serif; margin:0; background:#e8e8e8; color:#111; }
+  .wrap { max-width:1340px; margin:0 auto; padding:24px 16px 64px; }
+  .intro { background:#fff; border:1px solid #ddd; border-radius:10px; padding:18px 22px; margin-bottom:24px; }
+  .intro h1 { font-size:1.4rem; margin:0 0 6px; }
+  .muted { color:#666; font-size:.85rem; }
+  .annot { color:#fff; font-size:.78rem; border-radius:8px; padding:10px 13px; margin:10px 0 34px; max-width:1140px; background:#1a7f37; }
+  .annot b { display:block; margin-bottom:2px; font-size:.84rem; }
+  h2.section { font-size:1.1rem; margin:34px 0 10px; }
+  .frame { border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.2); border:1px solid #ccc; }
+  .swatches { display:flex; gap:6px; align-items:center; margin:8px 0 6px; }
+  .sw { width:26px; height:26px; border-radius:6px; border:1px solid rgba(0,0,0,.15); }
+  .swl { font-size:.74rem; color:#666; margin-left:8px; }
+
+  /* ===== shared structure (styled per skin) ===== */
+  .app { min-height:560px; }
+  .nav { display:flex; align-items:center; gap:22px; padding:12px 24px; }
+  .nav .tabs { display:flex; gap:18px; }
+  .page { padding:20px 26px 30px; }
+  .sec { display:flex; align-items:baseline; gap:12px; margin:0 0 10px; }
+  .sec.later { margin-top:26px; }
+  .visits { display:flex; gap:12px; }
+  .visit { flex:0 0 252px; }
+  .attnrow { display:flex; gap:10px; margin-top:8px; }
+  .gridhead { display:flex; align-items:center; gap:14px; margin:26px 0 10px; }
+  .grid { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+  .pcard { position:relative; }
+  button { cursor:pointer; font-family:inherit; }
+  .badge { display:none; }      /* real logo — brand skins only */
+  .brandline { display:none; }  /* picket-run divider — brand skins only */
+
+  /* ============ A — Refined Field Green ============ */
+  .skin-a .app { background:#f7f8f7; }
+  .skin-a .nav { background:#fff; border-bottom:1px solid #e3e6e3; }
+  .skin-a .logo { font-weight:800; color:#1a7f37; font-size:1rem; letter-spacing:-.01em; }
+  .skin-a .tab { color:#5d655e; text-decoration:none; font-size:.9rem; font-weight:500; padding:6px 2px; border-bottom:2px solid transparent; }
+  .skin-a .tab.on { color:#101510; font-weight:700; border-bottom-color:#1a7f37; }
+  .skin-a .sec h2 { font-size:.74rem; text-transform:uppercase; letter-spacing:.1em; color:#8a918b; font-weight:700; margin:0; }
+  .skin-a .sec a { font-size:.78rem; color:#1a7f37; text-decoration:none; font-weight:600; }
+  .skin-a .visit, .skin-a .attn, .skin-a .pcard { background:#fff; border:1px solid #e3e6e3; border-radius:12px; box-shadow:0 1px 2px rgba(16,21,16,.04); }
+  .skin-a .visit { padding:14px 16px; border-top:3px solid #1a7f37; }
+  .skin-a .visit .t { font-weight:700; font-size:.8rem; color:#1a7f37; letter-spacing:.02em; }
+  .skin-a .visit .who { font-weight:700; font-size:1rem; margin:3px 0 1px; }
+  .skin-a .visit .addr { color:#6b726c; font-size:.8rem; line-height:1.4; }
+  .skin-a .visit .act { margin-top:10px; display:flex; gap:10px; align-items:center; font-size:.78rem; }
+  .skin-a .chip { font-size:.72rem; font-weight:700; border-radius:99px; padding:3px 11px; border:0; }
+  .skin-a .chip.ok { background:#e9f4ec; color:#15662c; }
+  .skin-a .chip.new { background:#101510; color:#fff; }
+  .skin-a .attn { padding:10px 14px; font-size:.84rem; border-left:3px solid #d9a514; }
+  .skin-a .attn .why { color:#8a6d0b; font-weight:700; font-size:.72rem; display:block; }
+  .skin-a .search { flex:1; max-width:330px; background:#fff; border:1px solid #d8ddd8; border-radius:99px; padding:8px 16px; font-size:.85rem; color:#8a918b; }
+  .skin-a .newbtn { background:#1a7f37; color:#fff; border:0; border-radius:99px; font-weight:700; font-size:.85rem; padding:9px 18px; }
+  .skin-a .pcard { padding:14px 16px; }
+  .skin-a .pcard .who { font-weight:700; font-size:1rem; }
+  .skin-a .pcard .fence { color:#6b726c; font-size:.82rem; margin-top:2px; }
+  .skin-a .pcard .meta { color:#9aa09b; font-size:.75rem; margin-top:8px; }
+  .skin-a .pcard .tot { position:absolute; top:14px; right:16px; color:#15662c; font-weight:800; font-variant-numeric:tabular-nums; }
+  .skin-a .pcard .tot.none { color:#b08c10; font-weight:600; font-size:.76rem; }
+
+  /* ============ B — Ledger ============ */
+  .skin-b .app { background:#fcfcfa; }
+  .skin-b .nav { background:#15181a; }
+  .skin-b .logo { font-weight:800; color:#fff; font-size:.95rem; }
+  .skin-b .logo em { color:#5fd380; font-style:normal; }
+  .skin-b .tab { color:#9aa3a8; text-decoration:none; font-size:.86rem; font-weight:600; padding:6px 0; border-bottom:2px solid transparent; }
+  .skin-b .tab.on { color:#fff; border-bottom-color:#5fd380; }
+  .skin-b .page { padding:18px 26px 30px; }
+  .skin-b .sec h2 { font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; color:#15181a; font-weight:800; margin:0; border-bottom:2px solid #15181a; padding-bottom:4px; }
+  .skin-b .sec { border-bottom:1px solid #e6e6e2; padding-bottom:4px; }
+  .skin-b .sec a { font-size:.76rem; color:#15181a; font-weight:700; }
+  .skin-b .visit, .skin-b .attn, .skin-b .pcard { background:#fff; border:1px solid #d9d9d4; border-radius:3px; }
+  .skin-b .visit { padding:12px 14px; }
+  .skin-b .visit .t { font-family:ui-monospace,Menlo,monospace; font-weight:700; font-size:.78rem; color:#15181a; background:#eef0ec; display:inline-block; padding:1px 7px; }
+  .skin-b .visit .who { font-weight:800; font-size:.95rem; margin:6px 0 1px; }
+  .skin-b .visit .addr { color:#666; font-size:.78rem; }
+  .skin-b .visit .act { margin-top:9px; display:flex; gap:10px; font-size:.76rem; }
+  .skin-b .chip { font-size:.7rem; font-weight:800; border-radius:2px; padding:3px 9px; border:1px solid; letter-spacing:.03em; }
+  .skin-b .chip.ok { background:#fff; color:#177337; border-color:#177337; }
+  .skin-b .chip.new { background:#15181a; color:#fff; border-color:#15181a; }
+  .skin-b .attn { padding:9px 13px; font-size:.82rem; background:#fffbeb; border-color:#e6d9a8; }
+  .skin-b .attn .why { color:#8a6d0b; font-weight:800; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; display:block; }
+  .skin-b .search { flex:1; max-width:330px; background:#fff; border:1px solid #b9b9b2; border-radius:3px; padding:8px 12px; font-size:.85rem; color:#888; }
+  .skin-b .newbtn { background:#15181a; color:#fff; border:0; border-radius:3px; font-weight:700; font-size:.84rem; padding:9px 16px; }
+  .skin-b .pcard { padding:12px 14px; border-top:2px solid #15181a; }
+  .skin-b .pcard .who { font-weight:800; font-size:.95rem; }
+  .skin-b .pcard .fence { color:#555; font-size:.8rem; margin-top:2px; }
+  .skin-b .pcard .meta { color:#999; font-size:.74rem; margin-top:8px; font-family:ui-monospace,Menlo,monospace; }
+  .skin-b .pcard .tot { position:absolute; top:12px; right:14px; color:#177337; font-weight:800; font-family:ui-monospace,Menlo,monospace; font-size:.95rem; }
+  .skin-b .pcard .tot.none { color:#b08c10; font-size:.72rem; }
+
+  /* ============ C — Soft Slate ============ */
+  .skin-c .app { background:#f4f6f8; }
+  .skin-c .nav { background:#f4f6f8; padding-top:16px; }
+  .skin-c .logo { font-weight:800; color:#16271b; font-size:1.05rem; letter-spacing:-.02em; }
+  .skin-c .tabs { background:#e8ecef; border-radius:99px; padding:4px; gap:2px; }
+  .skin-c .tab { color:#5c6670; text-decoration:none; font-size:.86rem; font-weight:600; padding:7px 16px; border-radius:99px; }
+  .skin-c .tab.on { background:#fff; color:#16271b; box-shadow:0 1px 3px rgba(22,39,27,.1); }
+  .skin-c .sec h2 { font-size:1.05rem; color:#16271b; font-weight:700; margin:0; letter-spacing:-.01em; }
+  .skin-c .sec a { font-size:.8rem; color:#3a7d52; text-decoration:none; font-weight:600; }
+  .skin-c .visit, .skin-c .attn, .skin-c .pcard { background:#fff; border:0; border-radius:16px; box-shadow:0 1px 3px rgba(22,39,27,.06), 0 8px 24px rgba(22,39,27,.05); }
+  .skin-c .visit { padding:16px 18px; }
+  .skin-c .visit .t { font-weight:700; font-size:.78rem; color:#3a7d52; background:#e9f3ed; display:inline-block; border-radius:99px; padding:2px 10px; }
+  .skin-c .visit .who { font-weight:700; font-size:1.02rem; margin:8px 0 1px; }
+  .skin-c .visit .addr { color:#7a838c; font-size:.8rem; line-height:1.4; }
+  .skin-c .visit .act { margin-top:11px; display:flex; gap:10px; align-items:center; font-size:.78rem; }
+  .skin-c .chip { font-size:.74rem; font-weight:700; border-radius:99px; padding:4px 12px; border:0; }
+  .skin-c .chip.ok { background:#e9f3ed; color:#2c6342; }
+  .skin-c .chip.new { background:#16271b; color:#fff; }
+  .skin-c .attn { padding:11px 15px; font-size:.84rem; }
+  .skin-c .attn .why { color:#b07e10; font-weight:700; font-size:.72rem; display:block; }
+  .skin-c .search { flex:1; max-width:330px; background:#fff; border:0; box-shadow:inset 0 0 0 1px #dde2e7; border-radius:12px; padding:9px 15px; font-size:.85rem; color:#8b939b; }
+  .skin-c .newbtn { background:#2c6342; color:#fff; border:0; border-radius:12px; font-weight:700; font-size:.85rem; padding:10px 18px; box-shadow:0 2px 8px rgba(44,99,66,.3); }
+  .skin-c .pcard { padding:16px 18px; }
+  .skin-c .pcard .who { font-weight:700; font-size:1rem; }
+  .skin-c .pcard .fence { color:#7a838c; font-size:.82rem; margin-top:2px; }
+  .skin-c .pcard .meta { color:#9aa2aa; font-size:.75rem; margin-top:9px; }
+  .skin-c .pcard .tot { position:absolute; top:16px; right:18px; color:#2c6342; font-weight:800; font-variant-numeric:tabular-nums; background:#e9f3ed; border-radius:10px; padding:3px 10px; font-size:.88rem; }
+  .skin-c .pcard .tot.none { color:#b07e10; background:#faf3df; font-weight:600; font-size:.74rem; }
+
+  /* ============ D — Forest & Cream ============ */
+  .skin-d .app { background:#faf6ef; }
+  .skin-d .nav { background:#173f25; padding:14px 24px; }
+  .skin-d .logo { font-family:Georgia,'Times New Roman',serif; font-weight:700; color:#f3ead7; font-size:1.1rem; letter-spacing:.01em; }
+  .skin-d .tab { color:#9fb8a7; text-decoration:none; font-size:.88rem; font-weight:600; padding:6px 0; border-bottom:2px solid transparent; }
+  .skin-d .tab.on { color:#fff; border-bottom-color:#e0a82e; }
+  .skin-d .sec h2 { font-family:Georgia,'Times New Roman',serif; font-size:1.15rem; color:#173f25; font-weight:700; margin:0; }
+  .skin-d .sec a { font-size:.8rem; color:#8c6210; text-decoration:none; font-weight:700; }
+  .skin-d .visit, .skin-d .attn, .skin-d .pcard { background:#fff; border:1px solid #e7dfd0; border-radius:10px; }
+  .skin-d .visit { padding:14px 16px; box-shadow:0 2px 0 #e7dfd0; }
+  .skin-d .visit .t { font-weight:800; font-size:.78rem; color:#8c6210; letter-spacing:.06em; }
+  .skin-d .visit .who { font-family:Georgia,serif; font-weight:700; font-size:1.05rem; margin:4px 0 1px; color:#1d2a20; }
+  .skin-d .visit .addr { color:#75716a; font-size:.8rem; line-height:1.4; }
+  .skin-d .visit .act { margin-top:10px; display:flex; gap:10px; align-items:center; font-size:.78rem; }
+  .skin-d .chip { font-size:.72rem; font-weight:700; border-radius:7px; padding:4px 11px; border:0; }
+  .skin-d .chip.ok { background:#e9f0e9; color:#173f25; }
+  .skin-d .chip.new { background:#e0a82e; color:#2b2008; }
+  .skin-d .attn { padding:10px 14px; font-size:.84rem; background:#fdf6e3; border-color:#ecd9a0; }
+  .skin-d .attn .why { color:#8c6210; font-weight:800; font-size:.72rem; display:block; }
+  .skin-d .search { flex:1; max-width:330px; background:#fff; border:1px solid #ddd2bd; border-radius:9px; padding:9px 14px; font-size:.85rem; color:#998f7f; }
+  .skin-d .newbtn { background:#173f25; color:#f3ead7; border:0; border-radius:9px; font-weight:700; font-size:.85rem; padding:10px 18px; }
+  .skin-d .pcard { padding:14px 16px; }
+  .skin-d .pcard .who { font-family:Georgia,serif; font-weight:700; font-size:1.02rem; color:#1d2a20; }
+  .skin-d .pcard .fence { color:#75716a; font-size:.82rem; margin-top:2px; }
+  .skin-d .pcard .meta { color:#a39a89; font-size:.75rem; margin-top:8px; }
+  .skin-d .pcard .tot { position:absolute; top:14px; right:16px; color:#173f25; font-weight:800; font-variant-numeric:tabular-nums; font-size:1rem; }
+  .skin-d .pcard .tot.none { color:#8c6210; font-weight:600; font-size:.74rem; }
+  /* ============ E1 — Full Brand (from the brand brief) ============ */
+  .skin-e1 { font-family:'Quicksand',sans-serif; }
+  .skin-e1 .app { background:#FFF8DB; }
+  .skin-e1 .nav { background:#1C2533; padding:13px 24px; }
+  .skin-e1 .logo { font-family:'Bagel Fat One',sans-serif; font-size:1.05rem; letter-spacing:.03em; }
+  .skin-e1 .logo .h { color:#BFE3EF; } .skin-e1 .logo .f { color:#FFDF6B; }
+  .skin-e1 .tab { color:#9fb3c8; text-decoration:none; font-size:.88rem; font-weight:600; padding:6px 0; border-bottom:3px solid transparent; }
+  .skin-e1 .tab.on { color:#FFF8DB; border-bottom-color:#FFDF6B; }
+  .skin-e1 .sec h2 { font-family:'Bagel Fat One',sans-serif; font-size:1.05rem; color:#1C2533; margin:0; text-transform:uppercase; letter-spacing:.04em; }
+  .skin-e1 .sec a { font-size:.78rem; color:#1C2533; font-weight:700; }
+  .skin-e1 .visit, .skin-e1 .attn, .skin-e1 .pcard { background:#FFFAEA; border:2px solid #1C2533; border-radius:9px; box-shadow:4px 4px 0 #1C2533; }
+  .skin-e1 .visit { padding:13px 15px; }
+  .skin-e1 .visit .t { font-family:'Space Mono',monospace; font-weight:700; font-size:.72rem; background:#FFDF6B; border:1.5px solid #1C2533; display:inline-block; padding:1px 8px; border-radius:99px; }
+  .skin-e1 .visit .who { font-weight:700; font-size:1rem; margin:7px 0 1px; color:#1C2533; }
+  .skin-e1 .visit .addr { color:rgba(28,37,51,.66); font-size:.79rem; line-height:1.4; }
+  .skin-e1 .visit .act { margin-top:10px; display:flex; gap:9px; align-items:center; font-size:.78rem; }
+  .skin-e1 .visit .act a { color:#1C2533; font-weight:700; }
+  .skin-e1 .chip { font-size:.72rem; font-weight:700; border-radius:99px; padding:3px 11px; border:1.5px solid #1C2533; font-family:'Quicksand',sans-serif; }
+  .skin-e1 .chip.ok { background:#BFE3EF; color:#1C2533; }
+  .skin-e1 .chip.new { background:#1C2533; color:#FFF8DB; }
+  .skin-e1 .attn { padding:10px 13px; font-size:.83rem; background:#FFDF6B; box-shadow:3px 3px 0 #1C2533; }
+  .skin-e1 .attn .why { color:#1C2533; font-weight:700; font-size:.7rem; display:block; font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:.04em; }
+  .skin-e1 .search { flex:1; max-width:330px; background:#FFFAEA; border:2px solid #1C2533; border-radius:99px; padding:8px 15px; font-size:.84rem; color:rgba(28,37,51,.5); }
+  .skin-e1 .newbtn { background:#FFDF6B; color:#1C2533; border:2px solid #1C2533; border-radius:99px; font-weight:700; font-size:.84rem; padding:8px 17px; box-shadow:3px 3px 0 #1C2533; }
+  .skin-e1 .pcard { padding:13px 15px; }
+  .skin-e1 .pcard .who { font-weight:700; font-size:1rem; color:#1C2533; }
+  .skin-e1 .pcard .fence { color:rgba(28,37,51,.66); font-size:.82rem; margin-top:2px; }
+  .skin-e1 .pcard .meta { color:rgba(28,37,51,.5); font-size:.72rem; margin-top:8px; font-family:'Space Mono',monospace; }
+  .skin-e1 .pcard .tot { position:absolute; top:13px; right:15px; color:#1C2533; font-weight:700; font-variant-numeric:tabular-nums; background:#BFE3EF; border:1.5px solid #1C2533; border-radius:8px; padding:2px 9px; font-size:.86rem; }
+  .skin-e1 .pcard .tot.none { background:#FFDF6B; font-size:.72rem; }
+
+  /* ============ E2 — Brand at Work (quieter) ============ */
+  .skin-e1 .badge { display:block; height:46px; width:auto; }
+  .skin-e2 .badge { display:block; height:48px; width:auto; }
+  .skin-e2 .brandline { display:block; height:13px; width:208px; margin:26px auto 2px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='13'%3E%3Cpath d='M3 13 L3 6 L8 1.5 L13 6 L13 13 Z' fill='%231C2533' fill-opacity='.22'/%3E%3C/svg%3E") repeat-x; }
+  .skin-e2 { font-family:'Quicksand',sans-serif; }
+  .skin-e2 .app { background:#FBF7E8; }
+  .skin-e2 .nav { background:#FFFCF1; border-bottom:2px solid #1C2533; padding-top:8px; padding-bottom:8px; }
+  .skin-e2 .logo { font-family:'Bagel Fat One',sans-serif; font-size:1rem; color:#1C2533; letter-spacing:.02em; }
+  .skin-e2 .tab { color:rgba(28,37,51,.55); text-decoration:none; font-size:.88rem; font-weight:600; padding:6px 0; border-bottom:3px solid transparent; }
+  .skin-e2 .tab.on { color:#1C2533; font-weight:700; border-bottom-color:#FFDF6B; }
+  .skin-e2 .sec h2 { font-size:.74rem; text-transform:uppercase; letter-spacing:.14em; color:rgba(28,37,51,.55); font-weight:700; margin:0; font-family:'Space Mono',monospace; }
+  .skin-e2 .sec a { font-size:.78rem; color:#1C2533; font-weight:700; }
+  .skin-e2 .visit, .skin-e2 .attn, .skin-e2 .pcard { background:#FFFCF1; border:1.5px solid rgba(28,37,51,.3); border-radius:10px; }
+  .skin-e2 .visit { padding:14px 16px; border-top:3px solid #BFE3EF; }
+  .skin-e2 .visit .t { font-family:'Space Mono',monospace; font-weight:700; font-size:.74rem; color:#1C2533; }
+  .skin-e2 .visit .who { font-weight:700; font-size:1rem; margin:4px 0 1px; color:#1C2533; }
+  .skin-e2 .visit .addr { color:rgba(28,37,51,.62); font-size:.79rem; line-height:1.4; }
+  .skin-e2 .visit .act { margin-top:10px; display:flex; gap:10px; align-items:center; font-size:.78rem; }
+  .skin-e2 .visit .act a { color:#1C2533; font-weight:700; }
+  .skin-e2 .chip { font-size:.72rem; font-weight:700; border-radius:99px; padding:3px 11px; border:0; font-family:'Quicksand',sans-serif; }
+  .skin-e2 .chip.ok { background:#BFE3EF; color:#1C2533; }
+  .skin-e2 .chip.new { background:#1C2533; color:#FFF8DB; }
+  .skin-e2 .attn { padding:10px 14px; font-size:.84rem; border-left:3px solid #FFDF6B; }
+  .skin-e2 .attn .why { color:rgba(28,37,51,.6); font-weight:700; font-size:.7rem; display:block; font-family:'Space Mono',monospace; text-transform:uppercase; }
+  .skin-e2 .search { flex:1; max-width:330px; background:#FFFCF1; border:1.5px solid rgba(28,37,51,.3); border-radius:99px; padding:8px 15px; font-size:.84rem; color:rgba(28,37,51,.45); }
+  .skin-e2 .newbtn { background:#FFDF6B; color:#1C2533; border:2px solid #1C2533; border-radius:99px; font-weight:700; font-size:.84rem; padding:8px 17px; }
+  .skin-e2 .pcard { padding:14px 16px; }
+  .skin-e2 .pcard .who { font-weight:700; font-size:1rem; color:#1C2533; }
+  .skin-e2 .pcard .fence { color:rgba(28,37,51,.62); font-size:.82rem; margin-top:2px; }
+  .skin-e2 .pcard .meta { color:rgba(28,37,51,.45); font-size:.74rem; margin-top:8px; }
+  .skin-e2 .pcard .tot { position:absolute; top:14px; right:16px; color:#1C2533; font-weight:700; font-variant-numeric:tabular-nums; font-size:.88rem; background:#BFE3EF; border-radius:9px; padding:2px 10px; }
+  .skin-e2 .pcard .tot.none { color:#1C2533; font-weight:600; font-size:.74rem; background:#FFDF6B; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>Design directions — A / B / C / D</h1>
+    <p class="muted" style="margin:0">
+      Same dashboard, same UX (which you like) — four different design languages for the whole app. Judge the feel:
+      type, color, spacing, card treatment. The winner becomes a CSS pass across every screen (phone included, same language
+      scaled down). All web-safe fonts here; a real pass can pull one good webfont.
+    </p>
+  </div>
+
+  <div id="frames"></div>
+
+</div>
+
+<script>
+const DASH = `
+  <div class="app">
+    <div class="nav">
+      <img class="badge" src="/public/brand/happy-fence-logo.png" alt="" />
+      <span class="logo"><span class="h">Happy</span> <span class="f">Fence</span></span>
+      <span class="tabs">
+        <a class="tab on" href="#">Projects</a>
+        <a class="tab" href="#">Quick Quote</a>
+        <a class="tab" href="#">Appointments</a>
+      </span>
+    </div>
+    <div class="page">
+      <div class="sec"><h2>Today — Friday, June 12</h2><a href="#">all appointments →</a></div>
+      <div class="visits">
+        <div class="visit"><span class="t">9:30 AM</span><div class="who">Rafael Cruz</div><div class="addr">8821 SW 142nd Ave, Kendall</div><div class="act"><a href="#">📍 Map</a><button class="chip new">+ Create project</button></div></div>
+        <div class="visit"><span class="t">11:00 AM</span><div class="who">Juan</div><div class="addr">17580 SW 285th St, Miami</div><div class="act"><a href="#">📍 Map</a><span class="chip ok">Project ✓ · $17,700</span></div></div>
+        <div class="visit"><span class="t">4:30 PM</span><div class="who">D. Okafor</div><div class="addr">1310 NE 191st St, North Miami Beach</div><div class="act"><a href="#">📍 Map</a><button class="chip new">+ Create project</button></div></div>
+      </div>
+      <div class="sec later"><h2>Needs attention</h2></div>
+      <div class="attnrow">
+        <div class="attn"><span class="why">No fence selected</span><span>TEST · 278 ft measured</span></div>
+        <div class="attn"><span class="why">No measurements yet</span><span>Martha · created Jun 5</span></div>
+      </div>
+      <div class="brandline"></div>
+      <div class="gridhead">
+        <div class="sec" style="margin:0"><h2>All projects</h2></div>
+        <div class="search">🔍 Search client or address</div>
+        <span style="font-size:.8rem; opacity:.6">11 quotes</span>
+        <button class="newbtn">+ New</button>
+      </div>
+      <div class="grid">
+        <div class="pcard"><span class="who">Juan</span><span class="tot">$17,700</span><div class="fence">DuraFence - Horizontal · 300 ft</div><div class="meta">Miami · Jun 12 · Permit · 📷 1</div></div>
+        <div class="pcard"><span class="who">Martin A. Diaz-Yabor Faia</span><span class="tot">$35,012</span><div class="fence">WPC - Composite · 334 ft</div><div class="meta">Miami · Jun 3</div></div>
+        <div class="pcard"><span class="who">Martha</span><span class="tot none">no fence</span><div class="fence">No measurements yet</div><div class="meta">Miami · Jun 5</div></div>
+      </div>
+    </div>
+  </div>`;
+
+const OPTIONS = [
+  { key:'a', name:'A — Refined Field Green',
+    swatches:['#1a7f37','#101510','#f7f8f7','#d9a514'],
+    blurb:'The current identity, finished. White surfaces on a warm gray canvas, one green used deliberately (money + primary actions), amber for attention, pill buttons, a real type scale and consistent 12px radii. Lowest-risk: it reads as “the same app, grown up.”' },
+  { key:'b', name:'B — Ledger',
+    swatches:['#15181a','#5fd380','#fcfcfa','#177337'],
+    blurb:'An estimating tool with ink in its veins. Near-black top bar, squared corners, ruled section headers, monospace numbers and dates — built around the feeling that every figure on screen is a commitment. Densest of the four; most “office software.”' },
+  { key:'c', name:'C — Soft Slate',
+    swatches:['#f4f6f8','#16271b','#2c6342','#e9f3ed'],
+    blurb:'Modern SaaS calm: cool gray canvas, floating white cards with big radii and soft double shadows, pill tab switcher, totals in tinted lozenges. Friendliest and most current-feeling; the assistant lives in this screen all day and this is the easiest on the eyes.' },
+  { key:'d', name:'D — Forest & Cream',
+    swatches:['#173f25','#faf6ef','#e0a82e','#f3ead7'],
+    blurb:'Brand-forward: deep forest nav, cream paper canvas, serif display names, brass-gold accents. The most personality — feels like a premium outdoor company, matches fence/landscape identity. Boldest swing; serif is a taste call.' },
+  { key:'e1', name:'E1 — Full Brand (from your brand brief)',
+    swatches:['#FFF8DB','#BFE3EF','#FFDF6B','#1C2533'],
+    blurb:'The actual Happy Fence brand, straight from the brief: cream canvas, navy ink nav with the sky/butter wordmark, Bagel Fat One section headings, Quicksand body, Space Mono tags, 2px ink outlines with the signature hard offset shadow, butter for attention, sky for money chips. Maximum personality — the app IS the brand. Risk: a lot of voltage for a tool the assistant stares at all day.' },
+  { key:'e2', name:'E2 — Brand at Work (same palette, dialed down)',
+    swatches:['#FBF7E8','#BFE3EF','#FFDF6B','#1C2533'],
+    blurb:'Same four brand colors and fonts, tuned for 8-hours-a-day estimating: soft cream surfaces, navy ink text, thin ink borders instead of cartoon outlines, Bagel reserved for the wordmark, Space Mono as quiet section labels, sky/butter only as functional accents (status, money, attention). Unmistakably Happy Fence, but it gets out of the way. NB: the brand has no green — money reads in navy; danger/delete keeps a functional red by necessity.' },
+];
+
+const host = document.getElementById('frames');
+for (const o of OPTIONS) {
+  const sw = o.swatches.map(c => `<span class="sw" style="background:${c}"></span>`).join('');
+  host.insertAdjacentHTML('beforeend', `
+    <h2 class="section">${o.name}</h2>
+    <div class="swatches">${sw}<span class="swl">core palette</span></div>
+    <div class="frame skin-${o.key}">${DASH}</div>
+    <div class="annot"><b>${o.name}</b>${o.blurb}</div>
+  `);
+}
+</script>
+</body>
+</html>

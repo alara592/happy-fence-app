@@ -36,7 +36,7 @@ export default function PresentPage() {
   return (
     <div className="present">
       <div className="pv-head">
-        <div className="pv-logo">{COMPANY.name.toUpperCase()}</div>
+        <img className="pv-badge" src="/brand/logo-280.png" alt={COMPANY.name} />
         <div className="pv-contact">
           {COMPANY.phone && <>{COMPANY.phone}<br /></>}
           {COMPANY.web}
@@ -124,6 +124,7 @@ export default function PresentPage() {
         </div>
       )}
 
+      <div className="pv-pickets" />
       <div className="pv-foot">
         Estimate valid 30 days · <span className="biz">{COMPANY.web}</span><br />
         Thank you for considering {COMPANY.name}

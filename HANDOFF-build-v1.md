@@ -481,6 +481,35 @@ against real data.
 - NB totals like $8,034 are correct: gates/discounts add flat amounts after per-section
   $100 rounding.
 
+## Brand pass — E2 app-wide + E1 Present (2026-06-12) — DEPLOYED
+
+The app now wears the actual Happy Fence brand (Brand Brief v2:
+`../design_handoff_present_to_customer/Happy Fence Brand Brief v2.html`; tokens
+summarized in Claude's memory `happy-fence-brand.md`). Design process: A–D invented
+directions, then Anthony supplied the brand files → E1 (full brand) / E2 (dialed for
+work) added to `design-directions-mockup.html`. Anthony's call: **E2 everywhere, E1 on
+Present**, with the badge + more brand worked into E2.
+
+- **Tokens** (`globals.css` :root): cream canvas `#FBF7E8`, surfaces `#FFFCF1`, navy
+  ink `#1C2533` replaces green as `--brand` (buttons, headers, money text), sky
+  `#BFE3EF` = money lozenges + selection tints, butter `#FFDF6B` = attention, active
+  tab, +New, Present button. Danger red kept — functional, not brand. `--surface` is
+  new; all former `#fff` backgrounds use it.
+- **Fonts** (`layout.tsx`, next/font self-hosted, ONLY used weights): Quicksand
+  500/600/700 (body default 500), Bagel Fat One 400 (display — wordmark + Present
+  headings only, E2 restraint), Space Mono 400/700 (labels/kickers/times). Exposed as
+  `--font-body/--font-display/--font-label`.
+- **Badge**: `public/brand/logo-96.png` (11KB, desktop nav + phone hm-head) and
+  `logo-280.png` (44KB, Present header) — resized via sips from the 338KB original
+  (NOT shipped). Picket-run divider utility `.pickets` (sanctioned brief motif) on the
+  dashboard + Present.
+- **Present** = full E1: navy header w/ badge, Bagel client name + group headings,
+  butter Total Estimate card with 2.5px ink border + `5px 5px 0` ink offset shadow,
+  picket divider, mono footer. Verified live (Juan $17,700).
+- Phone same E2 language (navy header + badge, cream cards, butter +New); phone rules
+  intact (no dollar amounts on the list). Suite 34/34, build green, all screens
+  verified live at 1400 + 375.
+
 **Decided, next up (desktop concept, in order):**
 1. **Price snapshots / effective-date pricing** — projects snapshot the FULL price
    environment (sections, gates, permit, rates — freeze everything, Anthony's call) at
@@ -522,3 +551,8 @@ against real data.
 - NEVER run `npm run build` while the dev server is running — they share `.next/` and the
   prod build clobbers the dev chunks (every route 500s with `Cannot find module './NNN.js'`).
   Fix: stop dev, `rm -rf .next`, restart dev. Build first or stop the preview first.
+- Editing `app/layout.tsx` (e.g. the next/font setup) while dev is running can silently
+  wedge hydration: pages serve as frozen SSR HTML (no React fibers, skeletons forever,
+  sometimes "Application error: a client-side exception"), with NO console/server errors.
+  Hit 2026-06-12 during the brand pass. Fix: stop dev, `rm -rf .next`, restart. Dev-only —
+  cannot happen in production.

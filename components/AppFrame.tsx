@@ -38,7 +38,10 @@ export default function AppFrame({ children }: { children: React.ReactNode }) {
   return (
     <>
       <nav className="dnav">
-        <span className="dnav-logo">Happy Fence</span>
+        <span className="dnav-logo">
+          <img className="dnav-badge" src="/brand/logo-96.png" alt="" />
+          Happy Fence
+        </span>
         {TABS.map(([href, label]) => (
           <Link key={href} href={href} className={`dnav-tab${isActive(href) ? " on" : ""}`}>
             {label}
