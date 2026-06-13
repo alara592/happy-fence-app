@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
-import { currentPriceSnapshot } from "@/lib/server/reference";
+import { loadReference } from "@/lib/server/reference";
+import { snapshotFromReference } from "@/lib/snapshot";
 
 /** GET — project list, last-edited first. No totals (price-board model). */
 export async function GET() {
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
     }
     // Freeze current prices onto the project (effective-date pricing). New quotes always
     // start at today's prices; later price edits won't move them without an explicit update.
-    const price_snapshot = await currentPriceSnapshot();
+    const ref = await loadReference();
+    const price_snapshot = snapshotFromReference(ref);
     const { data, error } = await db()
       .from("projects")
       .insert({
@@ -33,8 +35,8 @@ export async function POST(req: NextRequest) {
         address: b.address || null,
         date: b.date || undefined,
         permit: !!b.permit,
-        labor_cost_ft: Number(b.labor_cost_ft ?? 12),
-        profit_margin: Number(b.profit_margin ?? 0.3),
+        labor_cost_ft: Number(b.labor_cost_ft ?? ref.defaults.laborCostFt),
+        profit_margin: Number(b.profit_margin ?? ref.defaults.profitMargin),
         discount: Number(b.discount ?? 0),
         notes: b.notes || null,
         price_mod_notes: b.price_mod_notes || null,

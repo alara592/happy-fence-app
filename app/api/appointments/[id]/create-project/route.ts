@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/server/db";
 import { etDate } from "@/lib/format";
-import { currentPriceSnapshot } from "@/lib/server/reference";
+import { loadReference } from "@/lib/server/reference";
+import { snapshotFromReference } from "@/lib/snapshot";
 
 /**
  * POST — create a Project from an appointment, then link them.
@@ -26,7 +27,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
       return NextResponse.json({ project_id: appt.project_id, created: false });
     }
 
-    const price_snapshot = await currentPriceSnapshot();
+    const ref = await loadReference();
+    const price_snapshot = snapshotFromReference(ref);
     const { data: project, error: pErr } = await db()
       .from("projects")
       .insert({
@@ -34,8 +36,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
         address: appt.address || null,
         date: appt.start_at ? etDate(appt.start_at) : undefined,
         permit: false,
-        labor_cost_ft: 12,
-        profit_margin: 0.3,
+        labor_cost_ft: ref.defaults.laborCostFt,
+        profit_margin: ref.defaults.profitMargin,
         price_snapshot,
       })
       .select("id")

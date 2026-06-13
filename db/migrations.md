@@ -168,3 +168,13 @@ update projects set price_snapshot = jsonb_build_object(
      'permitFee', permit_fee) from settings where id = 'GLOBAL')
 ) where price_snapshot is null;
 ```
+
+## 10. settings_default_labor_and_margin (2026-06-13)
+
+Project-creation defaults move into `settings` so the Prices tab can edit them. Quick Quote
+and both project-create paths read them via `loadReference().defaults` (was hardcoded 12 / 0.30).
+
+```sql
+alter table settings add column default_labor_cost_ft numeric not null default 12;
+alter table settings add column default_margin numeric not null default 0.30;
+```

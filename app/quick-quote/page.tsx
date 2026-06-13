@@ -12,6 +12,7 @@ interface Reference {
   fencePrices: FencePriceRow[];
   gatePrices: GatePriceRow[];
   settings: GlobalSettings;
+  defaults?: { laborCostFt: number; profitMargin: number };
 }
 
 /** Scratch state survives a mid-call refresh; cleared on promote/Clear. */
@@ -69,7 +70,7 @@ export default function QuickQuotePage() {
   const rows = useMemo(() => {
     if (!ref || ft <= 0) return null;
     return ref.fencePrices
-      .map((f) => ({ f, total: quickTotal(f.type, inputs, ref.fencePrices, ref.gatePrices, ref.settings) }))
+      .map((f) => ({ f, total: quickTotal(f.type, inputs, ref.fencePrices, ref.gatePrices, ref.settings, ref.defaults) }))
       .sort((a, b) => Number(a.total === null) - Number(b.total === null) || (a.total ?? 0) - (b.total ?? 0));
   }, [ref, ft, s.walk, s.dbl, s.tear, s.permit]);
 

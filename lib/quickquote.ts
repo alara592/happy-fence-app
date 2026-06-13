@@ -78,6 +78,7 @@ export function quickTotal(
   fencePrices: FencePriceRow[],
   gatePrices: GatePriceRow[],
   settings: GlobalSettings,
+  defaults: { laborCostFt: number; profitMargin: number } = { laborCostFt: QQ_LABOR_COST_FT, profitMargin: QQ_PROFIT_MARGIN },
 ): number | null {
   const fp = fencePrices.find((f) => f.type === fenceType);
   if (!fp || fp.perSection === 0 || inputs.linearFt <= 0) return null;
@@ -91,8 +92,8 @@ export function quickTotal(
 
   return projectTotal(
     {
-      laborCostFt: QQ_LABOR_COST_FT,
-      profitMargin: QQ_PROFIT_MARGIN,
+      laborCostFt: defaults.laborCostFt,
+      profitMargin: defaults.profitMargin,
       permit: inputs.permit,
       discount: 0,
       sections: [

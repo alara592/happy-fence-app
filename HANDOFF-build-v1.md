@@ -512,10 +512,8 @@ Present**, with the badge + more brand worked into E2.
 
 **Decided, next up (desktop concept, in order):**
 1. ~~Price snapshots / effective-date pricing~~ — **DONE 2026-06-13, see "Price snapshots" below.**
-2. **Prices screen** — inline editing of all price tables + new default labor/margin
-   settings. Now unblocked (snapshots shipped). Keep this order — editable prices before the
-   freeze would have silently repriced every open quote.
-3. **Morning view** — Anthony's desktop home: today's site visits + needs-attention list.
+2. ~~Prices screen~~ — **DONE 2026-06-13, see "Prices tab" below.**
+3. **Morning view** — Anthony's desktop home: today's site visits + needs-attention list. ← next
 
 ## Price snapshots — effective-date pricing (2026-06-13)
 
@@ -541,6 +539,35 @@ to current / Keep as quoted"** — Update re-freezes at live (`POST /api/project
 - Verified live (dev preview, real DB): Juan $17,700 unchanged + no banner; a drifted test
   project showed the banner + frozen total, "Update to current" restored it; the create route
   writes a snapshot; no console errors. `npm test` 43/43, `npm run build` green.
+
+## Prices tab — fence/gate/settings CRUD (2026-06-13)
+
+Desktop-only **Prices** tab (`app/prices/page.tsx`, 4th nav tab in `AppFrame`) — manage all
+pricing in-app instead of the Supabase dashboard. Three sections:
+
+- **Settings** — the 5 globals: tear-down rate, dump rate, permit fee, and new
+  `default_labor_cost_ft` / `default_margin` (migration #10). Quick Quote + both project-create
+  paths now read labor/margin from `loadReference().defaults` instead of the hardcoded 12 / 0.30;
+  the `QQ_*` constants in `lib/quickquote.ts` remain only as a stale-cache fallback.
+- **Fence catalog** — add / edit (per-section $, ft per section) / delete. `per_section = 0`
+  keeps the unpriced warning. Delete is FK-protected: a type on any project board returns 409.
+- **Gate catalog** — add / edit (unit price) / delete, keyed by (type, style). Same FK guard.
+
+Routes: `PATCH /api/prices/settings`, `POST|PATCH|DELETE /api/prices/{fences,gates}`
+(service-role; key in the body for POST/PATCH, query string for DELETE). Every write calls
+`clearReferenceCache()` so changes propagate within the request. Editing a price re-quotes NEW
+jobs only — existing quotes are frozen by their snapshot and show the "prices changed" banner.
+
+**Deferred (v1):** type **rename** + **reorder** (`sort_order` editing). Rename is the snag —
+`fence_prices.type` is the PK; a rename cascades to `project_materials` but NOT to the jsonb
+price snapshots (type stored by value), so a frozen quote would lose its price. Safe rename
+needs a snapshot-rewrite (an RPC) — add on request. Add covers "missing materials", edit covers
+drift, delete (FK-guarded) covers removing $0 types.
+
+Verified live (real DB, dev preview): every route E2E (add/edit/delete fence+gate, settings
+edit, FK-restrict 409); a new project picked up an edited labor default (12→13→reverted); the
+Settings `onBlur` saved + reloaded the field; page rendered 22 fence + 24 gate rows; no console
+errors. `npm test` 43/43, `npm run build` green.
 
 ## Open data questions (Anthony/Mimi)
 

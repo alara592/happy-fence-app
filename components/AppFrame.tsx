@@ -23,6 +23,7 @@ const TABS: [href: string, label: string][] = [
   ["/", "Projects"],
   ["/quick-quote", "Quick Quote"],
   ["/appointments", "Appointments"],
+  ["/prices", "Prices"],
 ];
 
 export default function AppFrame({ children }: { children: React.ReactNode }) {

@@ -13,6 +13,8 @@ export interface ReferenceData {
   gatePrices: GatePriceRow[];
   extras: ExtraCatalogRow[];
   settings: GlobalSettings;
+  /** Project-creation defaults (NOT engine inputs) — labor $/ft + margin for new quotes + Quick Quote. */
+  defaults: { laborCostFt: number; profitMargin: number };
 }
 
 /**
@@ -63,6 +65,10 @@ export async function loadReference(): Promise<ReferenceData> {
       defaultTearDownRate: Number(settings.data.default_tear_down_rate),
       defaultDumpRate: Number(settings.data.default_dump_rate),
       permitFee: Number(settings.data.permit_fee),
+    },
+    defaults: {
+      laborCostFt: Number(settings.data.default_labor_cost_ft),
+      profitMargin: Number(settings.data.default_margin),
     },
   };
 
