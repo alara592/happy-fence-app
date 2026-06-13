@@ -494,6 +494,7 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 
   /* Dashboard home + appointments week board live wide */
   main:has(.dk-home), main:has(.wk-board) { max-width: 1180px; }
+  main:has(.pr-settings) { max-width: 960px; }
 }
 
 /* ---- Desktop dashboard home (Option A, 2026-06-12) — component renders ≥1024px only ---- */
@@ -586,7 +587,7 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 .pr-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; max-width: 600px; }
 .pr-set { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .pr-set > span:first-child { font-weight: 600; font-size: 0.9rem; }
-.pr-grid { display: grid; grid-template-columns: minmax(0, 1fr) 132px 132px 40px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border-light); max-width: 760px; }
+.pr-grid { display: grid; grid-template-columns: minmax(0, 1fr) 130px 130px 38px; gap: 14px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border-light); max-width: 840px; }
 .pr-head { font-family: var(--font-label); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 1px solid var(--border-strong); }
 .pr-type { font-weight: 600; }
 .pr-unpriced { color: var(--warn-text); font-weight: 600; font-size: 0.8rem; }
@@ -596,4 +597,4 @@ form .actions { margin-top: 16px; } /* breathing room before Save/Cancel */
 .pr-inp em { color: var(--muted); font-style: normal; font-size: 0.82rem; }
 .pr-add { border-bottom: none; margin-top: 6px; }
 .pr-add input, .pr-add select { width: 100%; }
-.pr-grid .danger { padding: 4px 8px; }
+.pr-grid .danger { width: 38px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem; }
